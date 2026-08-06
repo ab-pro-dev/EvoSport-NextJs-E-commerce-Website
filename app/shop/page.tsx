@@ -1,0 +1,149 @@
+import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { ShopFilters } from "@/components/shop/shop-filters";
+import { ProductCard } from "@/components/shop/product-card";
+import { ShopPagination } from "@/components/shop/shop-pagination";
+import { SlidersHorizontal } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Shop All Gear & Apparel | EvoSport",
+  description: "Explore high-performance running shoes, gym apparel, and athletic accessories at EvoSport.",
+};
+
+interface ShopPageProps {
+  searchParams: Promise<{
+    category?: string;
+    brand?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    sort?: string;
+    search?: string;
+    page?: string;
+  }>;
+}
+
+export default async function ShopPage({ searchParams }: ShopPageProps) {
+  const resolvedParams = await searchParams;
+
+  const categorySlug = resolvedParams.category || "";
+  const brandSlug = resolvedParams.brand || "";
+  const minPrice = resolvedParams.minPrice ? parseFloat(resolvedParams.minPrice) : undefined;
+  const maxPrice = resolvedParams.maxPrice ? parseFloat(resolvedParams.maxPrice) : undefined;
+  const sort = resolvedParams.sort || "newest";
+  const search = resolvedParams.search || "";
+  const currentPage = Math.max(1, parseInt(resolvedParams.page || "1", 10));
+  const limit = 8;
+  const skip = (currentPage - 1) * limit;
+
+  const where: Prisma.ProductWhereInput = {
+    status: "ACTIVE",
+  };
+
+  if (categorySlug) {
+    where.category = { slug: categorySlug };
+  }
+
+  if (brandSlug) {
+    where.brand = { slug: brandSlug };
+  }
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    where.basePrice = {};
+    if (minPrice !== undefined) where.basePrice.gte = minPrice;
+    if (maxPrice !== undefined) where.basePrice.lte = maxPrice;
+  }
+
+  let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: "desc" };
+  if (sort === "price_asc") {
+    orderBy = { basePrice: "asc" };
+  } else if (sort === "price_desc") {
+    orderBy = { basePrice: "desc" };
+  }
+
+  const [products, totalCount, categories, brands] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        brand: true,
+        category: true,
+        images: { orderBy: { position: "asc" } },
+        variants: true,
+      },
+    }),
+    prisma.product.count({ where }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.brand.findMany({ orderBy: { name: "asc" } }),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / limit);
+
+  return (
+    <div className="min-h-screen bg-neutral-950 text-white">
+      {/* Hero Header */}
+      <section className="relative border-b border-neutral-800 bg-neutral-900/40 py-12 backdrop-blur-sm">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white">
+            EXPLORE <span className="text-lime-400">EVOSPORT GEAR</span>
+          </h1>
+          <p className="mt-2 text-sm text-neutral-400 max-w-2xl">
+            Pro-grade footwear, compression apparel, and athletic essentials engineered for peak performance.
+          </p>
+        </div>
+      </section>
+
+      {/* Main Shop Container */}
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+          {/* Filter Sidebar */}
+          <aside className="lg:col-span-1">
+            <ShopFilters categories={categories} brands={brands} />
+          </aside>
+
+          {/* Product Grid & Controls */}
+          <section className="lg:col-span-3">
+            {/* Top Toolbar */}
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 backdrop-blur-md">
+              <div className="flex items-center gap-2 text-xs font-semibold text-neutral-400">
+                <SlidersHorizontal className="h-4 w-4 text-lime-400" />
+                <span>
+                  Showing <strong className="text-white">{products.length}</strong> of{" "}
+                  <strong className="text-lime-400">{totalCount}</strong> products
+                </span>
+              </div>
+            </div>
+
+            {/* Product Grid - 4 Column Layout */}
+            {products.length > 0 ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-800 p-12 text-center">
+                <h3 className="text-lg font-semibold text-neutral-300">No products found</h3>
+                <p className="mt-1 text-sm text-neutral-500">
+                  Try clearing your filters or searching for a different keyword.
+                </p>
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            <ShopPagination currentPage={currentPage} totalPages={totalPages} />
+          </section>
+        </div>
+      </main>
+    </div>
+  );
+}

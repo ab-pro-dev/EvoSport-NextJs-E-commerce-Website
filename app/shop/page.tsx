@@ -68,7 +68,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     orderBy = { basePrice: "desc" };
   }
 
-  const [products, totalCount, categories, brands] = await Promise.all([
+  const [rawProducts, totalCount, categories, brands] = await Promise.all([
     prisma.product.findMany({
       where,
       orderBy,
@@ -85,6 +85,16 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.brand.findMany({ orderBy: { name: "asc" } }),
   ]);
+
+  const products = rawProducts.map((p) => ({
+    ...p,
+    basePrice: Number(p.basePrice),
+    compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
+    variants: p.variants.map((v) => ({
+      ...v,
+      price: v.price ? Number(v.price) : null,
+    })),
+  }));
 
   const totalPages = Math.ceil(totalCount / limit);
 

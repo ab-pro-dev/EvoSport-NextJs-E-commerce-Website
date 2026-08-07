@@ -164,7 +164,7 @@ export async function POST(req: Request) {
         await tx.payment.create({
           data: {
             orderId: order.id,
-            provider: "STRIPE",
+            provider: "MOCK" as any,
             status: "SUCCEEDED",
             amount: total,
             transactionRef: `MOCK_TX_${Date.now()}`,

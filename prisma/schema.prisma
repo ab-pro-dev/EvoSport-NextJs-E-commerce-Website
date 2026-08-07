@@ -32,6 +32,7 @@ enum OrderStatus {
 }
 
 enum PaymentProvider {
+  MOCK
   STRIPE
   PAYPAL
   CHAPA

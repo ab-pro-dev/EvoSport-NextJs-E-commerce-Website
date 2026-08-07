@@ -1,8 +1,11 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProductReviewsTab } from "@/components/product/product-reviews-tab";
 
 interface ProductTabsProps {
+  productId: string;
+  slug: string;
   description: string;
   brandName: string;
   categoryName: string;
@@ -11,6 +14,8 @@ interface ProductTabsProps {
 }
 
 export function ProductTabs({
+  productId,
+  slug,
   description,
   brandName,
   categoryName,
@@ -66,12 +71,13 @@ export function ProductTabs({
           </div>
         </TabsContent>
 
-        <TabsContent value="reviews" className="mt-6 space-y-4 text-xs text-neutral-300">
-          {reviewCount > 0 ? (
-            <p>Average Rating: {avgRating.toFixed(1)} / 5 ({reviewCount} reviews)</p>
-          ) : (
-            <p className="text-neutral-500 italic">No customer reviews yet for this product.</p>
-          )}
+        <TabsContent value="reviews" className="mt-6">
+          <ProductReviewsTab
+            productId={productId}
+            slug={slug}
+            initialReviewCount={reviewCount}
+            initialAvgRating={avgRating}
+          />
         </TabsContent>
 
         <TabsContent value="shipping" className="mt-6 space-y-4 text-xs text-neutral-300">

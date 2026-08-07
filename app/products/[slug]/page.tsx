@@ -102,6 +102,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Dynamic Product Tabs */}
         <ProductTabs
+          productId={product.id}
+          slug={product.slug}
           description={product.description}
           brandName={product.brand.name}
           categoryName={product.category.name}

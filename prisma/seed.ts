@@ -200,6 +200,55 @@ async function main() {
         { sku: "APX-BP-BLK-5L", color: "Midnight Black", size: "5L Vest", price: 64.99, stock: 16 },
       ],
     },
+    {
+      name: "EvoGrip Gym Lifting Gloves",
+      slug: "evogrip-gym-lifting-gloves",
+      description: "Padded palm fitness gloves with wrist wrap support for heavy weightlifting and pull-ups.",
+      brandId: evoBrand.id,
+      categoryId: accessoriesCategory.id,
+      basePrice: 24.99,
+      compareAtPrice: 29.99,
+      status: ProductStatus.ACTIVE,
+      images: [
+        { url: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600", altText: "EvoGrip Gym Gloves", position: 1 },
+      ],
+      variants: [
+        { sku: "EVO-GLV-M", color: "Stealth Black", size: "Medium", price: 24.99, stock: 30 },
+        { sku: "EVO-GLV-L", color: "Stealth Black", size: "Large", price: 24.99, stock: 25 },
+      ],
+    },
+    {
+      name: "Pulse Pro Running Socks 3-Pack",
+      slug: "pulse-pro-running-socks-3pack",
+      description: "Anti-blister cushioned athletic ankle socks engineered with arch compression.",
+      brandId: pulseBrand.id,
+      categoryId: accessoriesCategory.id,
+      basePrice: 18.99,
+      compareAtPrice: 24.99,
+      status: ProductStatus.ACTIVE,
+      images: [
+        { url: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=600", altText: "Pulse Socks 3-Pack", position: 1 },
+      ],
+      variants: [
+        { sku: "PLS-SCK-WHT-L", color: "White / Gray", size: "L (US 9-12)", price: 18.99, stock: 45 },
+      ],
+    },
+    {
+      name: "Apex Reflective Sports Armband",
+      slug: "apex-reflective-sports-armband",
+      description: "Water-resistant neoprene phone armband holder with key pocket and high-visibility strips.",
+      brandId: apexBrand.id,
+      categoryId: accessoriesCategory.id,
+      basePrice: 15.99,
+      compareAtPrice: 19.99,
+      status: ProductStatus.ACTIVE,
+      images: [
+        { url: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=600", altText: "Apex Armband", position: 1 },
+      ],
+      variants: [
+        { sku: "APX-ARM-BLK", color: "Reflective Black", size: "Universal", price: 15.99, stock: 60 },
+      ],
+    },
   ];
 
   for (const p of productsData) {

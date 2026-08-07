@@ -36,8 +36,24 @@ export async function GET(
       orderBy: { createdAt: "desc" },
     });
 
+    const productsWithReviews = await Promise.all(
+      relatedProducts.map(async (p) => {
+        const reviewStats = await prisma.review.aggregate({
+          where: { productId: p.id, status: "APPROVED" },
+          _avg: { rating: true },
+          _count: { rating: true },
+        });
+
+        return {
+          ...p,
+          avgRating: reviewStats._avg.rating ? Number(reviewStats._avg.rating.toFixed(1)) : 0,
+          reviewCount: reviewStats._count.rating || 0,
+        };
+      })
+    );
+
     return NextResponse.json({
-      products: relatedProducts,
+      products: productsWithReviews,
     });
   } catch (error) {
     console.error("Error fetching related products:", error);

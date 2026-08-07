@@ -17,6 +17,8 @@ interface ProductCardProps {
     brand: { name: string };
     category: { name: string };
     variants?: { color: string }[];
+    avgRating?: number;
+    reviewCount?: number;
   };
 }
 
@@ -28,8 +30,11 @@ export function ProductCard({ product }: ProductCardProps) {
     ? Math.round(((compareAt - price) / compareAt) * 100)
     : null;
 
-  // Extract unique color variants for color dot preview
-  const colors = Array.from(new Set(product.variants?.map((v) => v.color) || []));
+  const avgRating = product.avgRating ?? 0;
+  const reviewCount = product.reviewCount ?? 0;
+
+  // Extract unique real colors from variants
+  const colors = Array.from(new Set(product.variants?.map((v) => v.color).filter(Boolean) || []));
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl border border-neutral-800/80 bg-neutral-900/70 transition-all duration-300 hover:-translate-y-1 hover:border-[#CCFF00]/50 hover:shadow-lg hover:shadow-[#CCFF00]/5">
@@ -83,17 +88,24 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
         </Link>
 
-        {/* Rating Stars */}
+        {/* Real Rating Stars & Review Count */}
         <div className="mt-2 flex items-center gap-1.5">
           <div className="flex items-center text-amber-400">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-3 w-3 ${i < 4 ? "fill-amber-400" : "fill-neutral-800 text-neutral-800"}`} />
+              <Star
+                key={i}
+                className={`h-3 w-3 ${
+                  i < Math.floor(avgRating)
+                    ? "fill-amber-400 text-amber-400"
+                    : "fill-neutral-800 text-neutral-800"
+                }`}
+              />
             ))}
           </div>
-          <span className="text-[11px] text-neutral-400 font-medium">(128)</span>
+          <span className="text-[11px] text-neutral-400 font-medium">({reviewCount})</span>
         </div>
 
-        {/* Price & Colors */}
+        {/* Price & Real Color Variants */}
         <div className="mt-3 flex items-center justify-between border-t border-neutral-800/60 pt-3">
           <div className="flex items-baseline gap-2">
             <span className="text-base font-extrabold text-white">${price.toFixed(2)}</span>
@@ -102,12 +114,18 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
 
-          {/* Color Preview Dots */}
-          {colors.length > 0 && (
-            <div className="flex items-center gap-1">
-              <span className="h-2.5 w-2.5 rounded-full bg-black border border-neutral-600 inline-block" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#CCFF00] inline-block" />
-              <span className="h-2.5 w-2.5 rounded-full bg-cyan-500 inline-block" />
+          {/* Real Color Swatches Preview strictly from real variants */}
+          {colors.length > 1 && (
+            <div className="flex items-center gap-1" title={`${colors.length} colors available`}>
+              {colors.slice(0, 3).map((c, i) => (
+                <span
+                  key={i}
+                  className="h-2.5 w-2.5 rounded-full border border-neutral-600 bg-neutral-700 inline-block"
+                />
+              ))}
+              {colors.length > 3 && (
+                <span className="text-[9px] font-bold text-neutral-400">+{colors.length - 3}</span>
+              )}
             </div>
           )}
         </div>

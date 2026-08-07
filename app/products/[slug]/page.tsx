@@ -45,15 +45,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  // Real DB Aggregate Query over Review table
   const reviewStats = await prisma.review.aggregate({
     where: { productId: product.id, status: "APPROVED" },
     _avg: { rating: true },
     _count: { rating: true },
   });
 
-  const avgRating = reviewStats._avg.rating ? Number(reviewStats._avg.rating.toFixed(1)) : 4.8;
-  const reviewCount = reviewStats._count.rating || 12;
+  const avgRating = reviewStats._avg.rating ? Number(reviewStats._avg.rating.toFixed(1)) : 0;
+  const reviewCount = reviewStats._count.rating || 0;
 
+  // Real Related Products from Database (excluding current product)
   const rawRelated = await prisma.product.findMany({
     where: {
       categoryId: product.categoryId,
@@ -95,23 +97,25 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Main Product Details Header & Interactivity */}
+        {/* Main Product Details & Gallery */}
         <ProductDetails product={serializedProduct} />
 
-        {/* Detailed Tabs Section */}
+        {/* Dynamic Product Tabs */}
         <ProductTabs
           description={product.description}
           brandName={product.brand.name}
           categoryName={product.category.name}
+          reviewCount={serializedProduct.reviewCount}
+          avgRating={serializedProduct.avgRating}
         />
 
-        {/* Related Products Section */}
+        {/* Related Products Section (Responsive 4-card grid) */}
         {serializedRelated.length > 0 && (
           <section className="mt-16 pt-12 border-t border-neutral-800">
             <div className="mb-8 flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-extrabold tracking-tight text-white">
-                  YOU MAY ALSO <span className="text-lime-400">LIKE</span>
+                <h2 className="text-2xl font-black tracking-tight text-white uppercase">
+                  YOU MAY ALSO <span className="text-[#CCFF00]">LIKE</span>
                 </h2>
                 <p className="text-xs text-neutral-400 mt-1">
                   Hand-picked gear from the {product.category.name} collection
@@ -119,7 +123,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
               {serializedRelated.map((relProduct) => (
                 <ProductCard key={relProduct.id} product={relProduct} />
               ))}

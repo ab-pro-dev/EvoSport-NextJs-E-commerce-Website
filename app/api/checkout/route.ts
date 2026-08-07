@@ -195,6 +195,15 @@ export async function POST(req: Request) {
           where: cartWhere,
         });
 
+        // Trigger real notification for user
+        await tx.notification.create({
+          data: {
+            userId: finalUserId,
+            type: "ORDER_UPDATE",
+            message: `Order #${order.id.slice(-8).toUpperCase()} confirmed`,
+          },
+        });
+
         return paidOrder;
       },
       {

@@ -4,11 +4,10 @@ import { Prisma } from "@prisma/client";
 import { ShopFilters } from "@/components/shop/shop-filters";
 import { ProductCard } from "@/components/shop/product-card";
 import { ShopPagination } from "@/components/shop/shop-pagination";
-import { SlidersHorizontal } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Shop All Gear & Apparel | EvoSport",
-  description: "Explore high-performance running shoes, gym apparel, and athletic accessories at EvoSport.",
+  title: "Shop All Sportswear & Equipment | EvoSport",
+  description: "Find the best sportswear & equipment for every move at EvoSport.",
 };
 
 interface ShopPageProps {
@@ -100,14 +99,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
-      {/* Hero Header */}
-      <section className="relative border-b border-neutral-800 bg-neutral-900/40 py-12 backdrop-blur-sm">
+      {/* Header Panel */}
+      <section className="relative border-b border-neutral-800/80 bg-neutral-900/40 py-8 backdrop-blur-sm">
         <div className="container mx-auto px-4 max-w-7xl">
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-white">
-            EXPLORE <span className="text-lime-400">EVOSPORT GEAR</span>
+          <h1 className="text-3xl font-black tracking-tight text-white uppercase">
+            Shop
           </h1>
-          <p className="mt-2 text-sm text-neutral-400 max-w-2xl">
-            Pro-grade footwear, compression apparel, and athletic essentials engineered for peak performance.
+          <p className="mt-1 text-xs text-neutral-400">
+            Find the best sportswear & equipment for every move.
           </p>
         </div>
       </section>
@@ -120,36 +119,37 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <ShopFilters categories={categories} brands={brands} />
           </aside>
 
-          {/* Product Grid & Controls */}
+          {/* Product Grid & Top Bar */}
           <section className="lg:col-span-3">
-            {/* Top Toolbar */}
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 backdrop-blur-md">
-              <div className="flex items-center gap-2 text-xs font-semibold text-neutral-400">
-                <SlidersHorizontal className="h-4 w-4 text-lime-400" />
-                <span>
-                  Showing <strong className="text-white">{products.length}</strong> of{" "}
-                  <strong className="text-lime-400">{totalCount}</strong> products
-                </span>
+            {/* Top Bar matching mockup */}
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 p-3.5 backdrop-blur-md text-xs text-neutral-400">
+              <div>
+                Showing <strong className="text-white">1-{products.length}</strong> of{" "}
+                <strong className="text-[#CCFF00]">{totalCount}</strong> results
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="font-medium text-neutral-400">Sort by: <strong className="text-white">Featured</strong></span>
+                <span className="font-medium text-neutral-400">Show: <strong className="text-white">12</strong></span>
               </div>
             </div>
 
             {/* Product Grid - 4 Column Layout */}
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-800 p-12 text-center">
-                <h3 className="text-lg font-semibold text-neutral-300">No products found</h3>
-                <p className="mt-1 text-sm text-neutral-500">
-                  Try clearing your filters or searching for a different keyword.
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-800 p-12 text-center">
+                <h3 className="text-sm font-bold text-neutral-300">No products found</h3>
+                <p className="mt-1 text-xs text-neutral-500">
+                  Try clearing your filters or searching for another term.
                 </p>
               </div>
             )}
 
-            {/* Pagination Controls */}
+            {/* Pagination */}
             <ShopPagination currentPage={currentPage} totalPages={totalPages} />
           </section>
         </div>

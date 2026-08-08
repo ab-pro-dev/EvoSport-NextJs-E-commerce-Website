@@ -137,8 +137,7 @@ export async function PATCH(
     await prisma.notification.create({
       data: {
         userId: order.userId,
-        title: `Order #${order.id.slice(-8).toUpperCase()} Status Update`,
-        message: `Your order status has been updated to ${newStatus}.`,
+        message: `Order #${order.id.slice(-8).toUpperCase()}: Status updated to ${newStatus}.`,
         type: "ORDER_UPDATE",
       },
     });

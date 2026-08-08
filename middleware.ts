@@ -9,7 +9,9 @@ export function middleware(request: NextRequest) {
     host.includes("evosport-admin") ||
     host.startsWith("admin.");
 
-  const isAdminPath = pathname.startsWith("/admin") || pathname.startsWith("/admin-login");
+  // Check exact /admin path or subpaths under /admin/, distinct from /admin-login
+  const isAdminDashboardPath = pathname === "/admin" || pathname.startsWith("/admin/");
+  const isAdminLoginPage = pathname === "/admin-login";
   const isPublicAssetOrApi =
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
@@ -18,14 +20,15 @@ export function middleware(request: NextRequest) {
 
   // 1. If hitting the ADMIN domain (e.g. evosport-admin.vercel.app)
   if (isAdminDomain) {
-    if (!isAdminPath && !isPublicAssetOrApi) {
+    if (!isAdminDashboardPath && !isAdminLoginPage && !isPublicAssetOrApi) {
       // Redirect customer-facing requests on the admin domain to /admin
       return NextResponse.redirect(new URL("/admin", request.url));
     }
   } else {
     // 2. If hitting the MAIN customer domain (e.g. localhost:3000, evo-sport.vercel.app)
-    if (isAdminPath) {
-      // Block direct access to /admin and /admin-login on customer domain -> redirect to home / 404
+    // /admin-login is allowed to render normally for local testing
+    // Only block direct access to /admin/* dashboard routes on the main domain
+    if (isAdminDashboardPath) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
@@ -35,12 +38,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

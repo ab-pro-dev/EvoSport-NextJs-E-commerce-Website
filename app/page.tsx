@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Engineer your athletic potential with pro-grade footwear, apparel, and endurance equipment.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   // Fetch real featured products from DB
   const rawProducts = await prisma.product.findMany({

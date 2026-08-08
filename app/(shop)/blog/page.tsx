@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Read the latest athletic performance guides, marathon recovery tips, and equipment reviews.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicBlogListPage() {
   const posts = await prisma.blog.findMany({
     where: { status: "PUBLISHED" },

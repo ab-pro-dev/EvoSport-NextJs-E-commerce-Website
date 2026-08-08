@@ -22,6 +22,8 @@ interface ShopPageProps {
   }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const resolvedParams = await searchParams;
 

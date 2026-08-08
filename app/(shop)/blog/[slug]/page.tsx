@@ -4,6 +4,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ArrowLeft, Calendar, User, FileText } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

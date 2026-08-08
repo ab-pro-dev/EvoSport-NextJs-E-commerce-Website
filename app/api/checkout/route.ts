@@ -71,7 +71,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4. Calculate subtotal, base shipping, tax server-side
+    // 4. Calculate subtotal server-side
     let subtotal = 0;
     const itemsToPurchase = cartItems.map((item) => {
       const unitPrice = item.variant.price
@@ -88,13 +88,11 @@ export async function POST(req: Request) {
     });
 
     subtotal = Number(subtotal.toFixed(2));
-    let baseShipping = subtotal >= 100 ? 0 : 9.99;
-    const tax = Number((subtotal * 0.08).toFixed(2));
 
     // 5. Coupon validation and discount computation
     let couponRecord: any = null;
     let discountAmount = 0;
-    let effectiveShipping = baseShipping;
+    let effectiveShipping = subtotal >= 100 ? 0 : 9.99;
 
     if (couponCode && typeof couponCode === "string" && couponCode.trim() !== "") {
       const normalizedCode = couponCode.trim().toUpperCase();
@@ -121,12 +119,20 @@ export async function POST(req: Request) {
         discountAmount = Number(couponVal.toFixed(2));
       } else if (couponRecord.type === "FREE_SHIPPING") {
         effectiveShipping = 0;
-        discountAmount = baseShipping;
       }
     }
 
-    const rawTotal = subtotal + effectiveShipping + tax - (couponRecord?.type === "FREE_SHIPPING" ? 0 : discountAmount);
-    const finalTotal = Math.max(0, Number(rawTotal.toFixed(2)));
+    // Compute discounted subtotal first
+    const discountedSubtotal = Math.max(
+      0,
+      Number((subtotal - (couponRecord?.type === "FREE_SHIPPING" ? 0 : discountAmount)).toFixed(2))
+    );
+
+    // Calculate tax on the DISCOUNTED subtotal
+    const tax = Number((discountedSubtotal * 0.08).toFixed(2));
+
+    // Calculate final total: discounted subtotal + shipping + tax
+    const finalTotal = Number((discountedSubtotal + effectiveShipping + tax).toFixed(2));
 
     // 6. Execute DB transaction with explicit 20s timeout for remote DB latency
     const completedOrder = await prisma.$transaction(

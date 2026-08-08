@@ -47,6 +47,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        if (user.isBanned) {
+          throw new Error("Account is suspended.");
+        }
+
         const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
         if (!isPasswordValid) {
           return null;

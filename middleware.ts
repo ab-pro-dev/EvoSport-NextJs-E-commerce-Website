@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const pathname = request.nextUrl.pathname;
 
@@ -10,7 +10,6 @@ export function middleware(request: NextRequest) {
     host.startsWith("admin.") ||
     host.includes("admin.localhost");
 
-  // Check exact /admin path or subpaths under /admin/, distinct from /admin-login
   const isAdminDashboardPath = pathname === "/admin" || pathname.startsWith("/admin/");
   const isAdminLoginPage = pathname === "/admin-login";
   const isPublicAssetOrApi =
@@ -19,17 +18,40 @@ export function middleware(request: NextRequest) {
     pathname === "/favicon.ico" ||
     /\.(png|jpg|jpeg|svg|webp|css|js|ico)$/.test(pathname);
 
-  // Allow local development (localhost) to access /admin and /admin-login seamlessly
   const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
 
-  // 1. If hitting the ADMIN domain (e.g. evosport-admin.vercel.app or admin.localhost)
+  // 1. Check Maintenance Mode for public customer-facing routes
+  if (
+    !isAdminDashboardPath &&
+    !isAdminLoginPage &&
+    pathname !== "/maintenance" &&
+    !isPublicAssetOrApi
+  ) {
+    try {
+      const maintenanceRes = await fetch(new URL("/api/settings/maintenance", request.url));
+      if (maintenanceRes.ok) {
+        const { maintenanceMode } = await maintenanceRes.json();
+        if (maintenanceMode) {
+          const hasAdminAuthCookie =
+            request.cookies.has("authjs.session-token") ||
+            request.cookies.has("__Secure-authjs.session-token");
+
+          if (!hasAdminAuthCookie) {
+            return NextResponse.redirect(new URL("/maintenance", request.url));
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore network errors in middleware fallback
+    }
+  }
+
+  // 2. Admin Domain vs Customer Domain routing
   if (isAdminDomain) {
     if (!isAdminDashboardPath && !isAdminLoginPage && !isPublicAssetOrApi) {
-      // Redirect customer-facing requests on the admin domain to /admin
       return NextResponse.redirect(new URL("/admin", request.url));
     }
   } else if (!isLocalhost) {
-    // 2. On production customer domain (e.g. evo-sport.vercel.app), block /admin/* routes
     if (isAdminDashboardPath) {
       return NextResponse.redirect(new URL("/", request.url));
     }

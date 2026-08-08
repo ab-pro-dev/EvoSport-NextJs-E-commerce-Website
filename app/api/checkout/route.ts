@@ -89,10 +89,21 @@ export async function POST(req: Request) {
 
     subtotal = Number(subtotal.toFixed(2));
 
-    // 5. Coupon validation and discount computation
+    // 5. Fetch dynamic store settings (Tax Rate, Shipping Threshold)
+    const [taxSetting, freeShippingSetting, flatRateShippingSetting] = await Promise.all([
+      prisma.setting.findUnique({ where: { key: "taxRate" } }),
+      prisma.setting.findUnique({ where: { key: "freeShippingThreshold" } }),
+      prisma.setting.findUnique({ where: { key: "flatRateShipping" } }),
+    ]);
+
+    const activeTaxRate = taxSetting?.value ? parseFloat(taxSetting.value) : 0.08;
+    const activeFreeShippingThreshold = freeShippingSetting?.value ? parseFloat(freeShippingSetting.value) : 100;
+    const activeFlatRateShipping = flatRateShippingSetting?.value ? parseFloat(flatRateShippingSetting.value) : 9.99;
+
+    // Coupon validation and discount computation
     let couponRecord: any = null;
     let discountAmount = 0;
-    let effectiveShipping = subtotal >= 100 ? 0 : 9.99;
+    let effectiveShipping = subtotal >= activeFreeShippingThreshold ? 0 : activeFlatRateShipping;
 
     if (couponCode && typeof couponCode === "string" && couponCode.trim() !== "") {
       const normalizedCode = couponCode.trim().toUpperCase();
@@ -128,8 +139,8 @@ export async function POST(req: Request) {
       Number((subtotal - (couponRecord?.type === "FREE_SHIPPING" ? 0 : discountAmount)).toFixed(2))
     );
 
-    // Calculate tax on the DISCOUNTED subtotal
-    const tax = Number((discountedSubtotal * 0.08).toFixed(2));
+    // Calculate tax on the DISCOUNTED subtotal using dynamic store tax rate
+    const tax = Number((discountedSubtotal * activeTaxRate).toFixed(2));
 
     // Calculate final total: discounted subtotal + shipping + tax
     const finalTotal = Number((discountedSubtotal + effectiveShipping + tax).toFixed(2));

@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+cookies*.txt
 
 # debug
 npm-debug.log*
@@ -45,5 +46,5 @@ next-env.d.ts
 # graphify
 graphify-out/
 
-
 design-reference/
+.env*

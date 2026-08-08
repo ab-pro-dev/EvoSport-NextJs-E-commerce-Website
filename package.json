@@ -40,7 +40,8 @@
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.9",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vercel": "^58.7.1"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

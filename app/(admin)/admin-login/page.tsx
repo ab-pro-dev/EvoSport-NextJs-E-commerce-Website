@@ -33,11 +33,15 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // 2. Fetch current session to verify ADMIN role
+      // 2. Fetch current session from /api/me to verify ADMIN role
       const meRes = await fetch("/api/me");
       const meData = await meRes.json();
+      const userRole = meData?.user?.role;
 
-      if (!meRes.ok || meData?.role !== "ADMIN") {
+      // Debug log requirement: print exact fetched user session data and role
+      console.log("[ADMIN_LOGIN_DEBUG] Fetched /api/me user data:", meData, "Extracted role:", userRole);
+
+      if (!meRes.ok || userRole !== "ADMIN") {
         // Immediately sign out non-admin user
         await signOut({ redirect: false });
         setErrorMessage("Access denied. Admin privileges required.");

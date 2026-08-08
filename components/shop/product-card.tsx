@@ -23,7 +23,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const mainImage = product.images[0]?.url || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
+  const mainImage = (product.images && product.images.length > 0 && product.images[0]?.url)
+    ? product.images[0].url
+    : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
   const price = Number(product.basePrice);
   const compareAt = product.compareAtPrice ? Number(product.compareAtPrice) : null;
   const discountPercent = compareAt && compareAt > price

@@ -135,7 +135,9 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => {
           const product = item.product;
-          const image = product.images[0]?.url || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
+          const image = (product.images && product.images.length > 0 && product.images[0]?.url)
+            ? product.images[0].url
+            : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
           const price = Number(product.basePrice);
           const compareAt = product.compareAtPrice ? Number(product.compareAtPrice) : null;
           const isLoading = loadingId === product.id;
@@ -151,7 +153,7 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
               <div className="relative aspect-square w-full overflow-hidden bg-neutral-950 p-4">
                 <Image
                   src={image}
-                  alt={product.images[0]?.altText || product.name}
+                  alt={(product.images && product.images.length > 0 && product.images[0]?.altText) ? product.images[0].altText : product.name}
                   fill
                   className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
                 />

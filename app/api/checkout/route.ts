@@ -35,9 +35,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
     }
 
-    // 2. Validate shipping address fields
+    // 2. Validate shipping address fields and optional coupon code
     const body = await req.json();
-    const { shippingAddress } = body || {};
+    const { shippingAddress, couponCode } = body || {};
 
     if (
       !shippingAddress ||
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4. Calculate subtotal, shipping, tax, total server-side
+    // 4. Calculate subtotal, base shipping, tax server-side
     let subtotal = 0;
     const itemsToPurchase = cartItems.map((item) => {
       const unitPrice = item.variant.price
@@ -88,11 +88,47 @@ export async function POST(req: Request) {
     });
 
     subtotal = Number(subtotal.toFixed(2));
-    const shipping = subtotal >= 100 ? 0 : 9.99;
+    let baseShipping = subtotal >= 100 ? 0 : 9.99;
     const tax = Number((subtotal * 0.08).toFixed(2));
-    const total = Number((subtotal + shipping + tax).toFixed(2));
 
-    // 5. Execute DB transaction with explicit 20s timeout for remote DB latency
+    // 5. Coupon validation and discount computation
+    let couponRecord: any = null;
+    let discountAmount = 0;
+    let effectiveShipping = baseShipping;
+
+    if (couponCode && typeof couponCode === "string" && couponCode.trim() !== "") {
+      const normalizedCode = couponCode.trim().toUpperCase();
+      couponRecord = await prisma.coupon.findUnique({
+        where: { code: normalizedCode },
+      });
+
+      if (!couponRecord || !couponRecord.active) {
+        return NextResponse.json({ error: `Coupon "${normalizedCode}" is invalid or inactive.` }, { status: 400 });
+      }
+
+      if (couponRecord.expiresAt && new Date(couponRecord.expiresAt) < new Date()) {
+        return NextResponse.json({ error: `Coupon "${normalizedCode}" has expired.` }, { status: 400 });
+      }
+
+      if (couponRecord.usageLimit !== null && couponRecord.usageCount >= couponRecord.usageLimit) {
+        return NextResponse.json({ error: `Coupon "${normalizedCode}" has reached its maximum usage limit.` }, { status: 400 });
+      }
+
+      const couponVal = Number(couponRecord.value);
+      if (couponRecord.type === "PERCENTAGE") {
+        discountAmount = Number(((subtotal * couponVal) / 100).toFixed(2));
+      } else if (couponRecord.type === "FIXED") {
+        discountAmount = Number(couponVal.toFixed(2));
+      } else if (couponRecord.type === "FREE_SHIPPING") {
+        effectiveShipping = 0;
+        discountAmount = baseShipping;
+      }
+    }
+
+    const rawTotal = subtotal + effectiveShipping + tax - (couponRecord?.type === "FREE_SHIPPING" ? 0 : discountAmount);
+    const finalTotal = Math.max(0, Number(rawTotal.toFixed(2)));
+
+    // 6. Execute DB transaction with explicit 20s timeout for remote DB latency
     const completedOrder = await prisma.$transaction(
       async (tx) => {
         let finalUserId = authUserId;
@@ -126,16 +162,17 @@ export async function POST(req: Request) {
           },
         });
 
-        // Create Order (initial PENDING status)
+        // Create Order (initial PENDING status with linked couponId)
         const order = await tx.order.create({
           data: {
             userId: finalUserId,
             status: "PENDING",
             subtotal,
-            shipping,
+            shipping: effectiveShipping,
             tax,
-            total,
+            total: finalTotal,
             shippingAddressId: address.id,
+            couponId: couponRecord?.id || null,
           },
         });
 
@@ -160,13 +197,25 @@ export async function POST(req: Request) {
           });
         }
 
+        // Increment coupon usage count if coupon applied
+        if (couponRecord?.id) {
+          await tx.coupon.update({
+            where: { id: couponRecord.id },
+            data: {
+              usageCount: {
+                increment: 1,
+              },
+            },
+          });
+        }
+
         // Create Payment record with instant success simulation
         await tx.payment.create({
           data: {
             orderId: order.id,
             provider: "MOCK" as any,
             status: "SUCCEEDED",
-            amount: total,
+            amount: finalTotal,
             transactionRef: `MOCK_TX_${Date.now()}`,
           },
         });
@@ -187,6 +236,7 @@ export async function POST(req: Request) {
             },
             shippingAddress: true,
             payments: true,
+            coupon: true,
           },
         });
 
@@ -220,6 +270,7 @@ export async function POST(req: Request) {
       shipping: Number(completedOrder.shipping),
       tax: Number(completedOrder.tax),
       total: Number(completedOrder.total),
+      couponCode: completedOrder.coupon?.code || null,
       createdAt: completedOrder.createdAt,
       shippingAddress: completedOrder.shippingAddress,
       payments: completedOrder.payments.map((p) => ({

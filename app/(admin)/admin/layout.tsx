@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { Bell, ShieldCheck } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -16,7 +18,7 @@ export default async function AdminLayout({
   // Fetch real user from DB to verify ADMIN role
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { role: true },
+    select: { role: true, name: true, email: true, image: true },
   });
 
   if (!dbUser || dbUser.role !== "ADMIN") {
@@ -24,15 +26,15 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white flex flex-col">
-      {/* Admin Top Banner / Navbar */}
-      <header className="sticky top-0 z-50 border-b border-neutral-800 bg-neutral-900/90 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-neutral-950 text-white flex flex-col selection:bg-rose-600 selection:text-white">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-50 h-16 border-b border-neutral-800 bg-neutral-900/90 backdrop-blur-md px-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded bg-rose-600 font-black text-xs text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-600 font-black text-sm text-white">
             A
           </div>
           <div>
-            <span className="text-sm font-black italic tracking-tighter text-white">
+            <span className="text-base font-black italic tracking-tighter text-white">
               EVO<span className="text-rose-500">SPORT</span>
             </span>
             <span className="ml-2 rounded border border-rose-900 bg-rose-950 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-400">
@@ -41,13 +43,30 @@ export default async function AdminLayout({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-xs">
-          <span className="text-neutral-400">Logged in as <strong className="text-white">{session.user.email}</strong></span>
+        <div className="flex items-center gap-4">
+          <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-white transition-colors">
+            <Bell className="h-4 w-4" />
+          </button>
+
+          <div className="flex items-center gap-2.5 rounded-lg border border-neutral-800 bg-neutral-900/80 px-3 py-1.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-[10px] font-black text-white">
+              {dbUser.name?.charAt(0).toUpperCase() || "A"}
+            </div>
+            <div className="text-left leading-none">
+              <p className="text-xs font-bold text-white">{dbUser.name}</p>
+              <p className="text-[10px] text-neutral-400 mt-0.5">{dbUser.email}</p>
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 p-6 max-w-7xl mx-auto w-full">{children}</main>
+      {/* Sidebar + Main Content Layout */}
+      <div className="flex flex-1">
+        <AdminSidebar />
+        <main className="flex-1 p-8 max-w-7xl mx-auto w-full overflow-x-hidden">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

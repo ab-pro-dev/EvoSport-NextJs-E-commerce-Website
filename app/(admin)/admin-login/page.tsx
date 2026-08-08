@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, getSession } from "next-auth/react";
 import { Lock, Mail, ShieldAlert, ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,8 @@ export default function AdminLoginPage() {
       setIsLoading(true);
       setErrorMessage(null);
 
+      console.log("[ADMIN_LOGIN_LOG 1] Submitting admin login with email:", email.trim());
+
       // 1. NextAuth sign in
       const res = await signIn("credentials", {
         email: email.trim(),
@@ -27,33 +29,35 @@ export default function AdminLoginPage() {
         redirect: false,
       });
 
+      console.log("[ADMIN_LOGIN_LOG 2] signIn() returned result object:", res);
+
       if (res?.error) {
+        console.log("[ADMIN_LOGIN_LOG 2.1] signIn error detected:", res.error);
         setErrorMessage("Invalid admin credentials.");
         setIsLoading(false);
         return;
       }
 
-      // 2. Fetch current session from /api/me to verify ADMIN role
-      const meRes = await fetch("/api/me");
-      const meData = await meRes.json();
-      const userRole = meData?.user?.role;
+      // 2. Fetch session via getSession()
+      console.log("[ADMIN_LOGIN_LOG 3] Fetching session via getSession()...");
+      const session = await getSession();
+      const userRole = (session?.user as { role?: string })?.role;
 
-      // Debug log requirement: print exact fetched user session data and role
-      console.log("[ADMIN_LOGIN_DEBUG] Fetched /api/me user data:", meData, "Extracted role:", userRole);
+      console.log("[ADMIN_LOGIN_LOG 4] getSession() returned:", session, "Extracted userRole:", userRole);
 
-      if (!meRes.ok || userRole !== "ADMIN") {
-        // Immediately sign out non-admin user
+      if (!session?.user || userRole !== "ADMIN") {
+        console.log("[ADMIN_LOGIN_LOG 5] Access DENIED: session =", session, "userRole =", userRole);
         await signOut({ redirect: false });
         setErrorMessage("Access denied. Admin privileges required.");
         setIsLoading(false);
         return;
       }
 
-      // On successful admin verification: redirect to /admin
+      console.log("[ADMIN_LOGIN_LOG 6] Access GRANTED! Redirecting to /admin...");
       router.push("/admin");
       router.refresh();
     } catch (err) {
-      console.error("Admin login error:", err);
+      console.error("[ADMIN_LOGIN_LOG ERROR] Unexpected exception:", err);
       setErrorMessage("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }
@@ -95,7 +99,7 @@ export default function AdminLoginPage() {
                   placeholder="admin@evosport.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-neutral-950 border-neutral-800 text-xs text-white pl-9 placeholder:text-neutral-600 focus-visible:ring-rose-500"
+                  className="bg-neutral-950 border-neutral-800 text-xs text-[#fff] pl-9 placeholder:text-neutral-600 focus-visible:ring-rose-500"
                 />
                 <Mail className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
               </div>
@@ -110,7 +114,7 @@ export default function AdminLoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-neutral-950 border-neutral-800 text-xs text-white pl-9 placeholder:text-neutral-600 focus-visible:ring-rose-500"
+                  className="bg-neutral-950 border-neutral-800 text-xs text-[#fff] pl-9 placeholder:text-neutral-600 focus-visible:ring-rose-500"
                 />
                 <Lock className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
               </div>

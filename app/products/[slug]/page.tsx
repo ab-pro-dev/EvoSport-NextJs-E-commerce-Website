@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     where: { slug },
-    select: { name: true, description: true },
+    include: { images: { orderBy: { position: "asc" }, take: 1 } },
   });
 
   if (!product) {
@@ -24,9 +24,19 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
+  const firstImageUrl = product.images?.[0]?.url;
+
   return {
     title: `${product.name} | EvoSport`,
     description: product.description,
+    alternates: {
+      canonical: `/products/${product.slug}`,
+    },
+    openGraph: {
+      title: `${product.name} | EvoSport`,
+      description: product.description,
+      images: firstImageUrl ? [{ url: firstImageUrl, alt: product.name }] : [],
+    },
   };
 }
 
@@ -96,8 +106,41 @@ export default async function ProductPage({ params }: ProductPageProps) {
     })),
   }));
 
+  // JSON-LD Structured Data Schema.org/Product
+  const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+  const inStock = totalStock > 0;
+  const productImages = product.images.map((img) => img.url);
+
+  const jsonLd: any = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: productImages.length > 0 ? productImages : undefined,
+    offers: {
+      "@type": "Offer",
+      price: Number(product.basePrice),
+      priceCurrency: "USD",
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+  };
+
+  if (reviewCount > 0) {
+    jsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: avgRating,
+      reviewCount: reviewCount,
+    };
+  }
+
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
+      {/* Schema.org Product Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Main Product Details & Gallery */}
         <ProductDetails product={serializedProduct} />

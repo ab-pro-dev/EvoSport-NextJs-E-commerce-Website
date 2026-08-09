@@ -5,21 +5,30 @@ import { ShopFilters } from "@/components/shop/shop-filters";
 import { ProductCard } from "@/components/shop/product-card";
 import { ShopPagination } from "@/components/shop/shop-pagination";
 
-export const metadata: Metadata = {
-  title: "Shop All Sportswear & Equipment | EvoSport",
-  description: "Find the best sportswear & equipment for every move at EvoSport.",
-};
+export async function generateMetadata({ searchParams }: ShopPageProps): Promise<Metadata> {
+  const resolvedParams = await searchParams;
+  const categorySlug = resolvedParams.category || "";
+  const brandSlug = resolvedParams.brand || "";
+  const search = resolvedParams.search || "";
 
-interface ShopPageProps {
-  searchParams: Promise<{
-    category?: string;
-    brand?: string;
-    minPrice?: string;
-    maxPrice?: string;
-    sort?: string;
-    search?: string;
-    page?: string;
-  }>;
+  let title = "Shop All Sportswear & Equipment | EvoSport";
+  if (categorySlug) {
+    const category = await prisma.category.findUnique({ where: { slug: categorySlug } });
+    if (category) title = `${category.name} Sportswear & Gear | EvoSport`;
+  } else if (brandSlug) {
+    const brand = await prisma.brand.findUnique({ where: { slug: brandSlug } });
+    if (brand) title = `${brand.name} Athletic Gear | EvoSport`;
+  } else if (search) {
+    title = `Search results for "${search}" | EvoSport`;
+  }
+
+  return {
+    title,
+    description: "Browse EvoSport's collection of high-performance sportswear, marathon running footwear, and endurance gear.",
+    alternates: {
+      canonical: "/shop",
+    },
+  };
 }
 
 export const dynamic = "force-dynamic";

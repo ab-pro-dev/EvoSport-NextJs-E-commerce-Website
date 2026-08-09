@@ -14,7 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EvoSport | High-Performance Athletic Apparel & Gear",
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://evo-sport.vercel.app"),
+  title: {
+    default: "EvoSport | High-Performance Athletic Apparel & Gear",
+    template: "%s | EvoSport",
+  },
   description: "Engineer your athletic potential with pro-grade footwear, apparel, and endurance equipment.",
 };
 

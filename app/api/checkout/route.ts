@@ -3,10 +3,20 @@ import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
 const CART_COOKIE_NAME = "cart_session";
 
 export async function POST(req: Request) {
   try {
+    const clientIp = getClientIp(req);
+    const limiter = rateLimit(`checkout:${clientIp}`, 10, 60000);
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: "Too many checkout attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
     const session = await auth();
     const cookieStore = await cookies();
     const sessionId = cookieStore.get(CART_COOKIE_NAME)?.value || null;

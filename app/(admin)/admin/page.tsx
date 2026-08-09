@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -237,8 +238,7 @@ export default async function AdminOverviewPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 relative rounded bg-neutral-900 overflow-hidden border border-neutral-800 shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p.image} alt={p.name} className="h-full w-full object-cover" />
+                      <Image src={p.image} alt={p.name} fill sizes="40px" className="object-cover" />
                     </div>
                     <div>
                       <p className="text-xs font-bold text-white">{p.name}</p>

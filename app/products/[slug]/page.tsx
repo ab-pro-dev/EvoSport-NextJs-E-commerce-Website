@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { ProductDetails } from "@/components/product/product-details";
 import { ProductTabs } from "@/components/product/product-tabs";
@@ -145,37 +146,41 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Main Product Details & Gallery */}
         <ProductDetails product={serializedProduct} />
 
-        {/* Dynamic Product Tabs */}
-        <ProductTabs
-          productId={product.id}
-          slug={product.slug}
-          description={product.description}
-          brandName={product.brand.name}
-          categoryName={product.category.name}
-          reviewCount={serializedProduct.reviewCount}
-          avgRating={serializedProduct.avgRating}
-        />
+        {/* Dynamic Product Tabs with Suspense Boundary */}
+        <Suspense fallback={<div className="h-64 bg-neutral-900/50 animate-pulse rounded-xl my-8 border border-neutral-800" />}>
+          <ProductTabs
+            productId={product.id}
+            slug={product.slug}
+            description={product.description}
+            brandName={product.brand.name}
+            categoryName={product.category.name}
+            reviewCount={serializedProduct.reviewCount}
+            avgRating={serializedProduct.avgRating}
+          />
+        </Suspense>
 
-        {/* Related Products Section (Responsive 4-card grid) */}
+        {/* Related Products Section with Suspense Boundary */}
         {serializedRelated.length > 0 && (
-          <section className="mt-16 pt-12 border-t border-neutral-800">
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-black tracking-tight text-white uppercase">
-                  YOU MAY ALSO <span className="text-[#CCFF00]">LIKE</span>
-                </h2>
-                <p className="text-xs text-neutral-400 mt-1">
-                  Hand-picked gear from the {product.category.name} collection
-                </p>
+          <Suspense fallback={<div className="h-48 bg-neutral-900/50 animate-pulse rounded-xl mt-12 border border-neutral-800" />}>
+            <section className="mt-16 pt-12 border-t border-neutral-800">
+              <div className="mb-8 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-black tracking-tight text-white uppercase">
+                    YOU MAY ALSO <span className="text-[#CCFF00]">LIKE</span>
+                  </h2>
+                  <p className="text-xs text-neutral-400 mt-1">
+                    Hand-picked gear from the {product.category.name} collection
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-              {serializedRelated.map((relProduct) => (
-                <ProductCard key={relProduct.id} product={relProduct} />
-              ))}
-            </div>
-          </section>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                {serializedRelated.map((relProduct) => (
+                  <ProductCard key={relProduct.id} product={relProduct} />
+                ))}
+              </div>
+            </section>
+          </Suspense>
         )}
       </main>
     </div>

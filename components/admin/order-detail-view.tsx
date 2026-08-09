@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ShoppingBag, User, MapPin, CreditCard, AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -169,8 +170,7 @@ export function OrderDetailView({ order: initialOrder }: OrderDetailProps) {
                   <div className="flex items-center gap-3">
                     <div className="h-12 w-12 relative rounded bg-neutral-900 overflow-hidden border border-neutral-800 shrink-0">
                       {item.variant.product.images[0]?.url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.variant.product.images[0].url} alt={item.variant.product.name} className="h-full w-full object-cover" />
+                        <Image src={item.variant.product.images[0].url} alt={item.variant.product.name} fill sizes="48px" className="object-cover" />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center text-neutral-600">
                           <ShoppingBag className="h-4 w-4" />

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Plus, Edit2, Trash2, Package, Search, Filter, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -231,8 +232,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 relative rounded bg-neutral-950 overflow-hidden border border-neutral-800 shrink-0">
                           {p.image ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={p.image} alt={p.name} className="h-full w-full object-cover" />
+                            <Image src={p.image} alt={p.name} fill sizes="40px" className="object-cover" />
                           ) : (
                             <div className="h-full w-full flex items-center justify-center text-neutral-600">
                               <Package className="h-4 w-4" />

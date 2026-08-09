@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Tag, Plus, Edit2, Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,8 +141,7 @@ export function BrandsManagementView({ initialBrands }: BrandsManagementViewProp
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 relative rounded bg-neutral-950 flex items-center justify-center overflow-hidden border border-neutral-800 shrink-0">
                 {b.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={b.logoUrl} alt={b.name} className="max-h-8 max-w-8 object-contain" />
+                  <Image src={b.logoUrl} alt={b.name} fill sizes="32px" className="object-contain p-1" />
                 ) : (
                   <Tag className="h-4 w-4 text-neutral-600" />
                 )}

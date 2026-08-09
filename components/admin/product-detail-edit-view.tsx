@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Upload, Trash2, Plus, Package, Layers, Image as ImageIcon, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -501,8 +502,7 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
             <div className="grid grid-cols-2 gap-3">
               {images.map((img) => (
                 <div key={img.id} className="relative group rounded-lg overflow-hidden border border-neutral-800 bg-neutral-950 aspect-square">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.url} alt={img.altText || "Product Image"} className="h-full w-full object-cover" />
+                  <Image src={img.url} alt={img.altText || "Product Image"} fill sizes="200px" className="object-cover" />
                 </div>
               ))}
             </div>

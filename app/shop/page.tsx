@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { ShopFilters } from "@/components/shop/shop-filters";
@@ -126,7 +127,18 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* Filter Sidebar */}
           <aside className="lg:col-span-1">
-            <ShopFilters categories={categories} brands={brands} />
+            <Suspense fallback={<div className="h-96 bg-neutral-900/50 animate-pulse rounded-xl border border-neutral-800" />}>
+              <ShopFilters
+                categories={categories}
+                brands={brands}
+                selectedCategory={categorySlug}
+                selectedBrand={brandSlug}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                sort={sort}
+                search={search}
+              />
+            </Suspense>
           </aside>
 
           {/* Product Grid & Top Bar */}

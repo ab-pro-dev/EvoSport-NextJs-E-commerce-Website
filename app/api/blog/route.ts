@@ -22,15 +22,22 @@ export async function GET(req: Request) {
       prisma.blog.count({ where: { status: "PUBLISHED" } }),
     ]);
 
-    return NextResponse.json({
-      posts,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+    return NextResponse.json(
+      {
+        posts,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        },
+      }
+    );
   } catch (error) {
     console.error("GET /api/blog error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

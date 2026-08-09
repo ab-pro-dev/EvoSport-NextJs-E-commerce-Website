@@ -23,16 +23,12 @@ export default function RegisterPage() {
     e.preventDefault();
     try {
       if (password !== confirmPassword) {
-        const msg = "Passwords do not match.";
-        setErrorMessage(msg);
-        toast.error(msg);
+        setErrorMessage("Passwords do not match.");
         return;
       }
 
       if (!acceptTerms) {
-        const msg = "You must accept the Terms and Conditions to register.";
-        setErrorMessage(msg);
-        toast.error(msg);
+        setErrorMessage("You must accept the Terms and Conditions to register.");
         return;
       }
 
@@ -49,9 +45,7 @@ export default function RegisterPage() {
       const registerData = await registerRes.json();
 
       if (!registerRes.ok) {
-        const msg = registerData.error || "Registration failed.";
-        setErrorMessage(msg);
-        toast.error(msg);
+        setErrorMessage(registerData.error || "Registration failed.");
         setIsLoading(false);
         return;
       }

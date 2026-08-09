@@ -23,6 +23,21 @@ export default function LoginPage() {
       setIsLoading(true);
       setErrorMessage(null);
 
+      // 1. Verify credentials against API route for exact specific error message
+      const verifyRes = await fetch("/api/auth/verify-credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) {
+        setErrorMessage(verifyData.error || "Invalid email or password.");
+        setIsLoading(false);
+        return; // Only display inline error banner — NO toast popup for login form errors!
+      }
+
+      // 2. Credentials valid -> sign in via NextAuth
       const res = await signIn("credentials", {
         email: email.trim(),
         password,
@@ -30,28 +45,17 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        let msg = "Invalid email or password.";
-        if (res.error.includes("No account") || res.error.includes("user")) {
-          msg = "No account found with this email.";
-        } else if (res.error.includes("password") || res.error.includes("Password")) {
-          msg = "Incorrect password. Please try again.";
-        } else if (res.error.includes("suspended") || res.error.includes("banned")) {
-          msg = "Your account has been suspended.";
-        }
-        setErrorMessage(msg);
-        toast.error(msg);
+        setErrorMessage("Invalid email or password.");
         setIsLoading(false);
         return;
       }
 
-      toast.success(`Welcome back!`);
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
       console.error("Login error:", err);
       const msg = err?.message || "An unexpected error occurred. Please try again.";
       setErrorMessage(msg);
-      toast.error(msg);
       setIsLoading(false);
     }
   };

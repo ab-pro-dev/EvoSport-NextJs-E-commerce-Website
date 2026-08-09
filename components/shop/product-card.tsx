@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Star, ShoppingBag } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
 interface ProductCardProps {
@@ -50,12 +51,17 @@ export function ProductCard({ product }: ProductCardProps) {
       });
 
       if (cartRes.ok) {
+        toast.success(`${product.name} added to cart!`);
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
         window.dispatchEvent(new Event("cart-updated"));
+      } else {
+        const data = await cartRes.json();
+        toast.error(data.error || "Failed to add to cart");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Quick add error:", err);
+      toast.error(err.message || "Failed to add to cart");
     } finally {
       setIsAdding(false);
     }

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { SiteHeader } from "@/components/navigation/site-header";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,6 +40,19 @@ export default function RootLayout({
           <SmoothScrollProvider>
             <SiteHeader />
             {children}
+            <Toaster
+              position="top-right"
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: "#0a0a0a",
+                  color: "#ffffff",
+                  border: "1px solid #262626",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                },
+              }}
+            />
           </SmoothScrollProvider>
         </SessionProvider>
       </body>

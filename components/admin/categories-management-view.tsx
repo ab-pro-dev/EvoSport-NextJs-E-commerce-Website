@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FolderTree, Plus, Edit2, Trash2, AlertCircle, CornerDownRight } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -56,19 +57,24 @@ export function CategoriesManagementView({ initialCategories }: CategoriesManage
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to create category.");
+        const msg = data.error || "Failed to create category.";
+        setErrorMsg(msg);
+        toast.error(msg);
         setIsSubmitting(false);
         return;
       }
 
+      toast.success(`Category "${name}" created successfully!`);
       setCategories([...categories, data.category]);
       setIsAddModalOpen(false);
       setName("");
       setSlug("");
       setParentId("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating category:", err);
-      setErrorMsg("Network error. Please try again.");
+      const msg = err?.message || "Network error. Please try again.";
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -87,15 +93,20 @@ export function CategoriesManagementView({ initialCategories }: CategoriesManage
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to delete category.");
+        const msg = data.error || "Failed to delete category.";
+        setErrorMsg(msg);
+        toast.error(msg);
         setDeletingId(null);
         return;
       }
 
+      toast.success(`Category "${catName}" deleted successfully!`);
       setCategories(categories.filter((c) => c.id !== id));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting category:", err);
-      setErrorMsg("Failed to delete category.");
+      const msg = err?.message || "Failed to delete category.";
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setDeletingId(null);
     }

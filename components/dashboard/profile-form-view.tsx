@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User, Lock, Save, CheckCircle2, AlertCircle, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -48,15 +49,21 @@ export function ProfileFormView({ user }: ProfileFormViewProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        setProfileError(data.error || "Failed to update profile.");
+        const msg = data.error || "Failed to update profile.";
+        setProfileError(msg);
+        toast.error(msg);
         setIsSavingProfile(false);
         return;
       }
 
-      setProfileSuccess("Profile updated successfully!");
-    } catch (err) {
+      const msg = "Profile updated successfully!";
+      setProfileSuccess(msg);
+      toast.success(msg);
+    } catch (err: any) {
       console.error("Error updating profile:", err);
-      setProfileError("Network error. Please try again.");
+      const msg = err?.message || "Network error. Please try again.";
+      setProfileError(msg);
+      toast.error(msg);
     } finally {
       setIsSavingProfile(false);
     }
@@ -66,7 +73,9 @@ export function ProfileFormView({ user }: ProfileFormViewProps) {
     e.preventDefault();
     try {
       if (newPassword !== confirmPassword) {
-        setPasswordError("New passwords do not match.");
+        const msg = "New passwords do not match.";
+        setPasswordError(msg);
+        toast.error(msg);
         return;
       }
 
@@ -83,18 +92,24 @@ export function ProfileFormView({ user }: ProfileFormViewProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        setPasswordError(data.error || "Failed to update password.");
+        const msg = data.error || "Failed to update password.";
+        setPasswordError(msg);
+        toast.error(msg);
         setIsSavingPassword(false);
         return;
       }
 
-      setPasswordSuccess("Password updated successfully!");
+      const msg = "Password updated successfully!";
+      setPasswordSuccess(msg);
+      toast.success(msg);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating password:", err);
-      setPasswordError("Network error. Please try again.");
+      const msg = err?.message || "Network error. Please try again.";
+      setPasswordError(msg);
+      toast.error(msg);
     } finally {
       setIsSavingPassword(false);
     }

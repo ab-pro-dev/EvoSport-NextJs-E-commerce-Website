@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, ShieldCheck, CreditCard, Truck, ArrowRight, ArrowLeft, ShoppingBag } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -122,16 +123,20 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMessage(data.error || "Failed to process checkout.");
+        const msg = data.error || "Failed to process checkout.";
+        setErrorMessage(msg);
+        toast.error(msg);
         setIsPlacingOrder(false);
         return;
       }
 
-      // Redirect to confirmation page
+      toast.success(`Order #${data.order.id.slice(-8).toUpperCase()} placed successfully!`);
       router.push(`/checkout/confirmation/${data.order.id}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error during checkout:", err);
-      setErrorMessage("Network error. Please try again.");
+      const msg = err?.message || "Network error. Please try again.";
+      setErrorMessage(msg);
+      toast.error(msg);
       setIsPlacingOrder(false);
     }
   };

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Tag, Plus, Edit2, Trash2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -56,19 +57,24 @@ export function BrandsManagementView({ initialBrands }: BrandsManagementViewProp
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to create brand.");
+        const msg = data.error || "Failed to create brand.";
+        setErrorMsg(msg);
+        toast.error(msg);
         setIsSubmitting(false);
         return;
       }
 
+      toast.success(`Brand "${name}" created successfully!`);
       setBrands([...brands, data.brand]);
       setIsAddModalOpen(false);
       setName("");
       setSlug("");
       setLogoUrl("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating brand:", err);
-      setErrorMsg("Network error. Please try again.");
+      const msg = err?.message || "Network error. Please try again.";
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -87,15 +93,20 @@ export function BrandsManagementView({ initialBrands }: BrandsManagementViewProp
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to delete brand.");
+        const msg = data.error || "Failed to delete brand.";
+        setErrorMsg(msg);
+        toast.error(msg);
         setDeletingId(null);
         return;
       }
 
+      toast.success(`Brand "${brandName}" deleted successfully!`);
       setBrands(brands.filter((b) => b.id !== id));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting brand:", err);
-      setErrorMsg("Failed to delete brand.");
+      const msg = err?.message || "Failed to delete brand.";
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setDeletingId(null);
     }

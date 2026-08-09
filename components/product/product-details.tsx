@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Star, Heart, RefreshCw, Minus, Plus, ShoppingBag, Zap, ChevronRight, ShieldCheck, Truck } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -66,9 +67,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to add item to cart");
+        const msg = data.error || "Failed to add item to cart";
+        toast.error(msg);
+        throw new Error(msg);
       }
 
+      toast.success(`${product.name} added to cart!`);
       setAddSuccess(true);
       setTimeout(() => setAddSuccess(false), 3000);
       window.dispatchEvent(new Event("cart-updated"));

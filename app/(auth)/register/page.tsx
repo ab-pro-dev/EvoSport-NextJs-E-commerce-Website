@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { User, Mail, Lock, ArrowRight, AlertCircle, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -22,12 +23,16 @@ export default function RegisterPage() {
     e.preventDefault();
     try {
       if (password !== confirmPassword) {
-        setErrorMessage("Passwords do not match.");
+        const msg = "Passwords do not match.";
+        setErrorMessage(msg);
+        toast.error(msg);
         return;
       }
 
       if (!acceptTerms) {
-        setErrorMessage("You must accept the Terms and Conditions to register.");
+        const msg = "You must accept the Terms and Conditions to register.";
+        setErrorMessage(msg);
+        toast.error(msg);
         return;
       }
 
@@ -44,10 +49,14 @@ export default function RegisterPage() {
       const registerData = await registerRes.json();
 
       if (!registerRes.ok) {
-        setErrorMessage(registerData.error || "Registration failed.");
+        const msg = registerData.error || "Registration failed.";
+        setErrorMessage(msg);
+        toast.error(msg);
         setIsLoading(false);
         return;
       }
+
+      toast.success("Account created successfully! Welcome to EvoSport.");
 
       // 2. Auto sign in on success
       const signInRes = await signIn("credentials", {
@@ -57,17 +66,17 @@ export default function RegisterPage() {
       });
 
       if (signInRes?.error) {
-        // If sign in fails right after registration, redirect to login
         router.push("/login");
         return;
       }
 
-      // Redirect to dashboard on success
       router.push("/dashboard");
       router.refresh();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Registration error:", err);
-      setErrorMessage("An unexpected error occurred. Please try again.");
+      const msg = err?.message || "An unexpected error occurred. Please try again.";
+      setErrorMessage(msg);
+      toast.error(msg);
       setIsLoading(false);
     }
   };

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Lock, Mail, ArrowRight, AlertCircle, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -29,18 +30,28 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        // Generic error message to avoid leaking whether email exists
-        setErrorMessage("Invalid email or password.");
+        let msg = "Invalid email or password.";
+        if (res.error.includes("No account") || res.error.includes("user")) {
+          msg = "No account found with this email.";
+        } else if (res.error.includes("password") || res.error.includes("Password")) {
+          msg = "Incorrect password. Please try again.";
+        } else if (res.error.includes("suspended") || res.error.includes("banned")) {
+          msg = "Your account has been suspended.";
+        }
+        setErrorMessage(msg);
+        toast.error(msg);
         setIsLoading(false);
         return;
       }
 
-      // On success: redirect to dashboard
+      toast.success(`Welcome back!`);
       router.push("/dashboard");
       router.refresh();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Login error:", err);
-      setErrorMessage("An unexpected error occurred. Please try again.");
+      const msg = err?.message || "An unexpected error occurred. Please try again.";
+      setErrorMessage(msg);
+      toast.error(msg);
       setIsLoading(false);
     }
   };

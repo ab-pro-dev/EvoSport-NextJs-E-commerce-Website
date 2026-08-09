@@ -44,16 +44,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user || !user.passwordHash) {
-          return null;
+          throw new Error("No account found with this email.");
         }
 
         if (user.isBanned) {
-          throw new Error("Account is suspended.");
+          throw new Error("Your account has been suspended.");
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
         if (!isPasswordValid) {
-          return null;
+          throw new Error("Incorrect password. Please try again.");
         }
 
         return {

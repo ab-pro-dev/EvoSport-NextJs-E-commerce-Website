@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { ShoppingBag, Heart, User, Search, LogOut } from "lucide-react";
 import { NotificationsDropdown } from "@/components/navigation/notifications-dropdown";
+import { toast } from "sonner";
 
 interface NavbarProps {
   cartItemCount?: number;
@@ -103,7 +104,10 @@ export function Navbar({ cartItemCount = 0 }: NavbarProps) {
               </Link>
 
               <button
-                onClick={() => signOut({ callbackUrl: "/login" })}
+                onClick={() => {
+                  toast.success("You've been logged out");
+                  signOut({ callbackUrl: "/login" });
+                }}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-rose-800 hover:text-rose-400 transition-colors"
                 title="Logout"
               >

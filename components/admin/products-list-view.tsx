@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Plus, Edit2, Trash2, Package, Search, Filter, AlertCircle, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -90,10 +91,14 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to create product.");
+        const msg = data.error || "Failed to create product.";
+        setErrorMsg(msg);
+        toast.error(msg);
         setIsSubmitting(false);
         return;
       }
+
+      toast.success(`Product "${newProductName}" created successfully!`);
 
       // Add new product to local list
       const addedProduct: ProductItem = {
@@ -120,9 +125,11 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
       setNewProductDesc("");
       setNewBasePrice("");
       setNewComparePrice("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating product:", err);
-      setErrorMsg("Network error. Please try again.");
+      const msg = err?.message || "Network error. Please try again.";
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -140,15 +147,18 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || "Failed to delete product.");
+        const msg = data.error || "Failed to delete product.";
+        toast.error(msg);
         setIsDeleting(null);
         return;
       }
 
+      toast.success(`Product "${name}" deleted successfully!`);
       setProducts(products.filter((p) => p.id !== id));
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting product:", err);
-      alert("Failed to delete product.");
+      const msg = err?.message || "Failed to delete product.";
+      toast.error(msg);
     } finally {
       setIsDeleting(null);
     }

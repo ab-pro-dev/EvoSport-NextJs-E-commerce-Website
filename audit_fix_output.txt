@@ -1,0 +1,7 @@
+npm error code ENOTEMPTY
+npm error syscall rename
+npm error path /home/ab/Documents/EvoSport/node_modules/@vercel/vc-native-linux-x64
+npm error dest /home/ab/Documents/EvoSport/node_modules/@vercel/.vc-native-linux-x64-hsMXkUJf
+npm error errno -39
+npm error ENOTEMPTY: directory not empty, rename '/home/ab/Documents/EvoSport/node_modules/@vercel/vc-native-linux-x64' -> '/home/ab/Documents/EvoSport/node_modules/@vercel/.vc-native-linux-x64-hsMXkUJf'
+npm error A complete log of this run can be found in: /home/ab/.npm/_logs/2026-08-09T07_45_21_077Z-debug-0.log

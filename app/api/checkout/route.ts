@@ -17,9 +17,28 @@ export async function POST(req: Request) {
         { status: 429 }
       );
     }
-    const session = await auth();
-    const cookieStore = await cookies();
-    const sessionId = cookieStore.get(CART_COOKIE_NAME)?.value || null;
+    let session = null;
+    try {
+      session = await auth();
+    } catch (e) {
+      // Guest or unauthenticated context
+    }
+
+    let sessionId: string | null = null;
+    try {
+      const cookieStore = await cookies();
+      sessionId = cookieStore.get(CART_COOKIE_NAME)?.value || null;
+    } catch (e) {
+      // Fallback
+    }
+
+    if (!sessionId) {
+      const cookieHeader = req.headers.get("cookie") || "";
+      const match = cookieHeader.match(/cart_session=([^;]+)/);
+      if (match) {
+        sessionId = match[1];
+      }
+    }
 
     let authUserId = session?.user?.id || null;
 

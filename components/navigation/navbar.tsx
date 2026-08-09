@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { ShoppingBag, Heart, User, Search, LogOut } from "lucide-react";
@@ -11,6 +12,28 @@ interface NavbarProps {
 
 export function Navbar({ cartItemCount = 0 }: NavbarProps) {
   const { data: session } = useSession();
+  const [itemCount, setItemCount] = useState(cartItemCount);
+
+  const fetchCartCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/cart");
+      if (res.ok) {
+        const data = await res.json();
+        const total = data.items?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0;
+        setItemCount(total);
+      }
+    } catch (e) {
+      console.error("Failed to fetch cart count:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCartCount();
+
+    const handleUpdate = () => fetchCartCount();
+    window.addEventListener("cart-updated", handleUpdate);
+    return () => window.removeEventListener("cart-updated", handleUpdate);
+  }, [fetchCartCount]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md">
@@ -59,9 +82,9 @@ export function Navbar({ cartItemCount = 0 }: NavbarProps) {
             title="Cart"
           >
             <ShoppingBag className="h-4 w-4" />
-            {cartItemCount > 0 && (
+            {itemCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#CCFF00] font-black text-[9px] text-black">
-                {cartItemCount}
+                {itemCount}
               </span>
             )}
           </Link>

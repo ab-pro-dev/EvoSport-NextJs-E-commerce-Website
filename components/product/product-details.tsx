@@ -39,10 +39,45 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedSize, setSelectedSize] = useState(uniqueSizes[0] || "");
   const [quantity, setQuantity] = useState(1);
 
+  const [isAdding, setIsAdding] = useState(false);
+  const [addSuccess, setAddSuccess] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
   // Find selected variant from real API data
   const currentVariant = product.variants.find(
     (v) => (v.color === selectedColor || !selectedColor) && (v.size === selectedSize || !selectedSize)
   ) || product.variants[0];
+
+  const handleAddToCart = async () => {
+    if (!currentVariant?.id || !inStock || isAdding) return;
+    setIsAdding(true);
+    setAddError(null);
+    setAddSuccess(false);
+
+    try {
+      const res = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          variantId: currentVariant.id,
+          quantity,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to add item to cart");
+      }
+
+      setAddSuccess(true);
+      setTimeout(() => setAddSuccess(false), 3000);
+      window.dispatchEvent(new Event("cart-updated"));
+    } catch (err: any) {
+      setAddError(err.message || "Failed to add to cart");
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   const price = currentVariant?.price ? Number(currentVariant.price) : Number(product.basePrice);
   const compareAt = product.compareAtPrice ? Number(product.compareAtPrice) : null;
@@ -245,11 +280,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
               <Button
                 size="lg"
-                disabled={!inStock}
+                disabled={!inStock || isAdding}
+                onClick={handleAddToCart}
                 className="flex-1 bg-[#CCFF00] font-black text-black hover:bg-[#b8e600] h-11 text-xs uppercase tracking-wider rounded-lg shadow-lg shadow-[#CCFF00]/10"
               >
                 <ShoppingBag className="mr-2 h-4 w-4" />
-                ADD TO CART
+                {isAdding ? "ADDING..." : addSuccess ? "ADDED TO CART!" : "ADD TO CART"}
               </Button>
 
               <Button

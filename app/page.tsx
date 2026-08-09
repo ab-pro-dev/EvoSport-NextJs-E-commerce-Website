@@ -53,9 +53,6 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white selection:bg-[#CCFF00] selection:text-black">
-      {/* Navigation Header */}
-      <Navbar />
-
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 py-20 lg:py-32">
         {/* Glow Accent Effects */}

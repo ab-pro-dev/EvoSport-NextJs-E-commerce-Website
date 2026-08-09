@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Star, ShoppingBag } from "lucide-react";
@@ -16,13 +17,49 @@ interface ProductCardProps {
     images: { url: string; altText: string | null }[];
     brand: { name: string };
     category: { name: string };
-    variants?: { color: string }[];
+    variants?: { id?: string; color: string }[];
     avgRating?: number;
     reviewCount?: number;
   };
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  const handleQuickAdd = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isAdding) return;
+
+    setIsAdding(true);
+    try {
+      let variantId = product.variants?.[0]?.id;
+      if (!variantId) {
+        const res = await fetch(`/api/products/${product.slug}`);
+        const data = await res.json();
+        variantId = data.variants?.[0]?.id || data.product?.variants?.[0]?.id;
+      }
+
+      if (!variantId) throw new Error("No variant available");
+
+      const cartRes = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variantId, quantity: 1 }),
+      });
+
+      if (cartRes.ok) {
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2000);
+        window.dispatchEvent(new Event("cart-updated"));
+      }
+    } catch (err) {
+      console.error("Quick add error:", err);
+    } finally {
+      setIsAdding(false);
+    }
+  };
   const mainImage = (product.images && product.images.length > 0 && product.images[0]?.url)
     ? product.images[0].url
     : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
@@ -70,11 +107,14 @@ export function ProductCard({ product }: ProductCardProps) {
           <Heart className="h-4 w-4" />
         </button>
 
-        {/* Quick Add Overlay on Hover */}
         <div className="absolute bottom-3 left-3 right-3 z-10 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#CCFF00] py-2 text-xs font-extrabold uppercase text-black hover:bg-[#b8e600] transition-colors shadow-md">
+          <button
+            onClick={handleQuickAdd}
+            disabled={isAdding}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#CCFF00] py-2 text-xs font-extrabold uppercase text-black hover:bg-[#b8e600] transition-colors shadow-md disabled:opacity-50"
+          >
             <ShoppingBag className="h-3.5 w-3.5" />
-            Quick Add
+            {isAdding ? "Adding..." : added ? "Added!" : "Quick Add"}
           </button>
         </div>
       </div>

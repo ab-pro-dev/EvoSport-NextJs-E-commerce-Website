@@ -126,6 +126,7 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
   button, [role="button"], a, input[type="submit"], input[type="button"], label {
     cursor: pointer;

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { SiteHeader } from "@/components/navigation/site-header";
+import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -36,6 +37,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-neutral-950 text-white selection:bg-[#CCFF00] selection:text-black">
+        <NextTopLoader color="#CCFF00" showSpinner={false} height={3} crawl={true} />
         <SessionProvider>
           <SmoothScrollProvider>
             <SiteHeader />

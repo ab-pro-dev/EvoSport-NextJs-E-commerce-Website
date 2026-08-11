@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const CART_COOKIE_NAME = "cart_session";
@@ -10,13 +9,14 @@ const CART_COOKIE_NAME = "cart_session";
 export async function POST(req: Request) {
   try {
     const clientIp = getClientIp(req);
-    const limiter = rateLimit(`checkout:${clientIp}`, 10, 60000);
+    const limiter = rateLimit(`checkout:${clientIp}`, 15, 60000);
     if (!limiter.success) {
       return NextResponse.json(
         { error: "Too many checkout attempts. Please try again later." },
         { status: 429 }
       );
     }
+
     let session = null;
     try {
       session = await auth();
@@ -174,25 +174,24 @@ export async function POST(req: Request) {
     // Calculate final total: discounted subtotal + shipping + tax
     const finalTotal = Number((discountedSubtotal + effectiveShipping + tax).toFixed(2));
 
-    // 6. Execute DB transaction with explicit 20s timeout for remote DB latency
+    // Resolve guest user before opening the transaction to minimize transaction open time
+    let finalUserId = authUserId;
+    if (!finalUserId) {
+      const guestUser = await prisma.user.upsert({
+        where: { email: "guest@evosport.com" },
+        update: {},
+        create: {
+          email: "guest@evosport.com",
+          name: shippingAddress.fullName || "Guest Customer",
+          role: "CUSTOMER",
+        },
+      });
+      finalUserId = guestUser.id;
+    }
+
+    // 6. Execute atomic DB transaction with nested writes and parallel updates
     const completedOrder = await prisma.$transaction(
       async (tx) => {
-        let finalUserId = authUserId;
-
-        // Handle guest user relation if user is unauthenticated
-        if (!finalUserId) {
-          const guestUser = await tx.user.upsert({
-            where: { email: "guest@evosport.com" },
-            update: {},
-            create: {
-              email: "guest@evosport.com",
-              name: shippingAddress.fullName || "Guest Customer",
-              role: "CUSTOMER",
-            },
-          });
-          finalUserId = guestUser.id;
-        }
-
         // Create Address
         const address = await tx.address.create({
           data: {
@@ -208,68 +207,33 @@ export async function POST(req: Request) {
           },
         });
 
-        // Create Order (initial PENDING status with linked couponId)
+        // Create Order with nested OrderItems and Payment in ONE atomic query
         const order = await tx.order.create({
           data: {
             userId: finalUserId,
-            status: "PENDING",
+            status: "PAID",
             subtotal,
             shipping: effectiveShipping,
             tax,
             total: finalTotal,
             shippingAddressId: address.id,
             couponId: couponRecord?.id || null,
-          },
-        });
-
-        // Create OrderItems & decrement stock
-        for (const item of itemsToPurchase) {
-          await tx.orderItem.create({
-            data: {
-              orderId: order.id,
-              variantId: item.variantId,
-              quantity: item.quantity,
-              priceAtPurchase: item.priceAtPurchase,
+            items: {
+              create: itemsToPurchase.map((item) => ({
+                variantId: item.variantId,
+                quantity: item.quantity,
+                priceAtPurchase: item.priceAtPurchase,
+              })),
             },
-          });
-
-          await tx.productVariant.update({
-            where: { id: item.variantId },
-            data: {
-              stock: {
-                decrement: item.quantity,
+            payments: {
+              create: {
+                provider: "MOCK",
+                status: "SUCCEEDED",
+                amount: finalTotal,
+                transactionRef: `MOCK_TX_${Date.now()}`,
               },
             },
-          });
-        }
-
-        // Increment coupon usage count if coupon applied
-        if (couponRecord?.id) {
-          await tx.coupon.update({
-            where: { id: couponRecord.id },
-            data: {
-              usageCount: {
-                increment: 1,
-              },
-            },
-          });
-        }
-
-        // Create Payment record with instant success simulation
-        await tx.payment.create({
-          data: {
-            orderId: order.id,
-            provider: "MOCK" as any,
-            status: "SUCCEEDED",
-            amount: finalTotal,
-            transactionRef: `MOCK_TX_${Date.now()}`,
           },
-        });
-
-        // Update Order status to PAID
-        const paidOrder = await tx.order.update({
-          where: { id: order.id },
-          data: { status: "PAID" },
           include: {
             items: {
               include: {
@@ -286,12 +250,38 @@ export async function POST(req: Request) {
           },
         });
 
+        // Decrement stock in parallel
+        await Promise.all(
+          itemsToPurchase.map((item) =>
+            tx.productVariant.update({
+              where: { id: item.variantId },
+              data: {
+                stock: {
+                  decrement: item.quantity,
+                },
+              },
+            })
+          )
+        );
+
+        // Increment coupon usage count if coupon applied
+        if (couponRecord?.id) {
+          await tx.coupon.update({
+            where: { id: couponRecord.id },
+            data: {
+              usageCount: {
+                increment: 1,
+              },
+            },
+          });
+        }
+
         // Clear the cart
         await tx.cartItem.deleteMany({
           where: cartWhere,
         });
 
-        // Trigger real notification for user
+        // Trigger notification for user
         await tx.notification.create({
           data: {
             userId: finalUserId,
@@ -300,11 +290,11 @@ export async function POST(req: Request) {
           },
         });
 
-        return paidOrder;
+        return order;
       },
       {
-        timeout: 20000,
-        maxWait: 10000,
+        timeout: 45000,
+        maxWait: 20000,
       }
     );
 
@@ -339,8 +329,11 @@ export async function POST(req: Request) {
     };
 
     return NextResponse.json({ order: responseOrder }, { status: 200 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("POST /api/checkout error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || "Failed to process checkout. Please try again." },
+      { status: 500 }
+    );
   }
 }

@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-
-const CART_COOKIE_NAME = "cart_session";
 
 export async function POST(req: Request) {
   try {
@@ -17,40 +14,19 @@ export async function POST(req: Request) {
       );
     }
 
-    let session = null;
-    try {
-      session = await auth();
-    } catch (e) {
-      // Guest or unauthenticated context
+    const session = await auth();
+    const authUserId = session?.user?.id;
+
+    if (!authUserId) {
+      return NextResponse.json(
+        { error: "Please log in with your account to complete checkout and place an order." },
+        { status: 401 }
+      );
     }
 
-    let sessionId: string | null = null;
-    try {
-      const cookieStore = await cookies();
-      sessionId = cookieStore.get(CART_COOKIE_NAME)?.value || null;
-    } catch (e) {
-      // Fallback
-    }
-
-    if (!sessionId) {
-      const cookieHeader = req.headers.get("cookie") || "";
-      const match = cookieHeader.match(/cart_session=([^;]+)/);
-      if (match) {
-        sessionId = match[1];
-      }
-    }
-
-    let authUserId = session?.user?.id || null;
-
-    if (!authUserId && !sessionId) {
-      return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
-    }
-
-    const cartWhere = authUserId ? { userId: authUserId } : { sessionId: sessionId! };
-
-    // 1. Read real cart from DB server-side (prevent price/cart tampering)
+    // 1. Read real cart from DB for this authenticated user
     const cartItems = await prisma.cartItem.findMany({
-      where: cartWhere,
+      where: { userId: authUserId },
       include: {
         variant: {
           include: {
@@ -174,28 +150,13 @@ export async function POST(req: Request) {
     // Calculate final total: discounted subtotal + shipping + tax
     const finalTotal = Number((discountedSubtotal + effectiveShipping + tax).toFixed(2));
 
-    // Resolve guest user before opening the transaction to minimize transaction open time
-    let finalUserId = authUserId;
-    if (!finalUserId) {
-      const guestUser = await prisma.user.upsert({
-        where: { email: "guest@evosport.com" },
-        update: {},
-        create: {
-          email: "guest@evosport.com",
-          name: shippingAddress.fullName || "Guest Customer",
-          role: "CUSTOMER",
-        },
-      });
-      finalUserId = guestUser.id;
-    }
-
-    // 6. Execute atomic DB transaction with nested writes and parallel updates
+    // 6. Execute atomic DB transaction
     const completedOrder = await prisma.$transaction(
       async (tx) => {
-        // Create Address
+        // Create Address linked to authenticated user
         const address = await tx.address.create({
           data: {
-            userId: finalUserId,
+            userId: authUserId,
             fullName: shippingAddress.fullName,
             phone: shippingAddress.phone,
             line1: shippingAddress.line1,
@@ -210,7 +171,7 @@ export async function POST(req: Request) {
         // Create Order with nested OrderItems and Payment in ONE atomic query
         const order = await tx.order.create({
           data: {
-            userId: finalUserId,
+            userId: authUserId,
             status: "PAID",
             subtotal,
             shipping: effectiveShipping,
@@ -276,15 +237,15 @@ export async function POST(req: Request) {
           });
         }
 
-        // Clear the cart
+        // Clear the user's cart
         await tx.cartItem.deleteMany({
-          where: cartWhere,
+          where: { userId: authUserId },
         });
 
         // Trigger notification for user
         await tx.notification.create({
           data: {
-            userId: finalUserId,
+            userId: authUserId,
             type: "ORDER_UPDATE",
             message: `Order #${order.id.slice(-8).toUpperCase()} confirmed`,
           },

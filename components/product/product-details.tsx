@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Star, Heart, RefreshCw, Minus, Plus, ShoppingBag, Zap, ChevronRight, ShieldCheck, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +28,9 @@ interface ProductDetailsProps {
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
   const images = product.images.length > 0
     ? product.images
     : [{ id: "fallback", url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600", altText: product.name }];
@@ -50,6 +55,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   ) || product.variants[0];
 
   const handleAddToCart = async () => {
+    // Enforce authentication before adding to cart
+    if (status !== "authenticated") {
+      toast.error("Please log in to add items to your cart.");
+      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
     if (!currentVariant?.id || !inStock || isAdding) return;
     setIsAdding(true);
     setAddError(null);
@@ -65,6 +77,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         }),
       });
 
+      if (res.status === 401) {
+        toast.error("Please log in to add items to your cart.");
+        router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+
       if (!res.ok) {
         const data = await res.json();
         const msg = data.error || "Failed to add item to cart";
@@ -78,6 +96,41 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       window.dispatchEvent(new Event("cart-updated"));
     } catch (err: any) {
       setAddError(err.message || "Failed to add to cart");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    // Enforce authentication before proceeding to checkout
+    if (status !== "authenticated") {
+      toast.error("Please log in with your account to proceed to checkout.");
+      router.push(`/login?callbackUrl=/checkout`);
+      return;
+    }
+
+    if (!currentVariant?.id || !inStock || isAdding) return;
+    setIsAdding(true);
+
+    try {
+      const res = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          variantId: currentVariant.id,
+          quantity,
+        }),
+      });
+
+      if (res.ok) {
+        window.dispatchEvent(new Event("cart-updated"));
+        router.push("/checkout");
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to proceed to checkout");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to proceed to checkout");
     } finally {
       setIsAdding(false);
     }
@@ -149,6 +202,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
             <button
               aria-label="Add to wishlist"
+              onClick={() => {
+                if (status !== "authenticated") {
+                  toast.error("Please log in to manage your wishlist.");
+                  router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+                }
+              }}
               className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-[#0F1B2D]/40 backdrop-blur-md transition-colors hover:text-rose-400 border border-gray-200"
             >
               <Heart className="h-4 w-4" />
@@ -295,7 +354,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               <Button
                 size="lg"
                 variant="outline"
-                disabled={!inStock}
+                disabled={!inStock || isAdding}
+                onClick={handleBuyNow}
                 className="flex-1 border-[#0F1B2D] text-white hover:bg-[#0F1B2D]/90 h-11 text-xs uppercase tracking-wider font-black rounded-lg bg-[#0F1B2D] shadow-sm"
               >
                 <Zap className="mr-2 h-4 w-4 text-[#B8FF00]" />
@@ -304,7 +364,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </div>
 
             <div className="flex items-center gap-6 pt-2 text-xs font-semibold text-[#0F1B2D]/60">
-              <button className="flex items-center gap-1.5 hover:text-[#5B8DEF] transition-colors">
+              <button
+                onClick={() => {
+                  if (status !== "authenticated") {
+                    toast.error("Please log in to manage your wishlist.");
+                    router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+                  }
+                }}
+                className="flex items-center gap-1.5 hover:text-[#5B8DEF] transition-colors"
+              >
                 <Heart className="h-3.5 w-3.5" />
                 <span>Add to Wishlist</span>
               </button>

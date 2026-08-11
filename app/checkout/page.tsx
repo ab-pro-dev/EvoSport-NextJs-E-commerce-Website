@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -10,21 +9,9 @@ export const metadata: Metadata = {
   description: "Complete your order with secure checkout at EvoSport.",
 };
 
-async function getCartData() {
-  const session = await auth();
-  const userId = session?.user?.id || null;
-
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get("cart_session")?.value || null;
-
-  if (!userId && !sessionId) {
-    return { items: [], subtotal: 0 };
-  }
-
-  const where = userId ? { userId } : { sessionId: sessionId! };
-
+async function getCartData(userId: string) {
   const rawItems = await prisma.cartItem.findMany({
-    where,
+    where: { userId },
     orderBy: { createdAt: "desc" },
     include: {
       variant: {
@@ -76,9 +63,16 @@ async function getCartData() {
 }
 
 export default async function CheckoutPage() {
-  const cart = await getCartData();
+  const session = await auth();
 
-  // Requirement 3: If cart is empty, redirect /checkout back to /cart
+  // Require authentication to access Checkout
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/checkout");
+  }
+
+  const cart = await getCartData(session.user.id);
+
+  // If cart is empty, redirect back to /cart
   if (cart.items.length === 0) {
     redirect("/cart");
   }

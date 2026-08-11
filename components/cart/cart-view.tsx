@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, Trash2, Minus, Plus, ArrowRight, ShieldCheck, Tag } from "lucide-react";
+import { ShoppingBag, Trash2, Minus, Plus, ArrowRight, ShieldCheck, Tag, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -41,9 +41,10 @@ interface CartData {
 
 interface CartViewProps {
   initialCart: CartData;
+  isAuthenticated?: boolean;
 }
 
-export function CartView({ initialCart }: CartViewProps) {
+export function CartView({ initialCart, isAuthenticated = true }: CartViewProps) {
   const router = useRouter();
   const [cart, setCart] = useState<CartData>(initialCart);
   const [couponCode, setCouponCode] = useState("");
@@ -116,6 +117,35 @@ export function CartView({ initialCart }: CartViewProps) {
     });
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4 py-16">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white border border-gray-200 text-[#0F1B2D]/50 mb-6 shadow-sm">
+          <Lock className="h-10 w-10 text-[#0F1B2D]/60" />
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">
+          Sign In to Access Your Cart
+        </h2>
+        <p className="mt-2 text-xs sm:text-sm text-[#0F1B2D]/60 max-w-md leading-relaxed">
+          Please log in to your account to add items, view your shopping bag, and proceed to secure checkout.
+        </p>
+        <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-md justify-center">
+          <Link href="/login?callbackUrl=/cart" className="w-full sm:w-auto">
+            <Button size="lg" className="w-full bg-[#B8FF00] text-[#0F1B2D] font-black uppercase text-xs tracking-wider hover:bg-[#a3e600] rounded-xl px-8 h-12 shadow-sm">
+              Sign In to Your Account
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/register" className="w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="w-full border-gray-300 bg-white text-[#0F1B2D] font-bold text-xs uppercase tracking-wider hover:bg-gray-50 rounded-xl px-6 h-12">
+              Create Account
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (cart.items.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4 py-16">
@@ -158,91 +188,73 @@ export function CartView({ initialCart }: CartViewProps) {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         {/* Cart Items List (8 cols) */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm space-y-6">
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm divide-y divide-gray-100 overflow-hidden">
             {cart.items.map((item) => {
               const image = item.variant.product.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
-              const isLoading = loadingId === item.id;
+              const isItemLoading = loadingId === item.id;
 
               return (
-                <div
-                  key={item.id}
-                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-100 last:border-0 last:pb-0 transition-opacity ${
-                    isLoading ? "opacity-40 pointer-events-none" : "opacity-100"
-                  }`}
-                >
-                  {/* Thumbnail & Product Meta */}
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-[#F4F8FC]">
+                <div key={item.id} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-[#F4F8FC]/50">
+                  {/* Product Details Left */}
+                  <div className="flex items-center gap-4">
+                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-[#F4F8FC]">
                       <Image
                         src={image}
                         alt={item.variant.product.altText || item.variant.product.name}
                         fill
-                        className="object-cover"
+                        className="object-cover object-center"
                       />
                     </div>
                     <div className="space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40">
                         {item.variant.product.brand}
                       </span>
-                      <Link
-                        href={`/products/${item.variant.product.slug}`}
-                        className="block font-bold text-sm text-[#0F1B2D] hover:text-[#5B8DEF] transition-colors line-clamp-1"
-                      >
-                        {item.variant.product.name}
+                      <Link href={`/products/${item.variant.product.slug}`} className="block hover:text-[#5B8DEF] transition-colors">
+                        <h3 className="text-sm font-bold text-[#0F1B2D] line-clamp-1">{item.variant.product.name}</h3>
                       </Link>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#0F1B2D]/50">
-                        {item.variant.color && (
-                          <span>Color: <strong className="text-[#0F1B2D]">{item.variant.color}</strong></span>
-                        )}
-                        {item.variant.color && item.variant.size && <span>•</span>}
-                        {item.variant.size && (
-                          <span>Size: <strong className="text-[#0F1B2D]">{item.variant.size}</strong></span>
-                        )}
+                      <div className="flex items-center gap-2 text-xs text-[#0F1B2D]/50">
+                        <span>Color: <strong className="text-[#0F1B2D]">{item.variant.color}</strong></span>
+                        <span>•</span>
+                        <span>Size: <strong className="text-[#0F1B2D]">{item.variant.size}</strong></span>
                       </div>
-                      <div className="text-xs font-semibold text-[#0F1B2D]/50 sm:hidden">
+                      <div className="text-xs font-black text-[#0F1B2D] sm:hidden pt-1">
                         ${item.unitPrice.toFixed(2)}
                       </div>
                     </div>
                   </div>
 
-                  {/* Quantity Stepper & Price / Delete Actions */}
-                  <div className="flex items-center justify-between w-full sm:w-auto gap-6 pt-2 sm:pt-0">
-                    {/* Stepper */}
-                    <div className="flex items-center rounded-lg border border-gray-200 bg-[#F4F8FC] px-2">
+                  {/* Quantity and Actions Right */}
+                  <div className="flex items-center justify-between sm:justify-end gap-6 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                    <div className="flex items-center rounded-xl border border-gray-200 bg-[#F4F8FC] px-1.5 py-0.5 shadow-sm">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1.5 text-[#0F1B2D]/50 hover:text-[#0F1B2D] transition-colors"
-                        aria-label="Decrease quantity"
+                        disabled={isItemLoading || item.quantity <= 1}
+                        className="p-1.5 text-[#0F1B2D]/40 hover:text-[#0F1B2D] disabled:opacity-30 transition-colors"
                       >
-                        <Minus className="h-3.5 w-3.5" />
+                        <Minus className="h-3 w-3" />
                       </button>
-                      <span className="w-8 text-center text-xs font-black text-[#0F1B2D]">{item.quantity}</span>
+                      <span className="w-8 text-center text-xs font-black text-[#0F1B2D]">
+                        {item.quantity}
+                      </span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1.5 text-[#0F1B2D]/50 hover:text-[#0F1B2D] transition-colors"
-                        aria-label="Increase quantity"
+                        disabled={isItemLoading || item.quantity >= item.variant.stock}
+                        className="p-1.5 text-[#0F1B2D]/40 hover:text-[#0F1B2D] disabled:opacity-30 transition-colors"
                       >
-                        <Plus className="h-3.5 w-3.5" />
+                        <Plus className="h-3 w-3" />
                       </button>
                     </div>
 
-                    {/* Item Total */}
-                    <div className="text-right min-w-[80px]">
-                      <div className="text-sm font-black text-[#0F1B2D]">
-                        ${item.itemTotal.toFixed(2)}
-                      </div>
-                      {item.quantity > 1 && (
-                        <div className="text-[10px] text-[#0F1B2D]/40">
-                          ${item.unitPrice.toFixed(2)} each
-                        </div>
-                      )}
+                    <div className="hidden sm:block text-right min-w-20">
+                      <div className="text-sm font-black text-[#0F1B2D]">${item.itemTotal.toFixed(2)}</div>
+                      <div className="text-[10px] text-[#0F1B2D]/40">${item.unitPrice.toFixed(2)} each</div>
                     </div>
 
-                    {/* Trash / Remove Icon */}
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="text-[#0F1B2D]/30 hover:text-rose-500 transition-colors p-1.5 rounded-lg hover:bg-rose-50"
-                      aria-label="Remove item"
+                      disabled={isItemLoading}
+                      className="p-2 text-[#0F1B2D]/30 hover:text-rose-500 transition-colors rounded-lg hover:bg-rose-50"
+                      title="Remove item"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

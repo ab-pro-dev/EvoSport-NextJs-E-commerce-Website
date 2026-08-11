@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, ShoppingBag, ArrowRight, Lock } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 interface WishlistItem {
@@ -55,6 +56,12 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
   };
 
   const handleAddToCart = async (item: WishlistItem) => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to add items to your cart.");
+      router.push("/login?callbackUrl=/wishlist");
+      return;
+    }
+
     const firstVariant = item.product.variants[0];
     if (!firstVariant) return;
 
@@ -68,12 +75,24 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
         body: JSON.stringify({ variantId: firstVariant.id, quantity: 1 }),
       });
 
+      if (res.status === 401) {
+        toast.error("Please log in to add items to your cart.");
+        router.push("/login?callbackUrl=/wishlist");
+        return;
+      }
+
       if (res.ok) {
+        toast.success(`${item.product.name} added to cart!`);
         setCartMessage({ id: item.productId, text: "Added to Cart!" });
         setTimeout(() => setCartMessage(null), 3000);
+        window.dispatchEvent(new Event("cart-updated"));
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to add to cart");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error adding to cart:", err);
+      toast.error(err?.message || "Failed to add to cart");
     } finally {
       setLoadingId(null);
     }
@@ -83,16 +102,25 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4 py-16">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white border border-gray-200 text-[#0F1B2D]/50 mb-6 shadow-sm">
-          <Lock className="h-10 w-10" />
+          <Lock className="h-10 w-10 text-[#0F1B2D]/60" />
         </div>
-        <h2 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D]">Sign In to View Your Wishlist</h2>
-        <p className="mt-2 text-xs text-[#0F1B2D]/50 max-w-sm">
+        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">Sign In to View Your Wishlist</h2>
+        <p className="mt-2 text-xs sm:text-sm text-[#0F1B2D]/60 max-w-sm">
           Save your favorite sportswear, gear, and footwear to track items and buy anytime.
         </p>
-        <Link href="/login" className="mt-6 text-[#5B8DEF] font-bold hover:underline flex items-center">
-          Sign In Now
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Link>
+        <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-md justify-center">
+          <Link href="/login?callbackUrl=/wishlist" className="w-full sm:w-auto">
+            <Button size="lg" className="w-full bg-[#B8FF00] text-[#0F1B2D] font-black uppercase text-xs tracking-wider hover:bg-[#a3e600] rounded-xl px-8 h-12 shadow-sm">
+              Sign In Now
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/register" className="w-full sm:w-auto">
+            <Button size="lg" variant="outline" className="w-full border-gray-300 bg-white text-[#0F1B2D] font-bold text-xs uppercase tracking-wider hover:bg-gray-50 rounded-xl px-6 h-12">
+              Create Account
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -107,9 +135,11 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
         <p className="mt-2 text-xs text-[#0F1B2D]/50 max-w-sm">
           You haven&apos;t saved any products to your wishlist yet.
         </p>
-        <Link href="/shop" className="mt-6 text-[#5B8DEF] font-bold hover:underline flex items-center">
-          Explore Products
-          <ArrowRight className="ml-2 h-4 w-4" />
+        <Link href="/shop" className="mt-6">
+          <Button size="lg" className="bg-[#B8FF00] text-[#0F1B2D] font-black uppercase text-xs tracking-wider hover:bg-[#a3e600] rounded-xl px-8 shadow-sm">
+            Explore Products
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </Link>
       </div>
     );
@@ -120,15 +150,15 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200 pb-5">
         <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">
-          MY WISHLIST <span className="text-[#B8FF00]">({items.length})</span>
+          YOUR WISHLIST <span className="text-[#B8FF00]">({items.length})</span>
         </h1>
-        <Link href="/shop" className="text-xs text-[#0F1B2D]/50 hover:text-[#5B8DEF] font-medium transition-colors">
+        <Link href="/shop" className="text-xs text-[#5B8DEF] hover:text-[#4a7bd1] font-medium transition-colors">
           Continue Shopping &rarr;
         </Link>
       </div>
 
-      {/* 4-Column Card Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+      {/* Grid */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => {
           const product = item.product;
           const image = (product.images && product.images.length > 0 && product.images[0]?.url)
@@ -136,16 +166,13 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
             : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
           const price = Number(product.basePrice);
           const compareAt = product.compareAtPrice ? Number(product.compareAtPrice) : null;
-          const isLoading = loadingId === product.id;
 
           return (
             <div
               key={item.id}
-              className={`group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 shadow-sm hover:shadow-xl hover:border-gray-300 ${
-                isLoading ? "opacity-40 pointer-events-none" : ""
-              }`}
+              className="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50"
             >
-              {/* Product Image */}
+              {/* Image Container */}
               <div className="relative aspect-square w-full overflow-hidden bg-[#F4F8FC] p-4">
                 <Image
                   src={image}
@@ -188,7 +215,7 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
                   <Button
                     onClick={() => handleAddToCart(item)}
                     size="sm"
-                    className="w-full bg-[#B8FF00] font-extrabold text-[#0F1B2D] hover:bg-[#a3e600] text-xs uppercase tracking-wider rounded-xl transition-colors"
+                    className="w-full bg-[#B8FF00] font-extrabold text-[#0F1B2D] hover:bg-[#a3e600] text-xs uppercase tracking-wider rounded-xl transition-colors shadow-sm"
                   >
                     <ShoppingBag className="mr-1.5 h-3.5 w-3.5" />
                     {cartMessage?.id === product.id ? cartMessage.text : "ADD TO CART"}

@@ -1,49 +1,15 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const CART_COOKIE_NAME = "cart_session";
-
-async function getCartSessionInfo() {
+async function getAuthUserId() {
   const session = await auth();
-  const userId = session?.user?.id || null;
-
-  const cookieStore = await cookies();
-  let sessionId = cookieStore.get(CART_COOKIE_NAME)?.value || null;
-  let isNewSession = false;
-
-  if (!userId && !sessionId) {
-    sessionId = crypto.randomUUID();
-    isNewSession = true;
-  }
-
-  return { userId, sessionId, isNewSession };
+  return session?.user?.id || null;
 }
 
-function applyCartCookie(response: NextResponse, sessionId: string | null, isNewSession: boolean) {
-  if (isNewSession && sessionId) {
-    response.cookies.set({
-      name: CART_COOKIE_NAME,
-      value: sessionId,
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-    });
-  }
-  return response;
-}
-
-async function getCartData(userId: string | null, sessionId: string | null) {
-  if (!userId && !sessionId) {
-    return { items: [], subtotal: 0 };
-  }
-
-  const where = userId ? { userId } : { sessionId: sessionId! };
-
+async function getCartData(userId: string) {
   const rawItems = await prisma.cartItem.findMany({
-    where,
+    where: { userId },
     orderBy: { createdAt: "desc" },
     include: {
       variant: {
@@ -105,11 +71,13 @@ async function getCartData(userId: string | null, sessionId: string | null) {
 
 export async function GET() {
   try {
-    const { userId, sessionId, isNewSession } = await getCartSessionInfo();
-    const cart = await getCartData(userId, sessionId);
+    const userId = await getAuthUserId();
+    if (!userId) {
+      return NextResponse.json({ items: [], subtotal: 0, requiresLogin: true });
+    }
 
-    const response = NextResponse.json(cart);
-    return applyCartCookie(response, sessionId, isNewSession);
+    const cart = await getCartData(userId);
+    return NextResponse.json(cart);
   } catch (error) {
     console.error("GET /api/cart error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -118,6 +86,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const userId = await getAuthUserId();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Please log in to add items to your cart." },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const { variantId, quantity: requestedQty } = body;
     const quantity = Math.max(1, parseInt(requestedQty || "1", 10));
@@ -134,12 +110,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Product variant not found" }, { status: 404 });
     }
 
-    const { userId, sessionId, isNewSession } = await getCartSessionInfo();
-    const where = userId ? { userId } : { sessionId: sessionId! };
-
     const existingItem = await prisma.cartItem.findFirst({
       where: {
-        ...where,
+        userId,
         variantId,
       },
     });
@@ -167,16 +140,14 @@ export async function POST(req: Request) {
       await prisma.cartItem.create({
         data: {
           userId,
-          sessionId: userId ? null : sessionId,
           variantId,
           quantity,
         },
       });
     }
 
-    const cart = await getCartData(userId, sessionId);
-    const response = NextResponse.json(cart, { status: 200 });
-    return applyCartCookie(response, sessionId, isNewSession);
+    const cart = await getCartData(userId);
+    return NextResponse.json(cart, { status: 200 });
   } catch (error) {
     console.error("POST /api/cart error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -185,6 +156,14 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
+    const userId = await getAuthUserId();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Please log in to update your cart." },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const cartItemId = body.cartItemId || body.id;
     const quantity = parseInt(body.quantity, 10);
@@ -193,13 +172,10 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "cartItemId and valid quantity are required" }, { status: 400 });
     }
 
-    const { userId, sessionId, isNewSession } = await getCartSessionInfo();
-    const where = userId ? { userId } : { sessionId: sessionId! };
-
     const cartItem = await prisma.cartItem.findFirst({
       where: {
         id: cartItemId,
-        ...where,
+        userId,
       },
       include: { variant: true },
     });
@@ -229,9 +205,8 @@ export async function PATCH(req: Request) {
       });
     }
 
-    const cart = await getCartData(userId, sessionId);
-    const response = NextResponse.json(cart);
-    return applyCartCookie(response, sessionId, isNewSession);
+    const cart = await getCartData(userId);
+    return NextResponse.json(cart);
   } catch (error) {
     console.error("PATCH /api/cart error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -240,6 +215,14 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const userId = await getAuthUserId();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Please log in to remove items from your cart." },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     let cartItemId = searchParams.get("id") || searchParams.get("cartItemId");
 
@@ -256,13 +239,10 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "cartItemId parameter is required" }, { status: 400 });
     }
 
-    const { userId, sessionId, isNewSession } = await getCartSessionInfo();
-    const where = userId ? { userId } : { sessionId: sessionId! };
-
     const cartItem = await prisma.cartItem.findFirst({
       where: {
         id: cartItemId,
-        ...where,
+        userId,
       },
     });
 
@@ -274,9 +254,8 @@ export async function DELETE(req: Request) {
       where: { id: cartItem.id },
     });
 
-    const cart = await getCartData(userId, sessionId);
-    const response = NextResponse.json(cart);
-    return applyCartCookie(response, sessionId, isNewSession);
+    const cart = await getCartData(userId);
+    return NextResponse.json(cart);
   } catch (error) {
     console.error("DELETE /api/cart error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

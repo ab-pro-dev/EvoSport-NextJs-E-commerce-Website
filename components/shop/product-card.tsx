@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Heart, Star, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,12 +26,22 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Enforce authentication before adding to cart
+    if (status !== "authenticated") {
+      toast.error("Please log in to add items to your cart.");
+      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
     if (isAdding) return;
 
     setIsAdding(true);
@@ -48,6 +60,12 @@ export function ProductCard({ product }: ProductCardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variantId, quantity: 1 }),
       });
+
+      if (cartRes.status === 401) {
+        toast.error("Please log in to add items to your cart.");
+        router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
 
       if (cartRes.ok) {
         toast.success(`${product.name} added to cart!`);
@@ -108,6 +126,14 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Wishlist Icon */}
         <button
           aria-label="Add to wishlist"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (status !== "authenticated") {
+              toast.error("Please log in to manage your wishlist.");
+              router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+            }
+          }}
           className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#0F1B2D]/40 backdrop-blur-sm shadow-sm transition-all hover:text-rose-500 hover:bg-white hover:shadow-md"
         >
           <Heart className="h-4 w-4" />

@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CartView } from "@/components/cart/cart-view";
@@ -9,21 +8,13 @@ export const metadata: Metadata = {
   description: "Review your shopping cart items and proceed to checkout.",
 };
 
-async function getInitialCart() {
-  const session = await auth();
-  const userId = session?.user?.id || null;
-
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get("cart_session")?.value || null;
-
-  if (!userId && !sessionId) {
+async function getInitialCart(userId: string | null) {
+  if (!userId) {
     return { items: [], subtotal: 0 };
   }
 
-  const where = userId ? { userId } : { sessionId: sessionId! };
-
   const rawItems = await prisma.cartItem.findMany({
-    where,
+    where: { userId },
     orderBy: { createdAt: "desc" },
     include: {
       variant: {
@@ -84,12 +75,14 @@ async function getInitialCart() {
 }
 
 export default async function CartPage() {
-  const initialCart = await getInitialCart();
+  const session = await auth();
+  const userId = session?.user?.id || null;
+  const initialCart = await getInitialCart(userId);
 
   return (
     <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D]">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <CartView initialCart={initialCart} />
+        <CartView initialCart={initialCart} isAuthenticated={Boolean(userId)} />
       </main>
     </div>
   );

@@ -27,20 +27,13 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    // Enforce authentication before adding to cart
-    if (status !== "authenticated") {
-      toast.error("Please log in to add items to your cart.");
-      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
-      return;
-    }
 
     if (isAdding) return;
 
@@ -60,12 +53,6 @@ export function ProductCard({ product }: ProductCardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variantId, quantity: 1 }),
       });
-
-      if (cartRes.status === 401) {
-        toast.error("Please log in to add items to your cart.");
-        router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
-        return;
-      }
 
       if (cartRes.ok) {
         toast.success(`${product.name} added to cart!`);
@@ -130,7 +117,7 @@ export function ProductCard({ product }: ProductCardProps) {
             e.preventDefault();
             e.stopPropagation();
             if (status !== "authenticated") {
-              toast.error("Please log in to manage your wishlist.");
+              toast.error("Please log in to save items to your wishlist.");
               router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
             }
           }}

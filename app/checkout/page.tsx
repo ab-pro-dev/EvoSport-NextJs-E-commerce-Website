@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -10,6 +11,39 @@ export const metadata: Metadata = {
 };
 
 async function getCartData(userId: string) {
+  // Merge any guest cart items from sessionId into userId
+  try {
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get("cart_session")?.value;
+
+    if (sessionId) {
+      const guestItems = await prisma.cartItem.findMany({
+        where: { sessionId },
+      });
+
+      for (const guestItem of guestItems) {
+        const userExisting = await prisma.cartItem.findFirst({
+          where: { userId, variantId: guestItem.variantId },
+        });
+
+        if (userExisting) {
+          await prisma.cartItem.update({
+            where: { id: userExisting.id },
+            data: { quantity: userExisting.quantity + guestItem.quantity },
+          });
+          await prisma.cartItem.delete({ where: { id: guestItem.id } });
+        } else {
+          await prisma.cartItem.update({
+            where: { id: guestItem.id },
+            data: { userId, sessionId: null },
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error migrating guest cart to user on checkout:", err);
+  }
+
   const rawItems = await prisma.cartItem.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -65,7 +99,7 @@ async function getCartData(userId: string) {
 export default async function CheckoutPage() {
   const session = await auth();
 
-  // Require authentication to access Checkout
+  // Login is required to access Checkout
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/checkout");
   }

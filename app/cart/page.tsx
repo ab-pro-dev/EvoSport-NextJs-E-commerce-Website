@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CartView } from "@/components/cart/cart-view";
@@ -8,13 +9,21 @@ export const metadata: Metadata = {
   description: "Review your shopping cart items and proceed to checkout.",
 };
 
-async function getInitialCart(userId: string | null) {
-  if (!userId) {
+async function getInitialCart() {
+  const session = await auth();
+  const userId = session?.user?.id || null;
+
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get("cart_session")?.value || null;
+
+  if (!userId && !sessionId) {
     return { items: [], subtotal: 0 };
   }
 
+  const where = userId ? { userId } : { sessionId: sessionId! };
+
   const rawItems = await prisma.cartItem.findMany({
-    where: { userId },
+    where,
     orderBy: { createdAt: "desc" },
     include: {
       variant: {
@@ -77,7 +86,7 @@ async function getInitialCart(userId: string | null) {
 export default async function CartPage() {
   const session = await auth();
   const userId = session?.user?.id || null;
-  const initialCart = await getInitialCart(userId);
+  const initialCart = await getInitialCart();
 
   return (
     <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D]">

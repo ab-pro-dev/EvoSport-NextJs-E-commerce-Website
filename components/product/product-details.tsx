@@ -29,7 +29,7 @@ interface ProductDetailsProps {
 
 export function ProductDetails({ product }: ProductDetailsProps) {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   const images = product.images.length > 0
     ? product.images
@@ -55,13 +55,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   ) || product.variants[0];
 
   const handleAddToCart = async () => {
-    // Enforce authentication before adding to cart
-    if (status !== "authenticated") {
-      toast.error("Please log in to add items to your cart.");
-      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
-      return;
-    }
-
     if (!currentVariant?.id || !inStock || isAdding) return;
     setIsAdding(true);
     setAddError(null);
@@ -76,12 +69,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           quantity,
         }),
       });
-
-      if (res.status === 401) {
-        toast.error("Please log in to add items to your cart.");
-        router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
-        return;
-      }
 
       if (!res.ok) {
         const data = await res.json();
@@ -102,13 +89,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   };
 
   const handleBuyNow = async () => {
-    // Enforce authentication before proceeding to checkout
-    if (status !== "authenticated") {
-      toast.error("Please log in with your account to proceed to checkout.");
-      router.push(`/login?callbackUrl=/checkout`);
-      return;
-    }
-
     if (!currentVariant?.id || !inStock || isAdding) return;
     setIsAdding(true);
 
@@ -124,7 +104,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
       if (res.ok) {
         window.dispatchEvent(new Event("cart-updated"));
-        router.push("/checkout");
+        if (status !== "authenticated") {
+          toast.info("Please log in with your account to complete checkout.");
+          router.push("/login?callbackUrl=/checkout");
+        } else {
+          router.push("/checkout");
+        }
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to proceed to checkout");
@@ -204,7 +189,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               aria-label="Add to wishlist"
               onClick={() => {
                 if (status !== "authenticated") {
-                  toast.error("Please log in to manage your wishlist.");
+                  toast.error("Please log in to save items to your wishlist.");
                   router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
                 }
               }}
@@ -367,7 +352,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
               <button
                 onClick={() => {
                   if (status !== "authenticated") {
-                    toast.error("Please log in to manage your wishlist.");
+                    toast.error("Please log in to save items to your wishlist.");
                     router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
                   }
                 }}

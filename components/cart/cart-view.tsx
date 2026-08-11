@@ -44,7 +44,7 @@ interface CartViewProps {
   isAuthenticated?: boolean;
 }
 
-export function CartView({ initialCart, isAuthenticated = true }: CartViewProps) {
+export function CartView({ initialCart, isAuthenticated = false }: CartViewProps) {
   const router = useRouter();
   const [cart, setCart] = useState<CartData>(initialCart);
   const [couponCode, setCouponCode] = useState("");
@@ -73,6 +73,7 @@ export function CartView({ initialCart, isAuthenticated = true }: CartViewProps)
       }
 
       setCart(data);
+      window.dispatchEvent(new Event("cart-updated"));
       router.refresh();
     } catch (err) {
       console.error("Error updating cart quantity:", err);
@@ -99,6 +100,7 @@ export function CartView({ initialCart, isAuthenticated = true }: CartViewProps)
       }
 
       setCart(data);
+      window.dispatchEvent(new Event("cart-updated"));
       router.refresh();
     } catch (err) {
       console.error("Error removing cart item:", err);
@@ -117,39 +119,10 @@ export function CartView({ initialCart, isAuthenticated = true }: CartViewProps)
     });
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4 py-16">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white border border-gray-200 text-[#0F1B2D]/50 mb-6 shadow-sm">
-          <Lock className="h-10 w-10 text-[#0F1B2D]/60" />
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">
-          Sign In to Access Your Cart
-        </h2>
-        <p className="mt-2 text-xs sm:text-sm text-[#0F1B2D]/60 max-w-md leading-relaxed">
-          Please log in to your account to add items, view your shopping bag, and proceed to secure checkout.
-        </p>
-        <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-md justify-center">
-          <Link href="/login?callbackUrl=/cart" className="w-full sm:w-auto">
-            <Button size="lg" className="w-full bg-[#B8FF00] text-[#0F1B2D] font-black uppercase text-xs tracking-wider hover:bg-[#a3e600] rounded-xl px-8 h-12 shadow-sm">
-              Sign In to Your Account
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-          <Link href="/register" className="w-full sm:w-auto">
-            <Button size="lg" variant="outline" className="w-full border-gray-300 bg-white text-[#0F1B2D] font-bold text-xs uppercase tracking-wider hover:bg-gray-50 rounded-xl px-6 h-12">
-              Create Account
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   if (cart.items.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4 py-16">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white border border-gray-200 text-[#B8FF00] mb-6">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white border border-gray-200 text-[#B8FF00] mb-6 shadow-sm">
           <ShoppingBag className="h-10 w-10" />
         </div>
         <h2 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D]">Your Cart is Empty</h2>
@@ -157,7 +130,7 @@ export function CartView({ initialCart, isAuthenticated = true }: CartViewProps)
           Looks like you haven&apos;t added any performance gear to your cart yet.
         </p>
         <Link href="/shop" className="mt-6">
-          <Button size="lg" className="bg-[#B8FF00] text-[#0F1B2D] font-black uppercase text-xs tracking-wider hover:bg-[#a3e600] rounded-xl px-8">
+          <Button size="lg" className="bg-[#B8FF00] text-[#0F1B2D] font-black uppercase text-xs tracking-wider hover:bg-[#a3e600] rounded-xl px-8 shadow-sm">
             Start Shopping
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
@@ -165,6 +138,8 @@ export function CartView({ initialCart, isAuthenticated = true }: CartViewProps)
       </div>
     );
   }
+
+  const checkoutHref = isAuthenticated ? "/checkout" : "/login?callbackUrl=/checkout";
 
   return (
     <div className="space-y-8">
@@ -319,7 +294,7 @@ export function CartView({ initialCart, isAuthenticated = true }: CartViewProps)
               </div>
             </div>
 
-            <Link href="/checkout" className="block pt-2">
+            <Link href={checkoutHref} className="block pt-2">
               <Button
                 size="lg"
                 className="w-full bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-12 text-xs uppercase tracking-wider rounded-xl shadow-sm"
@@ -328,6 +303,13 @@ export function CartView({ initialCart, isAuthenticated = true }: CartViewProps)
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
+
+            {!isAuthenticated && (
+              <p className="text-[11px] text-center text-[#0F1B2D]/50 flex items-center justify-center gap-1">
+                <Lock className="h-3 w-3" />
+                <span>You will be prompted to sign in at checkout</span>
+              </p>
+            )}
 
             <div className="flex items-center justify-center gap-2 pt-2 text-[11px] text-[#0F1B2D]/50 font-medium border-t border-gray-100">
               <ShieldCheck className="h-4 w-4 text-[#B8FF00]" />

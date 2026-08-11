@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -22,6 +23,34 @@ export async function POST(req: Request) {
         { error: "Please log in with your account to complete checkout and place an order." },
         { status: 401 }
       );
+    }
+
+    // Merge any lingering guest items from sessionId into authUserId
+    try {
+      const cookieStore = await cookies();
+      const sessionId = cookieStore.get("cart_session")?.value;
+      if (sessionId) {
+        const guestItems = await prisma.cartItem.findMany({ where: { sessionId } });
+        for (const guestItem of guestItems) {
+          const userExisting = await prisma.cartItem.findFirst({
+            where: { userId: authUserId, variantId: guestItem.variantId },
+          });
+          if (userExisting) {
+            await prisma.cartItem.update({
+              where: { id: userExisting.id },
+              data: { quantity: userExisting.quantity + guestItem.quantity },
+            });
+            await prisma.cartItem.delete({ where: { id: guestItem.id } });
+          } else {
+            await prisma.cartItem.update({
+              where: { id: guestItem.id },
+              data: { userId: authUserId, sessionId: null },
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Checkout cart merge error:", e);
     }
 
     // 1. Read real cart from DB for this authenticated user

@@ -144,8 +144,8 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Multi-Step Indicator Header */}
-      <div className="flex items-center justify-between border-b border-neutral-800 pb-6">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-white">
+      <div className="flex items-center justify-between border-b border-gray-200 pb-6">
+        <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">
           CHECKOUT
         </h1>
 
@@ -153,48 +153,48 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
         <div className="flex items-center gap-2 sm:gap-4 text-xs font-black uppercase">
           <button
             onClick={() => setStep(1)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
               step === 1
-                ? "border-[#CCFF00] bg-[#CCFF00]/10 text-[#CCFF00]"
-                : "border-neutral-800 text-neutral-400 hover:text-white"
+                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
+                : "border-gray-200 text-[#0F1B2D]/50 hover:text-[#0F1B2D]"
             }`}
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-800 text-[10px]">1</span>
+            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 1 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 text-[#0F1B2D]'}`}>1</span>
             <span>Shipping</span>
           </button>
 
-          <span className="text-neutral-700">&rarr;</span>
+          <span className="text-gray-300">&rarr;</span>
 
           <button
             onClick={() => validateStep1() && setStep(2)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
               step === 2
-                ? "border-[#CCFF00] bg-[#CCFF00]/10 text-[#CCFF00]"
-                : "border-neutral-800 text-neutral-400 hover:text-white"
+                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
+                : "border-gray-200 text-[#0F1B2D]/50 hover:text-[#0F1B2D]"
             }`}
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-800 text-[10px]">2</span>
+            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 2 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 text-[#0F1B2D]'}`}>2</span>
             <span>Payment</span>
           </button>
 
-          <span className="text-neutral-700">&rarr;</span>
+          <span className="text-gray-300">&rarr;</span>
 
           <button
             onClick={() => validateStep1() && setStep(3)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
               step === 3
-                ? "border-[#CCFF00] bg-[#CCFF00]/10 text-[#CCFF00]"
-                : "border-neutral-800 text-neutral-400 hover:text-white"
+                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
+                : "border-gray-200 text-[#0F1B2D]/50 hover:text-[#0F1B2D]"
             }`}
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-neutral-800 text-[10px]">3</span>
+            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 3 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 text-[#0F1B2D]'}`}>3</span>
             <span>Review</span>
           </button>
         </div>
       </div>
 
       {errorMessage && (
-        <div className="rounded-lg border border-rose-900/60 bg-rose-950/40 p-4 text-xs text-rose-300 font-medium">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-xs text-rose-600 font-medium">
           {errorMessage}
         </div>
       )}
@@ -205,123 +205,123 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
         <div className="lg:col-span-7 space-y-6">
           {/* STEP 1: SHIPPING ADDRESS & METHOD */}
           {step === 1 && (
-            <form onSubmit={handleNextToPayment} className="rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-6 backdrop-blur-md space-y-6">
-              <div className="flex items-center gap-2 border-b border-neutral-800 pb-4">
-                <Truck className="h-5 w-5 text-[#CCFF00]" />
-                <h2 className="text-lg font-black uppercase text-white">1. SHIPPING ADDRESS</h2>
+            <form onSubmit={handleNextToPayment} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
+              <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+                <Truck className="h-5 w-5 text-[#B8FF00]" />
+                <h2 className="text-lg font-black uppercase text-[#0F1B2D]">1. SHIPPING ADDRESS</h2>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Full Name *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Full Name *</label>
                   <Input
                     required
                     placeholder="Alex Morgan"
                     value={address.fullName}
                     onChange={(e) => handleInputChange("fullName", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Email Address *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Email Address *</label>
                   <Input
                     required
                     type="email"
                     placeholder="alex@example.com"
                     value={address.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Phone Number *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Phone Number *</label>
                   <Input
                     required
                     placeholder="+1 (555) 000-0000"
                     value={address.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Street Address *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Street Address *</label>
                   <Input
                     required
                     placeholder="123 Performance Way"
                     value={address.line1}
                     onChange={(e) => handleInputChange("line1", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Apartment, Suite, Unit (Optional)</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Apartment, Suite, Unit (Optional)</label>
                   <Input
                     placeholder="Apt 4B"
                     value={address.line2}
                     onChange={(e) => handleInputChange("line2", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">City *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">City *</label>
                   <Input
                     required
                     placeholder="New York"
                     value={address.city}
                     onChange={(e) => handleInputChange("city", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">State / Province *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">State / Province *</label>
                   <Input
                     required
                     placeholder="NY"
                     value={address.state}
                     onChange={(e) => handleInputChange("state", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Postal / Zip Code *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Postal / Zip Code *</label>
                   <Input
                     required
                     placeholder="10001"
                     value={address.zip}
                     onChange={(e) => handleInputChange("zip", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Country *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Country *</label>
                   <Input
                     required
                     placeholder="US"
                     value={address.country}
                     onChange={(e) => handleInputChange("country", e.target.value)}
-                    className="mt-1.5 bg-neutral-950 border-neutral-800 text-xs text-white placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
               </div>
 
               {/* Shipping Method Selection */}
-              <div className="pt-4 border-t border-neutral-800">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-300 mb-3">Shipping Method</h3>
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">Shipping Method</h3>
                 <div className="space-y-2.5">
                   <label
                     onClick={() => setShippingMethod("standard")}
                     className={`flex items-center justify-between p-3.5 rounded-lg border cursor-pointer transition-all ${
                       shippingMethod === "standard"
-                        ? "border-[#CCFF00] bg-[#CCFF00]/10 text-white"
-                        : "border-neutral-800 bg-neutral-950 text-neutral-400 hover:border-neutral-700"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D]"
+                        : "border-gray-200 bg-[#F4F8FC] text-[#0F1B2D]/60 hover:border-gray-300"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -330,14 +330,14 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         name="shippingMethod"
                         checked={shippingMethod === "standard"}
                         onChange={() => setShippingMethod("standard")}
-                        className="accent-[#CCFF00]"
+                        className="accent-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-white">Standard Delivery</div>
-                        <div className="text-[10px] text-neutral-400">3-5 Business Days</div>
+                        <div className="text-xs font-bold text-[#0F1B2D]">Standard Delivery</div>
+                        <div className="text-[10px] text-[#0F1B2D]/50">3-5 Business Days</div>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-[#CCFF00]">
+                    <span className="text-xs font-bold text-[#B8FF00]">
                       {subtotal >= 100 ? "FREE" : "$9.99"}
                     </span>
                   </label>
@@ -346,8 +346,8 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                     onClick={() => setShippingMethod("express")}
                     className={`flex items-center justify-between p-3.5 rounded-lg border cursor-pointer transition-all ${
                       shippingMethod === "express"
-                        ? "border-[#CCFF00] bg-[#CCFF00]/10 text-white"
-                        : "border-neutral-800 bg-neutral-950 text-neutral-400 hover:border-neutral-700"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D]"
+                        : "border-gray-200 bg-[#F4F8FC] text-[#0F1B2D]/60 hover:border-gray-300"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -356,22 +356,22 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         name="shippingMethod"
                         checked={shippingMethod === "express"}
                         onChange={() => setShippingMethod("express")}
-                        className="accent-[#CCFF00]"
+                        className="accent-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-white">Express Air Shipping</div>
-                        <div className="text-[10px] text-neutral-400">1-2 Business Days</div>
+                        <div className="text-xs font-bold text-[#0F1B2D]">Express Air Shipping</div>
+                        <div className="text-[10px] text-[#0F1B2D]/50">1-2 Business Days</div>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-white">$12.99</span>
+                    <span className="text-xs font-bold text-[#0F1B2D]">$12.99</span>
                   </label>
 
                   <label
                     onClick={() => setShippingMethod("overnight")}
                     className={`flex items-center justify-between p-3.5 rounded-lg border cursor-pointer transition-all ${
                       shippingMethod === "overnight"
-                        ? "border-[#CCFF00] bg-[#CCFF00]/10 text-white"
-                        : "border-neutral-800 bg-neutral-950 text-neutral-400 hover:border-neutral-700"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D]"
+                        : "border-gray-200 bg-[#F4F8FC] text-[#0F1B2D]/60 hover:border-gray-300"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -380,14 +380,14 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         name="shippingMethod"
                         checked={shippingMethod === "overnight"}
                         onChange={() => setShippingMethod("overnight")}
-                        className="accent-[#CCFF00]"
+                        className="accent-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-white">Priority Overnight</div>
-                        <div className="text-[10px] text-neutral-400">Next Business Day</div>
+                        <div className="text-xs font-bold text-[#0F1B2D]">Priority Overnight</div>
+                        <div className="text-[10px] text-[#0F1B2D]/50">Next Business Day</div>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-white">$24.99</span>
+                    <span className="text-xs font-bold text-[#0F1B2D]">$24.99</span>
                   </label>
                 </div>
               </div>
@@ -395,7 +395,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-[#CCFF00] font-black text-black hover:bg-[#b8e600] h-12 text-xs uppercase tracking-wider rounded-lg"
+                className="w-full bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-12 text-xs uppercase tracking-wider rounded-xl shadow-sm"
               >
                 Continue to Payment
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -405,22 +405,22 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
 
           {/* STEP 2: MOCK PAYMENT PLACEHOLDER */}
           {step === 2 && (
-            <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-6 backdrop-blur-md space-y-6">
-              <div className="flex items-center gap-2 border-b border-neutral-800 pb-4">
-                <CreditCard className="h-5 w-5 text-[#CCFF00]" />
-                <h2 className="text-lg font-black uppercase text-white">2. PAYMENT METHOD</h2>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
+              <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+                <CreditCard className="h-5 w-5 text-[#B8FF00]" />
+                <h2 className="text-lg font-black uppercase text-[#0F1B2D]">2. PAYMENT METHOD</h2>
               </div>
 
-              <div className="rounded-xl border border-[#CCFF00]/30 bg-neutral-950 p-6 text-center space-y-3">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#CCFF00]/10 text-[#CCFF00]">
+              <div className="rounded-xl border border-[#B8FF00]/50 bg-[#F4F8FC] p-6 text-center space-y-3">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#B8FF00]/20 text-[#0F1B2D]">
                   <Check className="h-6 w-6" />
                 </div>
-                <h3 className="text-sm font-bold uppercase text-white">Mock Checkout Enabled</h3>
-                <p className="text-xs text-neutral-400 max-w-md mx-auto">
+                <h3 className="text-sm font-bold uppercase text-[#0F1B2D]">Mock Checkout Enabled</h3>
+                <p className="text-xs text-[#0F1B2D]/60 max-w-md mx-auto">
                   Instant mock payment simulation is active for testing. No real credit card or gateway processing required.
                 </p>
                 <div className="pt-2">
-                  <span className="inline-block rounded-md bg-neutral-900 border border-neutral-800 px-3 py-1 text-[11px] font-mono text-[#CCFF00]">
+                  <span className="inline-block rounded-md bg-white border border-gray-200 px-3 py-1 text-[11px] font-mono text-[#0F1B2D]">
                     Provider: MOCK_PAYMENT (Instant Approval)
                   </span>
                 </div>
@@ -431,7 +431,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   type="button"
                   variant="outline"
                   onClick={() => setStep(1)}
-                  className="border-neutral-700 text-white font-bold text-xs uppercase hover:border-[#CCFF00] h-12"
+                  className="border-gray-200 text-[#0F1B2D] font-bold text-xs uppercase hover:border-[#B8FF00] hover:bg-[#F4F8FC] h-12 rounded-xl"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Shipping
@@ -440,7 +440,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   type="button"
                   onClick={() => setStep(3)}
                   size="lg"
-                  className="flex-1 bg-[#CCFF00] font-black text-black hover:bg-[#b8e600] h-12 text-xs uppercase tracking-wider rounded-lg"
+                  className="flex-1 bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-12 text-xs uppercase tracking-wider rounded-xl shadow-sm"
                 >
                   Continue to Review
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -451,32 +451,32 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
 
           {/* STEP 3: REVIEW ORDER */}
           {step === 3 && (
-            <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-6 backdrop-blur-md space-y-6">
-              <div className="flex items-center gap-2 border-b border-neutral-800 pb-4">
-                <ShieldCheck className="h-5 w-5 text-[#CCFF00]" />
-                <h2 className="text-lg font-black uppercase text-white">3. REVIEW YOUR ORDER</h2>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
+              <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+                <ShieldCheck className="h-5 w-5 text-[#B8FF00]" />
+                <h2 className="text-lg font-black uppercase text-[#0F1B2D]">3. REVIEW YOUR ORDER</h2>
               </div>
 
               {/* Shipping Address Summary */}
-              <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4 text-xs space-y-1">
-                <div className="flex justify-between font-bold text-white mb-2">
-                  <span className="uppercase text-neutral-400">Shipping Address</span>
-                  <button onClick={() => setStep(1)} className="text-[#CCFF00] hover:underline">Edit</button>
+              <div className="rounded-lg border border-gray-200 bg-[#F4F8FC] p-4 text-xs space-y-1">
+                <div className="flex justify-between font-bold text-[#0F1B2D] mb-2">
+                  <span className="uppercase text-[#0F1B2D]/60">Shipping Address</span>
+                  <button onClick={() => setStep(1)} className="text-[#5B8DEF] hover:underline">Edit</button>
                 </div>
-                <p className="text-white font-bold">{address.fullName}</p>
-                <p className="text-neutral-400">{address.line1} {address.line2}</p>
-                <p className="text-neutral-400">{address.city}, {address.state} {address.zip}, {address.country}</p>
-                <p className="text-neutral-400">Phone: {address.phone}</p>
+                <p className="text-[#0F1B2D] font-bold">{address.fullName}</p>
+                <p className="text-[#0F1B2D]/60">{address.line1} {address.line2}</p>
+                <p className="text-[#0F1B2D]/60">{address.city}, {address.state} {address.zip}, {address.country}</p>
+                <p className="text-[#0F1B2D]/60">Phone: {address.phone}</p>
               </div>
 
               {/* Cart Items Summary List */}
               <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-400">Items ({cart.items.length})</h3>
-                <div className="divide-y divide-neutral-800 rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60">Items ({cart.items.length})</h3>
+                <div className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white p-4">
                   {cart.items.map((item) => (
                     <div key={item.id} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-neutral-800 bg-neutral-900">
+                        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-gray-100 bg-[#F4F8FC]">
                           <Image
                             src={item.variant.product.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"}
                             alt={item.variant.product.name}
@@ -485,13 +485,13 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                           />
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-white line-clamp-1">{item.variant.product.name}</div>
-                          <div className="text-[10px] text-neutral-400">
+                          <div className="text-xs font-bold text-[#0F1B2D] line-clamp-1">{item.variant.product.name}</div>
+                          <div className="text-[10px] text-[#0F1B2D]/50">
                             {item.variant.color} • {item.variant.size} • Qty: {item.quantity}
                           </div>
                         </div>
                       </div>
-                      <span className="text-xs font-bold text-[#CCFF00]">${item.itemTotal.toFixed(2)}</span>
+                      <span className="text-xs font-bold text-[#0F1B2D]">${item.itemTotal.toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -502,7 +502,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   type="button"
                   variant="outline"
                   onClick={() => setStep(2)}
-                  className="border-neutral-700 text-white font-bold text-xs uppercase hover:border-[#CCFF00] h-12"
+                  className="border-gray-200 text-[#0F1B2D] font-bold text-xs uppercase hover:border-[#B8FF00] hover:bg-[#F4F8FC] h-12 rounded-xl"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
@@ -512,7 +512,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   onClick={handlePlaceOrder}
                   disabled={isPlacingOrder}
                   size="lg"
-                  className="flex-1 bg-[#CCFF00] font-black text-black hover:bg-[#b8e600] h-12 text-xs uppercase tracking-wider rounded-lg shadow-lg shadow-[#CCFF00]/10"
+                  className="flex-1 bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-12 text-xs uppercase tracking-wider rounded-xl shadow-sm"
                 >
                   {isPlacingOrder ? "PROCESSING ORDER..." : `PLACE ORDER ($${total.toFixed(2)})`}
                 </Button>
@@ -523,8 +523,8 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
 
         {/* Right Persistent Order Summary Sidebar (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-xl border border-neutral-800 bg-neutral-900/80 p-6 backdrop-blur-md space-y-5 sticky top-6">
-            <h2 className="text-lg font-black uppercase tracking-tight text-white border-b border-neutral-800 pb-4">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-5 sticky top-6">
+            <h2 className="text-lg font-black uppercase tracking-tight text-[#0F1B2D] border-b border-gray-100 pb-4">
               ORDER SUMMARY
             </h2>
 
@@ -533,7 +533,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
               {cart.items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2.5">
-                    <div className="relative h-10 w-10 rounded border border-neutral-800 bg-neutral-950 flex-shrink-0 overflow-hidden">
+                    <div className="relative h-10 w-10 rounded border border-gray-100 bg-[#F4F8FC] flex-shrink-0 overflow-hidden">
                       <Image
                         src={item.variant.product.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"}
                         alt={item.variant.product.name}
@@ -542,42 +542,42 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                       />
                     </div>
                     <div>
-                      <div className="font-bold text-white line-clamp-1 max-w-[150px]">{item.variant.product.name}</div>
-                      <div className="text-[10px] text-neutral-400">Qty: {item.quantity}</div>
+                      <div className="font-bold text-[#0F1B2D] line-clamp-1 max-w-[150px]">{item.variant.product.name}</div>
+                      <div className="text-[10px] text-[#0F1B2D]/50">Qty: {item.quantity}</div>
                     </div>
                   </div>
-                  <span className="font-bold text-neutral-200">${item.itemTotal.toFixed(2)}</span>
+                  <span className="font-bold text-[#0F1B2D]">${item.itemTotal.toFixed(2)}</span>
                 </div>
               ))}
             </div>
 
             {/* Totals Breakdown */}
-            <div className="border-t border-neutral-800 pt-4 space-y-2.5 text-xs">
-              <div className="flex justify-between text-neutral-300">
+            <div className="border-t border-gray-100 pt-4 space-y-2.5 text-xs">
+              <div className="flex justify-between text-[#0F1B2D]/60">
                 <span>Subtotal</span>
-                <span className="font-bold text-white">${subtotal.toFixed(2)}</span>
+                <span className="font-bold text-[#0F1B2D]">${subtotal.toFixed(2)}</span>
               </div>
 
-              <div className="flex justify-between text-neutral-300">
+              <div className="flex justify-between text-[#0F1B2D]/60">
                 <span>Shipping ({shippingMethod.toUpperCase()})</span>
-                <span className="font-bold text-white">
+                <span className="font-bold text-[#0F1B2D]">
                   {shippingCost === 0 ? "FREE" : `$${shippingCost.toFixed(2)}`}
                 </span>
               </div>
 
-              <div className="flex justify-between text-neutral-300">
+              <div className="flex justify-between text-[#0F1B2D]/60">
                 <span>Estimated Tax (8%)</span>
-                <span className="font-bold text-white">${tax.toFixed(2)}</span>
+                <span className="font-bold text-[#0F1B2D]">${tax.toFixed(2)}</span>
               </div>
 
-              <div className="border-t border-neutral-800 pt-3 flex justify-between items-baseline">
-                <span className="text-sm font-black uppercase text-white">Total</span>
-                <span className="text-2xl font-black text-[#CCFF00]">${total.toFixed(2)}</span>
+              <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
+                <span className="text-sm font-black uppercase text-[#0F1B2D]">Total</span>
+                <span className="text-2xl font-black text-[#0F1B2D]">${total.toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2 pt-2 text-[11px] text-neutral-400 font-medium border-t border-neutral-800/80">
-              <ShieldCheck className="h-4 w-4 text-[#CCFF00]" />
+            <div className="flex items-center justify-center gap-2 pt-2 text-[11px] text-[#0F1B2D]/50 font-medium border-t border-gray-100">
+              <ShieldCheck className="h-4 w-4 text-[#B8FF00]" />
               <span>Instant Order Guarantee</span>
             </div>
           </div>

@@ -76,16 +76,16 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
   ];
 
   return (
-    <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/80 p-5 backdrop-blur-md text-white space-y-6">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm text-[#0F1B2D] space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
-        <div className="flex items-center gap-2 font-black text-sm uppercase tracking-wider text-white">
-          <Filter className="h-4 w-4 text-[#CCFF00]" />
+      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div className="flex items-center gap-2 font-black text-sm uppercase tracking-wider text-[#0F1B2D]">
+          <Filter className="h-4 w-4 text-[#B8FF00]" />
           <span>FILTERS</span>
         </div>
         <button
           onClick={handleClearAll}
-          className="flex items-center gap-1 text-[11px] text-neutral-400 hover:text-[#CCFF00] transition-colors"
+          className="flex items-center gap-1 text-[11px] text-[#0F1B2D]/40 hover:text-[#5B8DEF] transition-colors"
         >
           <RotateCcw className="h-3 w-3" />
           Clear All
@@ -94,23 +94,23 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
 
       {/* Search Input */}
       <div>
-        <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+        <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">
           Search
         </label>
         <div className="relative mt-2">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-neutral-500" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#0F1B2D]/40" />
           <Input
             placeholder="Search products..."
             value={currentSearch}
             onChange={(e) => updateFilter("search", e.target.value || null)}
-            className="pl-9 bg-neutral-950 border-neutral-800 text-xs text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+            className="pl-9 bg-[#F4F8FC] border-gray-200 text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
           />
         </div>
       </div>
 
       {/* Categories */}
-      <div className="border-t border-neutral-800/60 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3">
+      <div className="border-t border-gray-100 pt-5">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">
           Categories
         </h4>
         <div className="space-y-1.5">
@@ -118,12 +118,12 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
             onClick={() => updateFilter("category", null)}
             className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
               currentCategory === ""
-                ? "bg-[#CCFF00]/10 text-[#CCFF00] font-bold"
-                : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                ? "bg-[#B8FF00]/10 text-[#0F1B2D] font-bold"
+                : "text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D]"
             }`}
           >
             <span>All Categories</span>
-            {currentCategory === "" && <Check className="h-3.5 w-3.5 text-[#CCFF00]" />}
+            {currentCategory === "" && <Check className="h-3.5 w-3.5 text-[#B8FF00]" />}
           </button>
           {categories.map((cat) => (
             <button
@@ -133,20 +133,20 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
               }
               className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 currentCategory === cat.slug
-                  ? "bg-[#CCFF00]/10 text-[#CCFF00] font-bold"
-                  : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                  ? "bg-[#B8FF00]/10 text-[#0F1B2D] font-bold"
+                  : "text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D]"
               }`}
             >
               <span>{cat.name}</span>
-              {currentCategory === cat.slug && <Check className="h-3.5 w-3.5 text-[#CCFF00]" />}
+              {currentCategory === cat.slug && <Check className="h-3.5 w-3.5 text-[#B8FF00]" />}
             </button>
           ))}
         </div>
       </div>
 
       {/* Price Range */}
-      <div className="border-t border-neutral-800/60 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3">
+      <div className="border-t border-gray-100 pt-5">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">
           Price Range ($)
         </h4>
         <div className="flex items-center gap-2">
@@ -155,29 +155,29 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
             placeholder="Min"
             value={minPriceInput}
             onChange={(e) => setMinPriceInput(e.target.value)}
-            className="bg-neutral-950 border-neutral-800 text-xs text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+            className="bg-[#F4F8FC] border-gray-200 text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
           />
-          <span className="text-neutral-600">-</span>
+          <span className="text-[#0F1B2D]/40">-</span>
           <Input
             type="number"
             placeholder="Max"
             value={maxPriceInput}
             onChange={(e) => setMaxPriceInput(e.target.value)}
-            className="bg-neutral-950 border-neutral-800 text-xs text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+            className="bg-[#F4F8FC] border-gray-200 text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
           />
         </div>
         <Button
           onClick={handlePriceApply}
           size="sm"
-          className="mt-3 w-full bg-neutral-800 hover:bg-[#CCFF00] hover:text-black text-neutral-200 text-xs font-bold uppercase tracking-wider transition-colors"
+          className="mt-3 w-full bg-[#B8FF00] hover:bg-[#a8ef00] text-[#0F1B2D] text-xs font-bold uppercase tracking-wider transition-colors"
         >
           Apply Price
         </Button>
       </div>
 
       {/* Brands */}
-      <div className="border-t border-neutral-800/60 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3">
+      <div className="border-t border-gray-100 pt-5">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">
           Brand
         </h4>
         <div className="space-y-1.5">
@@ -189,20 +189,20 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
               }
               className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 currentBrand === b.slug
-                  ? "bg-[#CCFF00]/10 text-[#CCFF00] font-bold"
-                  : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                  ? "bg-[#B8FF00]/10 text-[#0F1B2D] font-bold"
+                  : "text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D]"
               }`}
             >
               <span>{b.name}</span>
-              {currentBrand === b.slug && <Check className="h-3.5 w-3.5 text-[#CCFF00]" />}
+              {currentBrand === b.slug && <Check className="h-3.5 w-3.5 text-[#B8FF00]" />}
             </button>
           ))}
         </div>
       </div>
 
       {/* Sizes */}
-      <div className="border-t border-neutral-800/60 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3">
+      <div className="border-t border-gray-100 pt-5">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">
           Size
         </h4>
         <div className="grid grid-cols-4 gap-1.5">
@@ -212,8 +212,8 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
               onClick={() => setSelectedSize(selectedSize === s ? "" : s)}
               className={`rounded-md border py-1.5 text-xs font-bold transition-colors ${
                 selectedSize === s
-                  ? "border-[#CCFF00] bg-[#CCFF00]/20 text-[#CCFF00]"
-                  : "border-neutral-800 bg-neutral-950 text-neutral-400 hover:border-neutral-700 hover:text-white"
+                  ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
+                  : "border-gray-200 bg-[#F4F8FC] text-[#0F1B2D]/50 hover:border-gray-300 hover:text-[#0F1B2D]"
               }`}
             >
               {s}
@@ -223,8 +223,8 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
       </div>
 
       {/* Color Swatches */}
-      <div className="border-t border-neutral-800/60 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3">
+      <div className="border-t border-gray-100 pt-5">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">
           Color
         </h4>
         <div className="flex items-center gap-2.5">
@@ -234,7 +234,7 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
               title={c.name}
               onClick={() => setSelectedColor(selectedColor === c.name ? "" : c.name)}
               className={`h-6 w-6 rounded-full border ${c.bg} flex items-center justify-center transition-transform ${
-                selectedColor === c.name ? "ring-2 ring-[#CCFF00] ring-offset-2 ring-offset-neutral-900 scale-110" : "hover:scale-105"
+                selectedColor === c.name ? "ring-2 ring-[#B8FF00] ring-offset-2 ring-offset-white scale-110" : "hover:scale-105"
               }`}
             >
               {selectedColor === c.name && <Check className="h-3 w-3 text-black" />}
@@ -244,21 +244,21 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
       </div>
 
       {/* Rating */}
-      <div className="border-t border-neutral-800/60 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-3">
+      <div className="border-t border-gray-100 pt-5">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">
           Rating
         </h4>
         <div className="space-y-1.5">
           {[4, 3, 2].map((r) => (
             <button
               key={r}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-xs text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-xs text-[#0F1B2D]/60 hover:bg-gray-50 hover:text-[#0F1B2D] transition-colors"
             >
               <div className="flex text-amber-400">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-3 w-3 ${i < r ? "fill-amber-400" : "fill-neutral-800 text-neutral-800"}`}
+                    className={`h-3 w-3 ${i < r ? "fill-amber-400" : "fill-gray-200 text-gray-200"}`}
                   />
                 ))}
               </div>

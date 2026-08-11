@@ -119,15 +119,15 @@ export function CartView({ initialCart }: CartViewProps) {
   if (cart.items.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4 py-16">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-900 border border-neutral-800 text-[#CCFF00] mb-6">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white border border-gray-200 text-[#B8FF00] mb-6">
           <ShoppingBag className="h-10 w-10" />
         </div>
-        <h2 className="text-2xl font-black uppercase tracking-tight text-white">Your Cart is Empty</h2>
-        <p className="mt-2 text-xs text-neutral-400 max-w-sm">
+        <h2 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D]">Your Cart is Empty</h2>
+        <p className="mt-2 text-xs text-[#0F1B2D]/50 max-w-sm">
           Looks like you haven&apos;t added any performance gear to your cart yet.
         </p>
         <Link href="/shop" className="mt-6">
-          <Button size="lg" className="bg-[#CCFF00] text-black font-black uppercase text-xs tracking-wider hover:bg-[#b8e600] rounded-lg px-8">
+          <Button size="lg" className="bg-[#B8FF00] text-[#0F1B2D] font-black uppercase text-xs tracking-wider hover:bg-[#a3e600] rounded-xl px-8">
             Start Shopping
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
@@ -139,17 +139,17 @@ export function CartView({ initialCart }: CartViewProps) {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-neutral-800 pb-5">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-white">
-          YOUR CART <span className="text-[#CCFF00]">({totalQuantity})</span>
+      <div className="flex items-center justify-between border-b border-gray-200 pb-5">
+        <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">
+          YOUR CART <span className="text-[#B8FF00]">({totalQuantity})</span>
         </h1>
-        <Link href="/shop" className="text-xs text-neutral-400 hover:text-[#CCFF00] font-medium transition-colors">
+        <Link href="/shop" className="text-xs text-[#5B8DEF] hover:text-[#4a7bd1] font-medium transition-colors">
           Continue Shopping &rarr;
         </Link>
       </div>
 
       {stockError && (
-        <div className="rounded-lg border border-rose-900/60 bg-rose-950/40 p-3.5 text-xs text-rose-300 font-medium">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-600 font-medium">
           {stockError}
         </div>
       )}
@@ -158,7 +158,7 @@ export function CartView({ initialCart }: CartViewProps) {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         {/* Cart Items List (8 cols) */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-4 sm:p-6 backdrop-blur-md space-y-6">
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm space-y-6">
             {cart.items.map((item) => {
               const image = item.variant.product.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
               const isLoading = loadingId === item.id;
@@ -166,13 +166,13 @@ export function CartView({ initialCart }: CartViewProps) {
               return (
                 <div
                   key={item.id}
-                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-800/60 last:border-0 last:pb-0 transition-opacity ${
+                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-100 last:border-0 last:pb-0 transition-opacity ${
                     isLoading ? "opacity-40 pointer-events-none" : "opacity-100"
                   }`}
                 >
                   {/* Thumbnail & Product Meta */}
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-neutral-800 bg-neutral-950">
+                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-[#F4F8FC]">
                       <Image
                         src={image}
                         alt={item.variant.product.altText || item.variant.product.name}
@@ -181,25 +181,25 @@ export function CartView({ initialCart }: CartViewProps) {
                       />
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40">
                         {item.variant.product.brand}
                       </span>
                       <Link
                         href={`/products/${item.variant.product.slug}`}
-                        className="block font-bold text-sm text-white hover:text-[#CCFF00] transition-colors line-clamp-1"
+                        className="block font-bold text-sm text-[#0F1B2D] hover:text-[#5B8DEF] transition-colors line-clamp-1"
                       >
                         {item.variant.product.name}
                       </Link>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-400">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#0F1B2D]/50">
                         {item.variant.color && (
-                          <span>Color: <strong className="text-neutral-200">{item.variant.color}</strong></span>
+                          <span>Color: <strong className="text-[#0F1B2D]">{item.variant.color}</strong></span>
                         )}
                         {item.variant.color && item.variant.size && <span>•</span>}
                         {item.variant.size && (
-                          <span>Size: <strong className="text-neutral-200">{item.variant.size}</strong></span>
+                          <span>Size: <strong className="text-[#0F1B2D]">{item.variant.size}</strong></span>
                         )}
                       </div>
-                      <div className="text-xs font-semibold text-neutral-400 sm:hidden">
+                      <div className="text-xs font-semibold text-[#0F1B2D]/50 sm:hidden">
                         ${item.unitPrice.toFixed(2)}
                       </div>
                     </div>
@@ -208,18 +208,18 @@ export function CartView({ initialCart }: CartViewProps) {
                   {/* Quantity Stepper & Price / Delete Actions */}
                   <div className="flex items-center justify-between w-full sm:w-auto gap-6 pt-2 sm:pt-0">
                     {/* Stepper */}
-                    <div className="flex items-center rounded-lg border border-neutral-800 bg-neutral-950 px-2">
+                    <div className="flex items-center rounded-lg border border-gray-200 bg-[#F4F8FC] px-2">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1.5 text-neutral-400 hover:text-[#CCFF00] transition-colors"
+                        className="p-1.5 text-[#0F1B2D]/50 hover:text-[#0F1B2D] transition-colors"
                         aria-label="Decrease quantity"
                       >
                         <Minus className="h-3.5 w-3.5" />
                       </button>
-                      <span className="w-8 text-center text-xs font-black text-white">{item.quantity}</span>
+                      <span className="w-8 text-center text-xs font-black text-[#0F1B2D]">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1.5 text-neutral-400 hover:text-[#CCFF00] transition-colors"
+                        className="p-1.5 text-[#0F1B2D]/50 hover:text-[#0F1B2D] transition-colors"
                         aria-label="Increase quantity"
                       >
                         <Plus className="h-3.5 w-3.5" />
@@ -228,11 +228,11 @@ export function CartView({ initialCart }: CartViewProps) {
 
                     {/* Item Total */}
                     <div className="text-right min-w-[80px]">
-                      <div className="text-sm font-black text-[#CCFF00]">
+                      <div className="text-sm font-black text-[#0F1B2D]">
                         ${item.itemTotal.toFixed(2)}
                       </div>
                       {item.quantity > 1 && (
-                        <div className="text-[10px] text-neutral-500">
+                        <div className="text-[10px] text-[#0F1B2D]/40">
                           ${item.unitPrice.toFixed(2)} each
                         </div>
                       )}
@@ -241,7 +241,7 @@ export function CartView({ initialCart }: CartViewProps) {
                     {/* Trash / Remove Icon */}
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="text-neutral-500 hover:text-rose-500 transition-colors p-1.5 rounded-lg hover:bg-rose-950/20"
+                      className="text-[#0F1B2D]/30 hover:text-rose-500 transition-colors p-1.5 rounded-lg hover:bg-rose-50"
                       aria-label="Remove item"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -253,27 +253,27 @@ export function CartView({ initialCart }: CartViewProps) {
           </div>
 
           {/* Coupon Input Box */}
-          <div className="rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-4 sm:p-5 backdrop-blur-md">
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
             <form onSubmit={handleApplyCoupon} className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Tag className="absolute left-3.5 top-3 h-3.5 w-3.5 text-neutral-500" />
+                <Tag className="absolute left-3.5 top-3 h-3.5 w-3.5 text-[#0F1B2D]/40" />
                 <Input
                   placeholder="Enter Promo or Coupon Code"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
-                  className="pl-9 bg-neutral-950 border-neutral-800 text-xs text-neutral-200 uppercase placeholder:normal-case placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
+                  className="pl-9 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] uppercase placeholder:normal-case placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
                 />
               </div>
               <Button
                 type="submit"
                 variant="outline"
-                className="border-neutral-700 text-white font-bold text-xs uppercase hover:border-[#CCFF00] hover:text-[#CCFF00] px-6"
+                className="border-gray-200 text-[#0F1B2D] font-bold text-xs uppercase hover:border-[#B8FF00] hover:bg-[#F4F8FC] px-6 rounded-xl"
               >
                 Apply
               </Button>
             </form>
             {couponMessage && (
-              <p className={`mt-2 text-xs font-medium ${couponMessage.type === "error" ? "text-rose-400" : "text-emerald-400"}`}>
+              <p className={`mt-2 text-xs font-medium ${couponMessage.type === "error" ? "text-rose-500" : "text-emerald-600"}`}>
                 {couponMessage.text}
               </p>
             )}
@@ -282,43 +282,43 @@ export function CartView({ initialCart }: CartViewProps) {
 
         {/* Order Summary Panel (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="rounded-xl border border-neutral-800 bg-neutral-900/80 p-6 backdrop-blur-md space-y-5">
-            <h2 className="text-lg font-black uppercase tracking-tight text-white border-b border-neutral-800 pb-4">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-5">
+            <h2 className="text-lg font-black uppercase tracking-tight text-[#0F1B2D] border-b border-gray-100 pb-4">
               ORDER SUMMARY
             </h2>
 
             <div className="space-y-3 text-xs">
-              <div className="flex justify-between text-neutral-300">
+              <div className="flex justify-between text-[#0F1B2D]/60">
                 <span>Subtotal</span>
-                <span className="font-bold text-white">${cart.subtotal.toFixed(2)}</span>
+                <span className="font-bold text-[#0F1B2D]">${cart.subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-neutral-400">
+              <div className="flex justify-between text-[#0F1B2D]/60">
                 <span>Estimated Shipping</span>
-                <span className="text-neutral-500 italic">Calculated at checkout</span>
+                <span className="text-[#0F1B2D]/50 italic">Calculated at checkout</span>
               </div>
-              <div className="flex justify-between text-neutral-400">
+              <div className="flex justify-between text-[#0F1B2D]/60">
                 <span>Estimated Tax</span>
-                <span className="text-neutral-300 font-bold">$0.00</span>
+                <span className="text-[#0F1B2D] font-bold">$0.00</span>
               </div>
 
-              <div className="border-t border-neutral-800 pt-4 flex justify-between items-baseline">
-                <span className="text-sm font-black uppercase text-white">Estimated Total</span>
-                <span className="text-xl font-black text-[#CCFF00]">${cart.subtotal.toFixed(2)}</span>
+              <div className="border-t border-gray-100 pt-4 flex justify-between items-baseline">
+                <span className="text-sm font-black uppercase text-[#0F1B2D]">Estimated Total</span>
+                <span className="text-xl font-black text-[#0F1B2D]">${cart.subtotal.toFixed(2)}</span>
               </div>
             </div>
 
             <Link href="/checkout" className="block pt-2">
               <Button
                 size="lg"
-                className="w-full bg-[#CCFF00] font-black text-black hover:bg-[#b8e600] h-12 text-xs uppercase tracking-wider rounded-lg shadow-lg shadow-[#CCFF00]/10"
+                className="w-full bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-12 text-xs uppercase tracking-wider rounded-xl shadow-sm"
               >
                 PROCEED TO CHECKOUT
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
 
-            <div className="flex items-center justify-center gap-2 pt-2 text-[11px] text-neutral-400 font-medium border-t border-neutral-800/80">
-              <ShieldCheck className="h-4 w-4 text-[#CCFF00]" />
+            <div className="flex items-center justify-center gap-2 pt-2 text-[11px] text-[#0F1B2D]/50 font-medium border-t border-gray-100">
+              <ShieldCheck className="h-4 w-4 text-[#B8FF00]" />
               <span>100% Secure Checkout Guaranteed</span>
             </div>
           </div>

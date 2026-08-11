@@ -52,43 +52,43 @@ export default async function PublicBlogDetailPage({
   });
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-16">
+    <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D] pt-24 pb-16">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 space-y-8">
         {/* Back Link */}
         <Link
           href="/blog"
-          className="inline-flex items-center text-xs font-bold text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center text-xs font-bold text-[#0F1B2D]/40 hover:text-[#5B8DEF] transition-colors"
         >
           <ArrowLeft className="mr-1.5 h-4 w-4" /> Back to Journal
         </Link>
 
         {/* Post Header */}
-        <div className="space-y-4 border-b border-neutral-800 pb-8">
-          <div className="flex items-center gap-3 text-xs text-neutral-400">
+        <div className="space-y-4 border-b border-gray-200 pb-8">
+          <div className="flex items-center gap-3 text-xs text-[#0F1B2D]/40">
             <span className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-rose-500" />
+              <Calendar className="h-3.5 w-3.5 text-[#5B8DEF]" />
               {formattedDate}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5">
-              <User className="h-3.5 w-3.5 text-neutral-500" />
+              <User className="h-3.5 w-3.5 text-[#0F1B2D]/30" />
               By {post.author?.name || "EvoSport Team"}
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-[#0F1B2D] leading-tight">
             {post.title}
           </h1>
 
           {post.excerpt && (
-            <p className="text-base text-neutral-300 italic border-l-2 border-rose-500 pl-4 py-1">
+            <p className="text-base text-[#0F1B2D]/60 italic border-l-2 border-[#5B8DEF] pl-4 py-1">
               {post.excerpt}
             </p>
           )}
         </div>
 
         {/* Post Body Content */}
-        <div className="prose prose-invert max-w-none text-sm text-neutral-300 leading-relaxed whitespace-pre-line space-y-4">
+        <div className="prose max-w-none text-sm text-[#0F1B2D]/70 leading-relaxed whitespace-pre-line space-y-4">
           {post.content}
         </div>
       </div>

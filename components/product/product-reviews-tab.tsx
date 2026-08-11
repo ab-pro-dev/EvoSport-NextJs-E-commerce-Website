@@ -101,11 +101,11 @@ export function ProductReviewsTab({
   };
 
   return (
-    <div className="space-y-8 text-xs text-neutral-300">
+    <div className="space-y-8 text-xs text-[#0F1B2D]/70">
       {/* Overview Rating Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-neutral-800 bg-neutral-950/60 p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-gray-200 bg-[#F4F8FC] p-6 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="text-3xl font-black text-[#CCFF00]">{avgRating.toFixed(1)}</div>
+          <div className="text-3xl font-black text-[#0F1B2D]">{avgRating.toFixed(1)}</div>
           <div>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -113,13 +113,13 @@ export function ProductReviewsTab({
                   key={star}
                   className={`h-4 w-4 ${
                     star <= Math.round(avgRating)
-                      ? "fill-[#CCFF00] text-[#CCFF00]"
-                      : "text-neutral-700"
+                      ? "fill-amber-400 text-amber-400"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
             </div>
-            <p className="text-[11px] text-neutral-400 mt-1 font-medium">
+            <p className="text-[11px] text-[#0F1B2D]/50 mt-1 font-medium">
               Based on {totalCount} verified customer {totalCount === 1 ? "review" : "reviews"}
             </p>
           </div>
@@ -127,32 +127,32 @@ export function ProductReviewsTab({
       </div>
 
       {/* Write a Review Section */}
-      <div className="rounded-xl border border-neutral-800 bg-neutral-950/80 p-6 space-y-4">
-        <h3 className="text-sm font-black uppercase text-white flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-[#CCFF00]" />
+      <div className="rounded-xl border border-gray-200 bg-[#F4F8FC] p-6 space-y-4 shadow-sm">
+        <h3 className="text-sm font-black uppercase text-[#0F1B2D] flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 text-[#B8FF00]" />
           WRITE A CUSTOMER REVIEW
         </h3>
 
         {submitSuccess ? (
-          <div className="rounded-lg border border-emerald-900/60 bg-emerald-950/40 p-4 text-emerald-400 font-medium space-y-1">
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-700 font-medium space-y-1">
             <div className="flex items-center gap-2 font-bold text-xs uppercase">
               <CheckCircle2 className="h-4 w-4" />
               Review Submitted for Moderation
             </div>
-            <p className="text-[11px] text-neutral-300">
+            <p className="text-[11px] text-emerald-600/80">
               Thank you for your feedback! Your review is in the moderation queue and will appear publicly once approved.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmitReview} className="space-y-4">
             {submitError && (
-              <div className="rounded-lg border border-rose-900/60 bg-rose-950/40 p-3 text-rose-300 text-[11px] font-medium">
+              <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-700 text-[11px] font-medium">
                 {submitError}
               </div>
             )}
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/50 block mb-1.5">
                 Your Rating *
               </label>
               <div className="flex items-center gap-1">
@@ -170,21 +170,21 @@ export function ProductReviewsTab({
                       <Star
                         className={`h-5 w-5 ${
                           star <= currentDisplayRating
-                            ? "fill-[#CCFF00] text-[#CCFF00]"
-                            : "text-neutral-700"
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-gray-300"
                         }`}
                       />
                     </button>
                   );
                 })}
-                <span className="ml-2 font-mono text-xs font-bold text-neutral-300">
+                <span className="ml-2 font-mono text-xs font-bold text-[#0F1B2D]">
                   {rating} / 5
                 </span>
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block mb-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/50 block mb-1.5">
                 Review Details (Optional)
               </label>
               <textarea
@@ -192,14 +192,14 @@ export function ProductReviewsTab({
                 placeholder="Share performance insights, fit details, or endurance tests..."
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="w-full rounded-lg border border-neutral-800 bg-neutral-900 p-3 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-[#CCFF00]"
+                className="w-full rounded-lg border border-gray-200 bg-white p-3 text-xs text-[#0F1B2D] placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#B8FF00]"
               />
             </div>
 
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-[#CCFF00] text-black font-black uppercase text-xs tracking-wider hover:bg-[#b8e600] rounded-lg px-6 h-10"
+              className="bg-[#B8FF00] text-[#0F1B2D] font-black uppercase text-xs tracking-wider hover:bg-[#a3e600] rounded-lg px-6 h-10 shadow-sm"
             >
               <Send className="mr-1.5 h-3.5 w-3.5" />
               {isSubmitting ? "Submitting..." : "Submit Review"}
@@ -210,27 +210,27 @@ export function ProductReviewsTab({
 
       {/* Reviews List */}
       <div className="space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/50">
           APPROVED REVIEWS ({reviews.length})
         </h3>
 
         {isLoading ? (
-          <div className="p-8 text-center text-neutral-500">Loading reviews...</div>
+          <div className="p-8 text-center text-gray-500">Loading reviews...</div>
         ) : reviews.length > 0 ? (
-          <div className="divide-y divide-neutral-800 rounded-xl border border-neutral-800 bg-neutral-950/60 p-4">
+          <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
             {reviews.map((r) => (
               <div key={r.id} className="py-4 first:pt-0 last:pb-0 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-xs">{r.userName}</span>
+                    <span className="font-bold text-[#0F1B2D] text-xs">{r.userName}</span>
                     {r.verifiedPurchase && (
-                      <Badge className="bg-emerald-950/80 text-emerald-400 border-emerald-800/80 text-[9px] uppercase font-bold px-2 py-0.2 flex items-center gap-1">
+                      <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 text-[9px] uppercase font-bold px-2 py-0.2 flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" />
                         Verified Purchase
                       </Badge>
                     )}
                   </div>
-                  <span className="text-[10px] text-neutral-500">
+                  <span className="text-[10px] text-gray-400">
                     {new Date(r.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -245,21 +245,21 @@ export function ProductReviewsTab({
                       key={star}
                       className={`h-3.5 w-3.5 ${
                         star <= r.rating
-                          ? "fill-[#CCFF00] text-[#CCFF00]"
-                          : "text-neutral-800"
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-gray-300"
                       }`}
                     />
                   ))}
                 </div>
 
                 {r.comment && (
-                  <p className="text-xs text-neutral-300 leading-relaxed pt-1">{r.comment}</p>
+                  <p className="text-xs text-[#0F1B2D]/70 leading-relaxed pt-1">{r.comment}</p>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center text-xs text-neutral-500 rounded-xl border border-dashed border-neutral-800">
+          <div className="p-8 text-center text-xs text-gray-500 rounded-xl border border-dashed border-gray-200">
             No approved public reviews yet for this product. Be the first to leave a review above!
           </div>
         )}

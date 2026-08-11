@@ -52,29 +52,29 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white selection:bg-[#CCFF00] selection:text-black">
+    <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D] selection:bg-[#B8FF00] selection:text-[#0F1B2D]">
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950 py-20 lg:py-32">
+      <section className="relative overflow-hidden border-b border-gray-200 bg-gradient-to-b from-[#E8F5E9] via-[#F4F8FC] to-white py-20 lg:py-32">
         {/* Glow Accent Effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-[#CCFF00]/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-[#5B8DEF]/10 blur-3xl pointer-events-none" />
 
         <div className="container mx-auto px-4 max-w-7xl relative z-10 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#CCFF00]/30 bg-[#CCFF00]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#CCFF00]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#B8FF00] bg-[#B8FF00] px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#0F1B2D]">
             <Flame className="h-4 w-4" />
             <span>NEW 2026 PRO COLLECTION RELEASED</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tighter text-white max-w-4xl mx-auto leading-none">
-            ENGINEER YOUR <span className="text-[#CCFF00] italic">LIMITLESS</span> POTENTIAL
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tighter text-[#0F1B2D] max-w-4xl mx-auto leading-none">
+            ENGINEER YOUR <span className="text-[#B8FF00] italic">LIMITLESS</span> POTENTIAL
           </h1>
 
-          <p className="text-xs sm:text-sm text-neutral-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#0F1B2D]/50 max-w-2xl mx-auto leading-relaxed">
             Discover precision carbon running shoes, thermal compression apparel, and endurance hydration systems designed for professional athletes.
           </p>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/shop">
-              <button className="flex items-center gap-2 rounded-lg bg-[#CCFF00] px-8 py-4 text-xs font-black uppercase tracking-wider text-black hover:bg-[#b8e600] transition-colors shadow-lg shadow-[#CCFF00]/15">
+              <button className="flex items-center gap-2 rounded-lg bg-[#B8FF00] px-8 py-4 text-xs font-black uppercase tracking-wider text-[#0F1B2D] hover:bg-[#a8ef00] transition-colors shadow-lg shadow-[#B8FF00]/20">
                 <ShoppingBag className="h-4 w-4" />
                 EXPLORE ALL GEAR
                 <ArrowRight className="h-4 w-4" />
@@ -82,7 +82,7 @@ export default async function HomePage() {
             </Link>
 
             <Link href="/shop?category=footwear">
-              <button className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-900 px-8 py-4 text-xs font-bold uppercase tracking-wider text-white hover:border-[#CCFF00] hover:text-[#CCFF00] transition-colors">
+              <button className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-8 py-4 text-xs font-bold uppercase tracking-wider text-[#0F1B2D] hover:border-[#B8FF00] hover:bg-gray-50 transition-colors">
                 FOOTWEAR COLLECTION
               </button>
             </Link>
@@ -93,15 +93,15 @@ export default async function HomePage() {
       {/* Featured Products Grid */}
       {featuredProducts.length > 0 && (
         <section className="py-16 container mx-auto px-4 max-w-7xl space-y-8">
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
             <div>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-white">
-                FEATURED <span className="text-[#CCFF00]">GEAR</span>
+              <h2 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D]">
+                FEATURED <span className="text-[#B8FF00]">GEAR</span>
               </h2>
-              <p className="text-xs text-neutral-400 mt-0.5">Top-tier athletic performance equipment</p>
+              <p className="text-xs text-[#0F1B2D]/50 mt-0.5">Top-tier athletic performance equipment</p>
             </div>
 
-            <Link href="/shop" className="text-xs font-bold text-[#CCFF00] hover:underline flex items-center gap-1">
+            <Link href="/shop" className="text-xs font-bold text-[#5B8DEF] hover:underline flex items-center gap-1">
               <span>View All Shop</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>

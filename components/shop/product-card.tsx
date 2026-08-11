@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, Star, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 
 interface ProductCardProps {
   product: {
@@ -66,6 +65,7 @@ export function ProductCard({ product }: ProductCardProps) {
       setIsAdding(false);
     }
   };
+
   const mainImage = (product.images && product.images.length > 0 && product.images[0]?.url)
     ? product.images[0].url
     : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600";
@@ -82,9 +82,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const colors = Array.from(new Set(product.variants?.map((v) => v.color).filter(Boolean) || []));
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-neutral-800/80 bg-neutral-900/70 transition-all duration-300 hover:-translate-y-1 hover:border-[#CCFF00]/50 hover:shadow-lg hover:shadow-[#CCFF00]/5">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50">
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden bg-neutral-950 p-4">
+      <div className="relative aspect-square w-full overflow-hidden bg-[#F4F8FC] p-4">
         <Image
           src={mainImage}
           alt={product.name}
@@ -95,29 +95,30 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Badges */}
         <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10">
           {discountPercent ? (
-            <Badge className="bg-rose-600 text-white font-extrabold text-[11px] px-2 py-0.5 rounded">
+            <span className="inline-flex items-center rounded-lg bg-[#B8FF00] px-2.5 py-1 text-[11px] font-extrabold text-[#0F1B2D]">
               -{discountPercent}%
-            </Badge>
+            </span>
           ) : (
-            <Badge className="bg-[#CCFF00] text-black font-extrabold text-[10px] tracking-wider uppercase px-2 py-0.5 rounded">
+            <span className="inline-flex items-center rounded-lg bg-[#B8FF00] px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase text-[#0F1B2D]">
               BEST SELLER
-            </Badge>
+            </span>
           )}
         </div>
 
         {/* Wishlist Icon */}
         <button
           aria-label="Add to wishlist"
-          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900/80 text-neutral-400 backdrop-blur-sm transition-colors hover:text-[#CCFF00]"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#0F1B2D]/40 backdrop-blur-sm shadow-sm transition-all hover:text-rose-500 hover:bg-white hover:shadow-md"
         >
           <Heart className="h-4 w-4" />
         </button>
 
+        {/* Quick Add - appears on hover */}
         <div className="absolute bottom-3 left-3 right-3 z-10 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           <button
             onClick={handleQuickAdd}
             disabled={isAdding}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#CCFF00] py-2 text-xs font-extrabold uppercase text-black hover:bg-[#b8e600] transition-colors shadow-md disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F1B2D] py-2.5 text-xs font-extrabold uppercase text-white hover:bg-[#0F1B2D]/90 transition-colors shadow-lg disabled:opacity-50"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
             {isAdding ? "Adding..." : added ? "Added!" : "Quick Add"}
@@ -127,11 +128,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Details */}
       <div className="flex flex-1 flex-col p-4">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40">
           {product.brand.name}
         </span>
-        <Link href={`/products/${product.slug}`} className="hover:text-[#CCFF00] transition-colors mt-0.5">
-          <h3 className="line-clamp-1 text-sm font-bold text-white">
+        <Link href={`/products/${product.slug}`} className="hover:text-[#5B8DEF] transition-colors mt-0.5">
+          <h3 className="line-clamp-1 text-sm font-bold text-[#0F1B2D]">
             {product.name}
           </h3>
         </Link>
@@ -145,20 +146,20 @@ export function ProductCard({ product }: ProductCardProps) {
                 className={`h-3 w-3 ${
                   i < Math.floor(avgRating)
                     ? "fill-amber-400 text-amber-400"
-                    : "fill-neutral-800 text-neutral-800"
+                    : "fill-gray-200 text-gray-200"
                 }`}
               />
             ))}
           </div>
-          <span className="text-[11px] text-neutral-400 font-medium">({reviewCount})</span>
+          <span className="text-[11px] text-[#0F1B2D]/40 font-medium">({reviewCount})</span>
         </div>
 
         {/* Price & Real Color Variants */}
-        <div className="mt-3 flex items-center justify-between border-t border-neutral-800/60 pt-3">
+        <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
           <div className="flex items-baseline gap-2">
-            <span className="text-base font-extrabold text-white">${price.toFixed(2)}</span>
+            <span className="text-base font-extrabold text-[#0F1B2D]">${price.toFixed(2)}</span>
             {compareAt && compareAt > price && (
-              <span className="text-xs text-neutral-500 line-through">${compareAt.toFixed(2)}</span>
+              <span className="text-xs text-[#0F1B2D]/30 line-through">${compareAt.toFixed(2)}</span>
             )}
           </div>
 
@@ -168,11 +169,11 @@ export function ProductCard({ product }: ProductCardProps) {
               {colors.slice(0, 3).map((c, i) => (
                 <span
                   key={i}
-                  className="h-2.5 w-2.5 rounded-full border border-neutral-600 bg-neutral-700 inline-block"
+                  className="h-2.5 w-2.5 rounded-full border border-gray-300 bg-gray-200 inline-block"
                 />
               ))}
               {colors.length > 3 && (
-                <span className="text-[9px] font-bold text-neutral-400">+{colors.length - 3}</span>
+                <span className="text-[9px] font-bold text-[#0F1B2D]/40">+{colors.length - 3}</span>
               )}
             </div>
           )}

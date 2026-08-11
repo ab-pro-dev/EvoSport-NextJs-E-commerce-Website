@@ -95,16 +95,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   return (
     <div className="space-y-6">
       {/* Real Breadcrumb built strictly from category and product name */}
-      <nav className="flex items-center gap-2 text-xs text-neutral-400 font-medium">
-        <Link href="/" className="hover:text-[#CCFF00] transition-colors">Home</Link>
-        <ChevronRight className="h-3 w-3 text-neutral-600" />
-        <Link href="/shop" className="hover:text-[#CCFF00] transition-colors">Shop</Link>
-        <ChevronRight className="h-3 w-3 text-neutral-600" />
-        <Link href={`/shop?category=${product.category.slug}`} className="hover:text-[#CCFF00] transition-colors">
+      <nav className="flex items-center gap-2 text-xs text-[#0F1B2D]/40 font-medium">
+        <Link href="/" className="hover:text-[#5B8DEF] transition-colors">Home</Link>
+        <ChevronRight className="h-3 w-3 text-gray-300" />
+        <Link href="/shop" className="hover:text-[#5B8DEF] transition-colors">Shop</Link>
+        <ChevronRight className="h-3 w-3 text-gray-300" />
+        <Link href={`/shop?category=${product.category.slug}`} className="hover:text-[#5B8DEF] transition-colors">
           {product.category.name}
         </Link>
-        <ChevronRight className="h-3 w-3 text-neutral-600" />
-        <span className="text-white font-bold truncate max-w-[250px]">{product.name}</span>
+        <ChevronRight className="h-3 w-3 text-gray-300" />
+        <span className="text-[#0F1B2D] font-bold truncate max-w-[250px]">{product.name}</span>
       </nav>
 
       {/* Main Grid: Left Gallery + Right Panel */}
@@ -119,8 +119,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   onClick={() => setSelectedImage(img.url)}
                   className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                     selectedImage === img.url
-                      ? "border-[#CCFF00] ring-2 ring-[#CCFF00]/30 scale-105"
-                      : "border-neutral-800 hover:border-neutral-700 opacity-60 hover:opacity-100"
+                      ? "border-[#B8FF00] ring-2 ring-[#B8FF00]/30 scale-105"
+                      : "border-gray-200 hover:border-gray-300 opacity-60 hover:opacity-100"
                   }`}
                 >
                   <Image src={img.url} alt={img.altText || product.name} fill className="object-cover" />
@@ -130,7 +130,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           )}
 
           {/* Main Product Image */}
-          <div className="relative aspect-square flex-1 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950 p-6 shadow-2xl">
+          <div className="relative aspect-square flex-1 overflow-hidden rounded-2xl border border-gray-200 bg-[#F4F8FC] p-6 shadow-sm">
             <Image
               src={selectedImage}
               alt={product.name}
@@ -149,7 +149,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
             <button
               aria-label="Add to wishlist"
-              className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900/80 text-neutral-400 backdrop-blur-md transition-colors hover:text-[#CCFF00]"
+              className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-[#0F1B2D]/40 backdrop-blur-md transition-colors hover:text-rose-400 border border-gray-200"
             >
               <Heart className="h-4 w-4" />
             </button>
@@ -160,14 +160,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         <div className="lg:col-span-6 flex flex-col space-y-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="border-[#CCFF00]/40 text-[#CCFF00] bg-[#CCFF00]/10 text-[10px] uppercase font-bold">
+              <Badge variant="outline" className="border-gray-200 text-[#0F1B2D]/40 bg-white text-[10px] uppercase font-bold">
                 {product.brand.name}
               </Badge>
               {currentVariant?.sku && (
-                <span className="text-[11px] text-neutral-500 font-mono">SKU: {currentVariant.sku}</span>
+                <span className="text-[11px] text-[#0F1B2D]/40 font-mono">SKU: {currentVariant.sku}</span>
               )}
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-white uppercase">
+            <h1 className="text-3xl font-black tracking-tight text-[#0F1B2D] uppercase">
               {product.name}
             </h1>
             
@@ -180,15 +180,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     className={`h-3.5 w-3.5 ${
                       i < Math.floor(product.avgRating)
                         ? "fill-amber-400 text-amber-400"
-                        : "fill-neutral-800 text-neutral-800"
+                        : "text-gray-200"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-xs font-bold text-neutral-300">
+              <span className="text-xs font-bold text-[#0F1B2D]/70">
                 {product.avgRating > 0 ? product.avgRating.toFixed(1) : "0.0"}
               </span>
-              <span className="text-xs text-neutral-500">
+              <span className="text-xs text-[#0F1B2D]/50">
                 ({product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"})
               </span>
             </div>
@@ -196,22 +196,22 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           {/* Real Price Header */}
           <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-black text-[#CCFF00]">${price.toFixed(2)}</span>
+            <span className="text-3xl font-black text-[#0F1B2D]">${price.toFixed(2)}</span>
             {compareAt && compareAt > price && (
-              <span className="text-base text-neutral-500 line-through">${compareAt.toFixed(2)}</span>
+              <span className="text-base text-[#0F1B2D]/30 line-through">${compareAt.toFixed(2)}</span>
             )}
           </div>
 
           {/* Real Description from Database */}
-          <p className="text-xs leading-relaxed text-neutral-300">
+          <p className="text-xs leading-relaxed text-[#0F1B2D]/70">
             {product.description}
           </p>
 
           {/* Dynamic Color Selection from real variants */}
           {uniqueColors.length > 0 && (
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-neutral-300">
-                Color: <span className="text-white font-normal">{selectedColor}</span>
+              <div className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60">
+                Color: <span className="text-[#0F1B2D] font-normal">{selectedColor}</span>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {uniqueColors.map((color) => (
@@ -220,8 +220,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={() => setSelectedColor(color)}
                     className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
                       selectedColor === color
-                        ? "border-[#CCFF00] bg-[#CCFF00]/20 text-[#CCFF00]"
-                        : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-700 hover:text-white"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
+                        : "border-gray-200 bg-white text-[#0F1B2D]/60 hover:border-gray-300 hover:text-[#0F1B2D]"
                     }`}
                   >
                     {color}
@@ -234,8 +234,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           {/* Dynamic Size Selection from real variants */}
           {uniqueSizes.length > 0 && (
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-neutral-300">
-                Size: <span className="text-white font-normal">{selectedSize}</span>
+              <div className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60">
+                Size: <span className="text-[#0F1B2D] font-normal">{selectedSize}</span>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {uniqueSizes.map((size) => (
@@ -244,8 +244,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={() => setSelectedSize(size)}
                     className={`h-9 min-w-10 rounded-md border px-3 text-xs font-bold transition-all ${
                       selectedSize === size
-                        ? "border-[#CCFF00] bg-[#CCFF00]/20 text-[#CCFF00]"
-                        : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-700 hover:text-white"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
+                        : "border-gray-200 bg-white text-[#0F1B2D]/60 hover:border-gray-300 hover:text-[#0F1B2D]"
                     }`}
                   >
                     {size}
@@ -257,8 +257,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           {/* Real Stock Status Indicator */}
           <div className="flex items-center gap-2 text-xs font-bold">
-            <span className={`h-2 w-2 rounded-full ${inStock ? "bg-emerald-400 animate-pulse" : "bg-rose-500"}`} />
-            <span className={inStock ? "text-emerald-400" : "text-rose-400"}>
+            <span className={`h-2 w-2 rounded-full ${inStock ? "bg-emerald-600 animate-pulse" : "bg-rose-500"}`} />
+            <span className={inStock ? "text-emerald-600" : "text-rose-500"}>
               {inStock ? `In Stock (${stockCount} available)` : "Out of Stock"}
             </span>
           </div>
@@ -266,17 +266,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           {/* Quantity & Action Buttons */}
           <div className="space-y-4 pt-2">
             <div className="flex gap-3">
-              <div className="flex items-center rounded-lg border border-neutral-800 bg-neutral-900 px-2">
+              <div className="flex items-center rounded-lg border border-gray-200 bg-white px-2 shadow-sm">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-1.5 text-neutral-400 hover:text-[#CCFF00] transition-colors"
+                  className="p-1.5 text-[#0F1B2D]/50 hover:text-[#0F1B2D] transition-colors"
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
-                <span className="w-8 text-center text-xs font-black text-white">{quantity}</span>
+                <span className="w-8 text-center text-xs font-black text-[#0F1B2D]">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="p-1.5 text-neutral-400 hover:text-[#CCFF00] transition-colors"
+                  className="p-1.5 text-[#0F1B2D]/50 hover:text-[#0F1B2D] transition-colors"
                 >
                   <Plus className="h-3.5 w-3.5" />
                 </button>
@@ -286,7 +286,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 size="lg"
                 disabled={!inStock || isAdding}
                 onClick={handleAddToCart}
-                className="flex-1 bg-[#CCFF00] font-black text-black hover:bg-[#b8e600] h-11 text-xs uppercase tracking-wider rounded-lg shadow-lg shadow-[#CCFF00]/10"
+                className="flex-1 bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-11 text-xs uppercase tracking-wider rounded-lg shadow-sm"
               >
                 <ShoppingBag className="mr-2 h-4 w-4" />
                 {isAdding ? "ADDING..." : addSuccess ? "ADDED TO CART!" : "ADD TO CART"}
@@ -296,19 +296,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 size="lg"
                 variant="outline"
                 disabled={!inStock}
-                className="flex-1 border-neutral-700 text-white hover:border-[#CCFF00] hover:text-[#CCFF00] h-11 text-xs uppercase tracking-wider font-black rounded-lg bg-neutral-900/60"
+                className="flex-1 border-[#0F1B2D] text-white hover:bg-[#0F1B2D]/90 h-11 text-xs uppercase tracking-wider font-black rounded-lg bg-[#0F1B2D] shadow-sm"
               >
-                <Zap className="mr-2 h-4 w-4 text-[#CCFF00]" />
+                <Zap className="mr-2 h-4 w-4 text-[#B8FF00]" />
                 BUY NOW
               </Button>
             </div>
 
-            <div className="flex items-center gap-6 pt-2 text-xs font-semibold text-neutral-400">
-              <button className="flex items-center gap-1.5 hover:text-[#CCFF00] transition-colors">
+            <div className="flex items-center gap-6 pt-2 text-xs font-semibold text-[#0F1B2D]/60">
+              <button className="flex items-center gap-1.5 hover:text-[#5B8DEF] transition-colors">
                 <Heart className="h-3.5 w-3.5" />
                 <span>Add to Wishlist</span>
               </button>
-              <button className="flex items-center gap-1.5 hover:text-[#CCFF00] transition-colors">
+              <button className="flex items-center gap-1.5 hover:text-[#5B8DEF] transition-colors">
                 <RefreshCw className="h-3.5 w-3.5" />
                 <span>Compare</span>
               </button>
@@ -316,28 +316,28 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
 
           {/* Static Trust Badges Bar */}
-          <div className="grid grid-cols-3 gap-3 pt-6 border-t border-neutral-800 text-left">
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-neutral-900/60 border border-neutral-800/80">
-              <Truck className="h-5 w-5 text-[#CCFF00] flex-shrink-0 mt-0.5" />
+          <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200 text-left">
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white border border-gray-100 shadow-sm">
+              <Truck className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
               <div>
-                <div className="text-[11px] font-bold text-white uppercase">Free Shipping</div>
-                <div className="text-[10px] text-neutral-400">On orders over $100</div>
+                <div className="text-[11px] font-bold text-[#0F1B2D] uppercase">Free Shipping</div>
+                <div className="text-[10px] text-[#0F1B2D]/60">On orders over $100</div>
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-neutral-900/60 border border-neutral-800/80">
-              <RefreshCw className="h-5 w-5 text-[#CCFF00] flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white border border-gray-100 shadow-sm">
+              <RefreshCw className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
               <div>
-                <div className="text-[11px] font-bold text-white uppercase">Easy Returns</div>
-                <div className="text-[10px] text-neutral-400">30 days return policy</div>
+                <div className="text-[11px] font-bold text-[#0F1B2D] uppercase">Easy Returns</div>
+                <div className="text-[10px] text-[#0F1B2D]/60">30 days return policy</div>
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-neutral-900/60 border border-neutral-800/80">
-              <ShieldCheck className="h-5 w-5 text-[#CCFF00] flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white border border-gray-100 shadow-sm">
+              <ShieldCheck className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
               <div>
-                <div className="text-[11px] font-bold text-white uppercase">Secure Payment</div>
-                <div className="text-[10px] text-neutral-400">100% secure payment</div>
+                <div className="text-[11px] font-bold text-[#0F1B2D] uppercase">Secure Payment</div>
+                <div className="text-[10px] text-[#0F1B2D]/60">100% secure payment</div>
               </div>
             </div>
           </div>

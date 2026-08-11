@@ -109,14 +109,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D]">
       {/* Header Panel */}
-      <section className="relative border-b border-neutral-800/80 bg-neutral-900/40 py-8 backdrop-blur-sm">
+      <section className="relative border-b border-gray-200 bg-gradient-to-r from-[#B8FF00]/20 via-[#5B8DEF]/10 to-[#F4F8FC] py-8 backdrop-blur-sm">
         <div className="container mx-auto px-4 max-w-7xl">
-          <h1 className="text-3xl font-black tracking-tight text-white uppercase">
+          <h1 className="text-3xl font-black tracking-tight text-[#0F1B2D] uppercase">
             Shop
           </h1>
-          <p className="mt-1 text-xs text-neutral-400">
+          <p className="mt-1 text-xs text-[#0F1B2D]/50">
             Find the best sportswear & equipment for every move.
           </p>
         </div>
@@ -127,7 +127,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* Filter Sidebar */}
           <aside className="lg:col-span-1">
-            <Suspense fallback={<div className="h-96 bg-neutral-900/50 animate-pulse rounded-xl border border-neutral-800" />}>
+            <Suspense fallback={<div className="h-96 bg-white animate-pulse rounded-xl border border-gray-200" />}>
               <ShopFilters
                 categories={categories}
                 brands={brands}
@@ -144,14 +144,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           {/* Product Grid & Top Bar */}
           <section className="lg:col-span-3">
             {/* Top Bar matching mockup */}
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 p-3.5 backdrop-blur-md text-xs text-neutral-400">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm text-xs text-[#0F1B2D]/60">
               <div>
-                Showing <strong className="text-white">1-{products.length}</strong> of{" "}
-                <strong className="text-[#CCFF00]">{totalCount}</strong> results
+                Showing <strong className="text-[#0F1B2D]">1-{products.length}</strong> of{" "}
+                <strong className="text-[#0F1B2D]">{totalCount}</strong> results
               </div>
               <div className="flex items-center gap-4">
-                <span className="font-medium text-neutral-400">Sort by: <strong className="text-white">Featured</strong></span>
-                <span className="font-medium text-neutral-400">Show: <strong className="text-white">12</strong></span>
+                <span className="font-medium text-[#0F1B2D]/60">Sort by: <strong className="text-[#0F1B2D]">Featured</strong></span>
+                <span className="font-medium text-[#0F1B2D]/60">Show: <strong className="text-[#0F1B2D]">12</strong></span>
               </div>
             </div>
 
@@ -163,9 +163,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-800 p-12 text-center">
-                <h3 className="text-sm font-bold text-neutral-300">No products found</h3>
-                <p className="mt-1 text-xs text-neutral-500">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 p-12 text-center bg-white">
+                <h3 className="text-sm font-bold text-[#0F1B2D]">No products found</h3>
+                <p className="mt-1 text-xs text-[#0F1B2D]/50">
                   Try clearing your filters or searching for another term.
                 </p>
               </div>

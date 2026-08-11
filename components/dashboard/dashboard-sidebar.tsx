@@ -57,20 +57,20 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
   return (
     <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
       {/* Profile Mini-Card */}
-      <div className="rounded-xl border border-neutral-800 bg-neutral-900/80 p-4 backdrop-blur-md flex items-center gap-3">
-        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#CCFF00] font-black text-black text-sm shadow-md shadow-[#CCFF00]/10">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm flex items-center gap-3">
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#B8FF00] font-black text-[#0F1B2D] text-sm shadow-sm">
           {getInitials(user.name)}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-bold text-sm text-white">{user.name || "Customer"}</h3>
-          <p className="truncate text-[11px] text-neutral-400">{user.email}</p>
+          <h3 className="truncate font-bold text-sm text-[#0F1B2D]">{user.name || "Customer"}</h3>
+          <p className="truncate text-[11px] text-[#0F1B2D]/40">{user.email}</p>
         </div>
       </div>
 
       {/* Main Navigation Group */}
-      <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-3 backdrop-blur-md space-y-4">
+      <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm space-y-4">
         <div>
-          <div className="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-neutral-500">
+          <div className="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-[#0F1B2D]/30">
             Main Menu
           </div>
           <nav className="space-y-1">
@@ -82,13 +82,13 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold transition-all ${
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
                     isActive
-                      ? "bg-[#CCFF00] text-black shadow-md shadow-[#CCFF00]/10"
-                      : "text-neutral-400 hover:bg-neutral-800/80 hover:text-white"
+                      ? "bg-[#B8FF00]/10 text-[#0F1B2D]"
+                      : "text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D]"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className={`h-4 w-4 ${isActive ? "text-[#B8FF00]" : "text-[#0F1B2D]/40"}`} />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -97,8 +97,8 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
         </div>
 
         {/* Account Navigation Group */}
-        <div className="border-t border-neutral-800/80 pt-3">
-          <div className="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-neutral-500">
+        <div className="border-t border-gray-100 pt-3">
+          <div className="px-3 pb-2 text-[10px] font-black uppercase tracking-wider text-[#0F1B2D]/30">
             Account Settings
           </div>
           <nav className="space-y-1">
@@ -110,13 +110,13 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold transition-all ${
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
                     isActive
-                      ? "bg-[#CCFF00] text-black shadow-md shadow-[#CCFF00]/10"
-                      : "text-neutral-400 hover:bg-neutral-800/80 hover:text-white"
+                      ? "bg-[#B8FF00]/10 text-[#0F1B2D]"
+                      : "text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D]"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className={`h-4 w-4 ${isActive ? "text-[#B8FF00]" : "text-[#0F1B2D]/40"}`} />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -124,9 +124,9 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
 
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-950/30 hover:text-rose-300 transition-all"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-bold text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-all"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4 text-rose-500/60" />
               <span>Logout</span>
             </button>
           </nav>

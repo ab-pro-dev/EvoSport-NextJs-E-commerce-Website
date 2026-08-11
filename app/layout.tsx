@@ -36,22 +36,24 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-neutral-950 text-white selection:bg-[#CCFF00] selection:text-black">
-        <NextTopLoader color="#CCFF00" showSpinner={false} height={3} crawl={true} />
+      <body className="min-h-full flex flex-col bg-[#F4F8FC] text-[#0F1B2D] selection:bg-[#B8FF00] selection:text-[#0F1B2D]">
+        <NextTopLoader color="#B8FF00" showSpinner={false} height={3} crawl={true} />
         <SessionProvider>
           <SmoothScrollProvider>
             <SiteHeader />
             {children}
             <Toaster
               position="top-right"
-              theme="dark"
+              theme="light"
               toastOptions={{
                 style: {
-                  background: "#0a0a0a",
-                  color: "#ffffff",
-                  border: "1px solid #262626",
+                  background: "#ffffff",
+                  color: "#0F1B2D",
+                  border: "1px solid #e5e7eb",
                   fontSize: "13px",
                   fontWeight: "600",
+                  borderRadius: "16px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)",
                 },
               }}
             />

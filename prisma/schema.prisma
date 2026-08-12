@@ -387,3 +387,23 @@ model Setting {
 
   @@index([key])
 }
+
+model HomepageBanner {
+  id                 String    @id @default(cuid())
+  headline           String
+  subtext            String
+  badgeText          String?
+  ctaText            String
+  ctaLink            String
+  backgroundImageUrl String?
+  order              Int       @default(0)
+  active             Boolean   @default(true)
+  startsAt           DateTime?
+  endsAt             DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([active])
+  @@index([order])
+}
+

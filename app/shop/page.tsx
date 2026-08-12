@@ -9,6 +9,7 @@ import { ShopPagination } from "@/components/shop/shop-pagination";
 
 interface ShopPageProps {
   searchParams: Promise<{
+    gender?: string;
     category?: string;
     brand?: string;
     minPrice?: string;
@@ -21,12 +22,17 @@ interface ShopPageProps {
 
 export async function generateMetadata({ searchParams }: ShopPageProps): Promise<Metadata> {
   const resolvedParams = await searchParams;
+  const genderSlug = resolvedParams.gender || "";
   const categorySlug = resolvedParams.category || "";
   const brandSlug = resolvedParams.brand || "";
   const search = resolvedParams.search || "";
 
   let title = "Shop All Sportswear & Equipment | EvoSport";
-  if (categorySlug) {
+  if (genderSlug && categorySlug) {
+    title = `${genderSlug.toUpperCase()} ${categorySlug.toUpperCase()} | EvoSport`;
+  } else if (genderSlug) {
+    title = `${genderSlug.charAt(0).toUpperCase() + genderSlug.slice(1)}'s Sportswear & Gear | EvoSport`;
+  } else if (categorySlug) {
     const category = await prisma.category.findUnique({ where: { slug: categorySlug } });
     if (category) title = `${category.name} Sportswear & Gear | EvoSport`;
   } else if (brandSlug) {
@@ -50,6 +56,7 @@ export const dynamic = "force-dynamic";
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const resolvedParams = await searchParams;
 
+  const genderSlug = resolvedParams.gender || "";
   const categorySlug = resolvedParams.category || "";
   const brandSlug = resolvedParams.brand || "";
   const minPrice = resolvedParams.minPrice ? parseFloat(resolvedParams.minPrice) : undefined;
@@ -64,8 +71,35 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     status: "ACTIVE",
   };
 
-  if (categorySlug) {
-    where.category = { slug: categorySlug };
+  const categoryConditions: Prisma.ProductWhereInput[] = [];
+
+  if (genderSlug && genderSlug !== "all") {
+    categoryConditions.push({
+      category: {
+        OR: [
+          { slug: genderSlug },
+          { parent: { slug: genderSlug } },
+        ],
+      },
+    });
+  }
+
+  if (categorySlug && categorySlug !== "all") {
+    categoryConditions.push({
+      category: {
+        OR: [
+          { id: categorySlug },
+          { slug: categorySlug },
+          { slug: { endsWith: `-${categorySlug}` } },
+          { parent: { slug: categorySlug } },
+          ...(categorySlug === "footwear" ? [{ slug: { endsWith: "-running-shoes" } }] : []),
+        ],
+      },
+    });
+  }
+
+  if (categoryConditions.length > 0) {
+    where.AND = categoryConditions;
   }
 
   if (brandSlug) {
@@ -99,14 +133,17 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     take: limit,
     include: {
       brand: true,
-      category: true,
+      category: {
+        include: {
+          parent: true,
+        },
+      },
       images: { orderBy: { position: "asc" } },
       variants: true,
     },
   });
 
   const totalCount = await prisma.product.count({ where });
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
   const brands = await prisma.brand.findMany({ orderBy: { name: "asc" } });
 
   const products = rawProducts.map((p) => ({
@@ -142,7 +179,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             {/* Left Content */}
             <div className="w-full md:w-1/2 py-6 md:py-10 z-10">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#0F1B2D] uppercase font-sans">
-                Shop
+                {genderSlug ? `${genderSlug.toUpperCase()} SHOP` : "Shop"}
               </h1>
               <p className="mt-2 text-xs sm:text-sm md:text-base text-[#0F1B2D]/60 max-w-md font-medium leading-relaxed">
                 Find the best sportswear & equipment for every move.
@@ -172,8 +209,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <aside className="lg:col-span-1">
             <Suspense fallback={<div className="h-96 bg-white animate-pulse rounded-xl border border-gray-200" />}>
               <ShopFilters
-                categories={categories}
                 brands={brands}
+                selectedGender={genderSlug}
                 selectedCategory={categorySlug}
                 selectedBrand={brandSlug}
                 minPrice={minPrice}
@@ -189,12 +226,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             {/* Top Bar matching mockup */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm text-xs text-[#0F1B2D]/60">
               <div>
-                Showing <strong className="text-[#0F1B2D]">1-{products.length}</strong> of{" "}
+                Showing <strong className="text-[#0F1B2D]">{products.length > 0 ? "1-" + products.length : "0"}</strong> of{" "}
                 <strong className="text-[#0F1B2D]">{totalCount}</strong> results
               </div>
               <div className="flex items-center gap-4">
                 <span className="font-medium text-[#0F1B2D]/60">Sort by: <strong className="text-[#0F1B2D]">Featured</strong></span>
-                <span className="font-medium text-[#0F1B2D]/60">Show: <strong className="text-[#0F1B2D]">12</strong></span>
+                <span className="font-medium text-[#0F1B2D]/60">Show: <strong className="text-[#0F1B2D]">8</strong></span>
               </div>
             </div>
 
@@ -206,10 +243,19 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 p-12 text-center bg-white">
-                <h3 className="text-sm font-bold text-[#0F1B2D]">No products found</h3>
-                <p className="mt-1 text-xs text-[#0F1B2D]/50">
-                  Try clearing your filters or searching for another term.
+              <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 p-12 text-center bg-white shadow-sm">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F4F8FC] border border-gray-200 text-[#0F1B2D]/40 mb-4">
+                  <Image
+                    src="/images/shop_runner_hero.jpg"
+                    alt="Empty"
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover opacity-50 grayscale"
+                  />
+                </div>
+                <h3 className="text-base font-black uppercase tracking-tight text-[#0F1B2D]">No products found</h3>
+                <p className="mt-1.5 text-xs text-[#0F1B2D]/50 max-w-sm">
+                  We don&apos;t have any products matching your selected filters right now. New gear is arriving soon!
                 </p>
               </div>
             )}

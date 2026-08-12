@@ -7,6 +7,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
 
     const category = searchParams.get("category");
+    const gender = searchParams.get("gender");
     const brand = searchParams.get("brand");
     const minPriceParam = searchParams.get("minPrice");
     const maxPriceParam = searchParams.get("maxPrice");
@@ -22,10 +23,34 @@ export async function GET(req: Request) {
       status: "ACTIVE",
     };
 
-    if (category) {
-      where.category = {
-        OR: [{ id: category }, { slug: category }],
-      };
+    const categoryConditions: Prisma.ProductWhereInput[] = [];
+
+    if (gender && gender !== "all") {
+      categoryConditions.push({
+        category: {
+          OR: [
+            { slug: gender },
+            { parent: { slug: gender } },
+          ],
+        },
+      });
+    }
+
+    if (category && category !== "all") {
+      categoryConditions.push({
+        category: {
+          OR: [
+            { id: category },
+            { slug: category },
+            { slug: { endsWith: `-${category}` } },
+            { parent: { slug: category } },
+          ],
+        },
+      });
+    }
+
+    if (categoryConditions.length > 0) {
+      where.AND = categoryConditions;
     }
 
     if (brand) {
@@ -62,7 +87,11 @@ export async function GET(req: Request) {
         take: limit,
         include: {
           brand: true,
-          category: true,
+          category: {
+            include: {
+              parent: true,
+            },
+          },
           images: {
             orderBy: { position: "asc" },
           },

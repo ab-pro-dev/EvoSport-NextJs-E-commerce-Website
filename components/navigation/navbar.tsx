@@ -11,6 +11,14 @@ interface NavbarProps {
   cartItemCount?: number;
 }
 
+const NAV_LINKS = [
+  { href: "/shop", label: "Shop All" },
+  { href: "/shop?gender=men", label: "Men" },
+  { href: "/shop?gender=women", label: "Women" },
+  { href: "/shop?gender=kids", label: "Kids" },
+  { href: "/shop?category=accessories", label: "Accessories" },
+];
+
 export function Navbar({ cartItemCount = 0 }: NavbarProps) {
   const { data: session } = useSession();
   const [itemCount, setItemCount] = useState(cartItemCount);
@@ -64,18 +72,15 @@ export function Navbar({ cartItemCount = 0 }: NavbarProps) {
 
         {/* Center Nav Links - Desktop */}
         <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/70">
-          <Link href="/shop" className="hover:text-[#0F1B2D] transition-colors py-1">
-            Shop All
-          </Link>
-          <Link href="/shop?category=footwear" className="hover:text-[#0F1B2D] transition-colors py-1">
-            Footwear
-          </Link>
-          <Link href="/shop?category=apparel" className="hover:text-[#0F1B2D] transition-colors py-1">
-            Apparel
-          </Link>
-          <Link href="/shop?category=accessories" className="hover:text-[#0F1B2D] transition-colors py-1">
-            Accessories
-          </Link>
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="hover:text-[#0F1B2D] transition-colors py-1 hover:border-b-2 hover:border-[#B8FF00]"
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
         {/* Right Action Controls */}
@@ -154,12 +159,7 @@ export function Navbar({ cartItemCount = 0 }: NavbarProps) {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white">
           <nav className="container mx-auto max-w-7xl px-4 py-4 space-y-1">
-            {[
-              { href: "/shop", label: "Shop All" },
-              { href: "/shop?category=footwear", label: "Footwear" },
-              { href: "/shop?category=apparel", label: "Apparel" },
-              { href: "/shop?category=accessories", label: "Accessories" },
-            ].map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

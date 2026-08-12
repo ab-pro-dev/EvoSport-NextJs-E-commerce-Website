@@ -7,15 +7,38 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface ShopFiltersProps {
-  categories: { id: string; name: string; slug: string }[];
   brands: { id: string; name: string; slug: string }[];
+  selectedGender?: string;
+  selectedCategory?: string;
+  selectedBrand?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: string;
+  search?: string;
 }
 
-export function ShopFilters({ categories, brands }: ShopFiltersProps) {
+const GENDER_OPTIONS = [
+  { label: "All Departments", value: "" },
+  { label: "Men", value: "men" },
+  { label: "Women", value: "women" },
+  { label: "Kids", value: "kids" },
+  { label: "Unisex", value: "unisex" },
+];
+
+const CATEGORY_OPTIONS = [
+  { label: "All Product Types", value: "" },
+  { label: "Footwear / Running Shoes", value: "running-shoes" },
+  { label: "Apparel", value: "apparel" },
+  { label: "Gym Gear", value: "gym-gear" },
+  { label: "Accessories", value: "accessories" },
+];
+
+export function ShopFilters({ brands }: ShopFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const currentGender = searchParams.get("gender") || "";
   const currentCategory = searchParams.get("category") || "";
   const currentBrand = searchParams.get("brand") || "";
   const currentMinPrice = searchParams.get("minPrice") || "";
@@ -108,37 +131,49 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
         </div>
       </div>
 
-      {/* Categories */}
+      {/* Gender / Department Filter */}
       <div className="border-t border-gray-100 pt-5">
         <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">
-          Categories
+          Gender / Department
         </h4>
         <div className="space-y-1.5">
-          <button
-            onClick={() => updateFilter("category", null)}
-            className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-              currentCategory === ""
-                ? "bg-[#B8FF00]/10 text-[#0F1B2D] font-bold"
-                : "text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D]"
-            }`}
-          >
-            <span>All Categories</span>
-            {currentCategory === "" && <Check className="h-3.5 w-3.5 text-[#B8FF00]" />}
-          </button>
-          {categories.map((cat) => (
+          {GENDER_OPTIONS.map((g) => (
             <button
-              key={cat.id}
-              onClick={() =>
-                updateFilter("category", currentCategory === cat.slug ? null : cat.slug)
-              }
-              className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                currentCategory === cat.slug
-                  ? "bg-[#B8FF00]/10 text-[#0F1B2D] font-bold"
-                  : "text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D]"
+              key={g.value}
+              onClick={() => updateFilter("gender", currentGender === g.value ? null : g.value || null)}
+              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-colors ${
+                currentGender === g.value
+                  ? "bg-[#B8FF00]/15 text-[#0F1B2D] font-bold"
+                  : "text-[#0F1B2D]/60 hover:bg-[#F4F8FC] hover:text-[#0F1B2D]"
               }`}
             >
-              <span>{cat.name}</span>
-              {currentCategory === cat.slug && <Check className="h-3.5 w-3.5 text-[#B8FF00]" />}
+              <span>{g.label}</span>
+              {currentGender === g.value && <Check className="h-3.5 w-3.5 text-[#0F1B2D]" />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Product Type / Category */}
+      <div className="border-t border-gray-100 pt-5">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">
+          Product Type
+        </h4>
+        <div className="space-y-1.5">
+          {CATEGORY_OPTIONS.map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() =>
+                updateFilter("category", currentCategory === cat.value ? null : cat.value || null)
+              }
+              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-colors ${
+                currentCategory === cat.value
+                  ? "bg-[#B8FF00]/15 text-[#0F1B2D] font-bold"
+                  : "text-[#0F1B2D]/60 hover:bg-[#F4F8FC] hover:text-[#0F1B2D]"
+              }`}
+            >
+              <span>{cat.label}</span>
+              {currentCategory === cat.value && <Check className="h-3.5 w-3.5 text-[#0F1B2D]" />}
             </button>
           ))}
         </div>
@@ -187,14 +222,14 @@ export function ShopFilters({ categories, brands }: ShopFiltersProps) {
               onClick={() =>
                 updateFilter("brand", currentBrand === b.slug ? null : b.slug)
               }
-              className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-colors ${
                 currentBrand === b.slug
-                  ? "bg-[#B8FF00]/10 text-[#0F1B2D] font-bold"
-                  : "text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D]"
+                  ? "bg-[#B8FF00]/15 text-[#0F1B2D] font-bold"
+                  : "text-[#0F1B2D]/60 hover:bg-[#F4F8FC] hover:text-[#0F1B2D]"
               }`}
             >
               <span>{b.name}</span>
-              {currentBrand === b.slug && <Check className="h-3.5 w-3.5 text-[#B8FF00]" />}
+              {currentBrand === b.slug && <Check className="h-3.5 w-3.5 text-[#0F1B2D]" />}
             </button>
           ))}
         </div>

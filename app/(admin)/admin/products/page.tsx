@@ -24,18 +24,35 @@ export default async function AdminProductsPage() {
     redirect("/admin-login");
   }
 
-  const [productsRaw, brands, categories] = await Promise.all([
+  const [productsRaw, brands, categoriesRaw] = await Promise.all([
     prisma.product.findMany({
       orderBy: { createdAt: "desc" },
       include: {
         brand: { select: { id: true, name: true } },
-        category: { select: { id: true, name: true } },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            parentId: true,
+            parent: { select: { id: true, name: true, slug: true } },
+          },
+        },
         images: { orderBy: { position: "asc" } },
         variants: true,
       },
     }),
     prisma.brand.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        parentId: true,
+        parent: { select: { id: true, name: true, slug: true } },
+      },
+      orderBy: { name: "asc" },
+    }),
   ]);
 
   const formattedProducts = productsRaw.map((p) => {
@@ -62,7 +79,7 @@ export default async function AdminProductsPage() {
     <ProductsListView
       initialProducts={formattedProducts}
       brands={brands}
-      categories={categories}
+      categories={categoriesRaw}
     />
   );
 }

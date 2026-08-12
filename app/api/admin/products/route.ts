@@ -40,7 +40,7 @@ export async function GET(req: Request) {
         orderBy: { createdAt: "desc" },
         include: {
           brand: { select: { id: true, name: true } },
-          category: { select: { id: true, name: true } },
+          category: { select: { id: true, name: true, slug: true, parentId: true } },
           images: { orderBy: { position: "asc" } },
           variants: true,
         },
@@ -83,7 +83,7 @@ export async function GET(req: Request) {
   }
 }
 
-// POST /api/admin/products — Create new product
+// POST /api/admin/products — Create new product with image attachment support
 export async function POST(req: Request) {
   try {
     const authResult = await verifyAdmin();
@@ -92,7 +92,18 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, slug, description, brandId, categoryId, basePrice, compareAtPrice, status } = body || {};
+    const {
+      name,
+      slug,
+      description,
+      brandId,
+      categoryId,
+      basePrice,
+      compareAtPrice,
+      status,
+      imageUrl,
+      images,
+    } = body || {};
 
     if (!name || !slug || !brandId || !categoryId || basePrice === undefined) {
       return NextResponse.json(
@@ -113,6 +124,19 @@ export async function POST(req: Request) {
       );
     }
 
+    // Aggregate images
+    const imageList: string[] = [];
+    if (imageUrl && typeof imageUrl === "string" && imageUrl.trim()) {
+      imageList.push(imageUrl.trim());
+    }
+    if (Array.isArray(images)) {
+      images.forEach((img) => {
+        if (typeof img === "string" && img.trim() && !imageList.includes(img.trim())) {
+          imageList.push(img.trim());
+        }
+      });
+    }
+
     const newProduct = await prisma.product.create({
       data: {
         name: name.trim(),
@@ -123,11 +147,21 @@ export async function POST(req: Request) {
         basePrice: Number(basePrice),
         compareAtPrice: compareAtPrice ? Number(compareAtPrice) : null,
         status: status || "ACTIVE",
+        images:
+          imageList.length > 0
+            ? {
+                create: imageList.map((url, index) => ({
+                  url,
+                  altText: name.trim(),
+                  position: index,
+                })),
+              }
+            : undefined,
       },
       include: {
         brand: true,
         category: true,
-        images: true,
+        images: { orderBy: { position: "asc" } },
         variants: true,
       },
     });

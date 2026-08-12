@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Edit2, Trash2, Package, Search, Filter, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Package, Search, Filter, AlertCircle, Upload, Link as LinkIcon, X, Image as ImageIcon, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,10 +24,18 @@ interface ProductItem {
   createdAt: string;
 }
 
+interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+  parent?: { id: string; name: string; slug: string } | null;
+}
+
 interface ProductsListViewProps {
   initialProducts: ProductItem[];
   brands: { id: string; name: string }[];
-  categories: { id: string; name: string }[];
+  categories: CategoryItem[];
 }
 
 export function ProductsListView({ initialProducts, brands, categories }: ProductsListViewProps) {
@@ -38,16 +46,36 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Group categories into Parents (Genders) and Subcategories
+  const parentCategories = useMemo(() => {
+    return categories.filter((c) => !c.parentId);
+  }, [categories]);
+
+  const defaultGenderId = parentCategories[0]?.id || "";
+  const [selectedGenderId, setSelectedGenderId] = useState(defaultGenderId);
+
+  // Subcategories for the selected gender
+  const availableSubcategories = useMemo(() => {
+    return categories.filter((c) => c.parentId === selectedGenderId);
+  }, [categories, selectedGenderId]);
+
   // Form State for Add Product
   const [newProductName, setNewProductName] = useState("");
   const [newProductSlug, setNewProductSlug] = useState("");
   const [newProductDesc, setNewProductDesc] = useState("");
   const [newBrandId, setNewBrandId] = useState(brands[0]?.id || "");
-  const [newCategoryId, setNewCategoryId] = useState(categories[0]?.id || "");
+  const [newCategoryId, setNewCategoryId] = useState(availableSubcategories[0]?.id || "");
   const [newBasePrice, setNewBasePrice] = useState("");
   const [newComparePrice, setNewComparePrice] = useState("");
   const [newStatus, setNewStatus] = useState("ACTIVE");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Image Upload State
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
@@ -68,11 +96,74 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
     );
   };
 
+  const handleGenderChange = (genderId: string) => {
+    setSelectedGenderId(genderId);
+    const subcats = categories.filter((c) => c.parentId === genderId);
+    if (subcats.length > 0) {
+      setNewCategoryId(subcats[0].id);
+    } else {
+      setNewCategoryId(genderId);
+    }
+  };
+
+  // Image Upload via File
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploadingImage(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/admin/media/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "File upload failed.");
+        return;
+      }
+
+      if (data.secure_url) {
+        setImageUrls((prev) => [...prev, data.secure_url]);
+        toast.success("Image uploaded successfully!");
+      }
+    } catch (err) {
+      console.error("Image upload error:", err);
+      toast.error("Network error uploading image.");
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  // Add Image via Direct URL
+  const handleAddImageUrl = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!imageUrlInput.trim()) return;
+    const url = imageUrlInput.trim();
+    if (!imageUrls.includes(url)) {
+      setImageUrls((prev) => [...prev, url]);
+      setImageUrlInput("");
+      toast.success("Image URL added!");
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setImageUrls((prev) => prev.filter((_, i) => i !== indexToRemove));
+  };
+
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
       setErrorMsg(null);
+
+      // Fallback category if none selected
+      const targetCatId = newCategoryId || availableSubcategories[0]?.id || selectedGenderId;
 
       const res = await fetch("/api/admin/products", {
         method: "POST",
@@ -82,10 +173,11 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
           slug: newProductSlug,
           description: newProductDesc,
           brandId: newBrandId,
-          categoryId: newCategoryId,
+          categoryId: targetCatId,
           basePrice: parseFloat(newBasePrice),
           compareAtPrice: newComparePrice ? parseFloat(newComparePrice) : null,
           status: newStatus,
+          images: imageUrls,
         }),
       });
 
@@ -105,14 +197,13 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
         id: data.product.id,
         name: data.product.name,
         slug: data.product.slug,
-        description: data.product.description,
         basePrice: Number(data.product.basePrice),
         compareAtPrice: data.product.compareAtPrice ? Number(data.product.compareAtPrice) : null,
         status: data.product.status,
         brand: data.product.brand,
         category: data.product.category,
-        image: null,
-        imagesCount: 0,
+        image: data.product.images?.[0]?.url || imageUrls[0] || null,
+        imagesCount: data.product.images?.length || imageUrls.length,
         variantsCount: 0,
         totalStock: 0,
         createdAt: data.product.createdAt,
@@ -125,6 +216,8 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
       setNewProductDesc("");
       setNewBasePrice("");
       setNewComparePrice("");
+      setImageUrls([]);
+      setImageUrlInput("");
     } catch (err: any) {
       console.error("Error creating product:", err);
       const msg = err?.message || "Network error. Please try again.";
@@ -179,7 +272,12 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
         </div>
 
         <Button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => {
+            setIsAddModalOpen(true);
+            if (parentCategories.length > 0) {
+              handleGenderChange(parentCategories[0].id);
+            }
+          }}
           className="bg-rose-600 text-white font-black uppercase text-xs tracking-wider hover:bg-rose-500 rounded-lg h-10 px-5"
         >
           <Plus className="mr-1.5 h-4 w-4" />
@@ -318,10 +416,13 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
 
       {/* Add Product Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-900 p-6 space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-2xl border border-neutral-800 bg-neutral-900 p-6 space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="border-b border-neutral-800 pb-3 flex items-center justify-between">
-              <h3 className="text-base font-black uppercase text-white">ADD NEW PRODUCT</h3>
+              <h3 className="text-base font-black uppercase text-white flex items-center gap-2">
+                <Package className="h-5 w-5 text-rose-500" />
+                ADD NEW PRODUCT
+              </h3>
               <button
                 onClick={() => setIsAddModalOpen(false)}
                 className="text-neutral-400 hover:text-white text-xs font-bold"
@@ -338,58 +439,185 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
             )}
 
             <form onSubmit={handleAddProduct} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Product Name *</label>
-                <Input
-                  required
-                  placeholder="Apex Carbon Running Shoe"
-                  value={newProductName}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">URL Slug *</label>
-                <Input
-                  required
-                  placeholder="apex-carbon-running-shoe"
-                  value={newProductSlug}
-                  onChange={(e) => setNewProductSlug(e.target.value)}
-                  className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white font-mono"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Brand *</label>
-                  <select
-                    value={newBrandId}
-                    onChange={(e) => setNewBrandId(e.target.value)}
-                    className="mt-1 w-full bg-neutral-950 border border-neutral-800 text-xs text-white rounded-lg p-2.5"
-                  >
-                    {brands.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Product Name *</label>
+                  <Input
+                    required
+                    placeholder="e.g. Apex Carbon Speed Shoe"
+                    value={newProductName}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white"
+                  />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Category *</label>
-                  <select
-                    value={newCategoryId}
-                    onChange={(e) => setNewCategoryId(e.target.value)}
-                    className="mt-1 w-full bg-neutral-950 border border-neutral-800 text-xs text-white rounded-lg p-2.5"
-                  >
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">URL Slug *</label>
+                  <Input
+                    required
+                    placeholder="apex-carbon-speed-shoe"
+                    value={newProductSlug}
+                    onChange={(e) => setNewProductSlug(e.target.value)}
+                    className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white font-mono"
+                  />
                 </div>
+              </div>
+
+              {/* Brand Selector */}
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Brand *</label>
+                <select
+                  value={newBrandId}
+                  onChange={(e) => setNewBrandId(e.target.value)}
+                  className="mt-1 w-full bg-neutral-950 border border-neutral-800 text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
+                >
+                  {brands.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* TWO-STEP GENDER + CATEGORY PICKER */}
+              <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 space-y-3">
+                <div className="text-[11px] font-black uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                  <span>Category & Department Selection</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Step 1: Gender Selector */}
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                      1. Gender / Department *
+                    </label>
+                    <select
+                      value={selectedGenderId}
+                      onChange={(e) => handleGenderChange(e.target.value)}
+                      className="mt-1 w-full bg-neutral-900 border border-neutral-700 text-xs text-white rounded-lg p-2.5 font-bold focus:outline-none focus:border-rose-500"
+                    >
+                      {parentCategories.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Step 2: Specific Subcategory within Gender */}
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                      2. Subcategory *
+                    </label>
+                    <select
+                      value={newCategoryId}
+                      onChange={(e) => setNewCategoryId(e.target.value)}
+                      className="mt-1 w-full bg-neutral-900 border border-neutral-700 text-xs text-white rounded-lg p-2.5 font-bold focus:outline-none focus:border-rose-500"
+                    >
+                      {availableSubcategories.length > 0 ? (
+                        availableSubcategories.map((sub) => (
+                          <option key={sub.id} value={sub.id}>
+                            {sub.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value={selectedGenderId}>General ({parentCategories.find(p => p.id === selectedGenderId)?.name})</option>
+                      )}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* IMAGE UPLOAD SECTION (DEVICE UPLOAD + URL PASTE) */}
+              <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                    <ImageIcon className="h-3.5 w-3.5" />
+                    Product Images
+                  </span>
+                  <div className="flex rounded-lg border border-neutral-800 bg-neutral-900 p-0.5 text-[10px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMode("upload")}
+                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                        imageInputMode === "upload" ? "bg-rose-600 text-white" : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMode("url")}
+                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                        imageInputMode === "url" ? "bg-rose-600 text-white" : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      Paste URL
+                    </button>
+                  </div>
+                </div>
+
+                {imageInputMode === "upload" ? (
+                  <div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="product-image-file-input"
+                    />
+                    <label
+                      htmlFor="product-image-file-input"
+                      className="flex flex-col items-center justify-center p-4 border border-dashed border-neutral-800 rounded-lg bg-neutral-900/50 hover:bg-neutral-900 hover:border-neutral-700 cursor-pointer transition-all text-center"
+                    >
+                      <Upload className="h-5 w-5 text-neutral-400 mb-1" />
+                      <span className="text-xs font-bold text-white">
+                        {isUploadingImage ? "Uploading to Cloudinary..." : "Click to browse and upload image"}
+                      </span>
+                      <span className="text-[10px] text-neutral-500 mt-0.5">PNG, JPG, WEBP up to 10MB</span>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="https://images.unsplash.com/photo-..."
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      className="bg-neutral-900 border-neutral-800 text-xs text-white flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      className="bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold px-4"
+                    >
+                      Add URL
+                    </Button>
+                  </div>
+                )}
+
+                {/* Thumbnails of Added Images */}
+                {imageUrls.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-neutral-800/80">
+                    {imageUrls.map((url, idx) => (
+                      <div key={idx} className="relative h-16 w-16 rounded-lg overflow-hidden border border-neutral-700 bg-neutral-900 group">
+                        <Image src={url} alt={`Preview ${idx + 1}`} fill className="object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(idx)}
+                          className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-rose-400 hover:text-rose-300 transition-opacity"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                        {idx === 0 && (
+                          <span className="absolute bottom-0 inset-x-0 bg-rose-600/90 text-white text-[8px] font-black uppercase text-center py-0.5">
+                            Primary
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -424,7 +652,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  className="mt-1 w-full bg-neutral-950 border border-neutral-800 text-xs text-white rounded-lg p-2.5"
+                  className="mt-1 w-full bg-neutral-950 border border-neutral-800 text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
                 >
                   <option value="ACTIVE">ACTIVE</option>
                   <option value="DRAFT">DRAFT</option>
@@ -443,19 +671,19 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                 />
               </div>
 
-              <div className="pt-2 flex justify-end gap-3">
+              <div className="pt-2 flex justify-end gap-3 border-t border-neutral-800">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="border-neutral-800 text-xs text-neutral-400 font-bold"
+                  className="border-neutral-800 text-xs text-neutral-400 font-bold hover:bg-neutral-800 hover:text-white"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-rose-600 text-white font-black uppercase text-xs hover:bg-rose-500 rounded-lg px-6"
+                  className="bg-rose-600 text-white font-black uppercase text-xs hover:bg-rose-500 rounded-lg px-6 h-10"
                 >
                   {isSubmitting ? "Creating..." : "Create Product"}
                 </Button>

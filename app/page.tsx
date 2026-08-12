@@ -52,12 +52,12 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D] selection:bg-[#B8FF00] selection:text-[#0F1B2D]">
+    <div className="min-h-screen bg-[#F4F8FC] dark:bg-[#090E17] text-[#0F1B2D] dark:text-[#F1F5F9] transition-colors duration-200">
       {/* Hero Section with Action Athlete & Dynamic Gradient */}
-      <section className="relative overflow-hidden border-b border-gray-200/80 bg-gradient-to-b from-[#EEF8F1] via-[#F4F8FC] to-white py-12 lg:py-20">
+      <section className="relative overflow-hidden border-b border-gray-200/80 dark:border-slate-800/80 bg-gradient-to-b from-[#EEF8F1] via-[#F4F8FC] to-white dark:from-[#0B182B] dark:via-[#090E17] dark:to-[#090E17] py-12 lg:py-20">
         {/* Soft Ambient Gradients & Glow Circles */}
-        <div className="absolute top-1/4 left-10 h-96 w-96 rounded-full bg-[#B8FF00]/15 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/3 right-10 h-96 w-96 rounded-full bg-[#5B8DEF]/15 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-10 h-96 w-96 rounded-full bg-[#B8FF00]/15 dark:bg-[#B8FF00]/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 right-10 h-96 w-96 rounded-full bg-[#5B8DEF]/15 dark:bg-[#5B8DEF]/10 blur-3xl pointer-events-none" />
 
         {/* Decorative Speed Lines */}
         <div className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none opacity-20 hidden lg:block">
@@ -69,16 +69,16 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Content Column */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#B8FF00] bg-[#B8FF00]/20 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-[#0F1B2D]">
-                <Flame className="h-4 w-4 text-[#0F1B2D]" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#B8FF00] bg-[#B8FF00]/20 dark:bg-[#B8FF00]/15 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-[#0F1B2D] dark:text-[#B8FF00]">
+                <Flame className="h-4 w-4 text-[#0F1B2D] dark:text-[#B8FF00]" />
                 <span>NEW 2026 PRO COLLECTION RELEASED</span>
               </div>
 
-              <h1 className="text-4xl sm:text-6xl lg:text-6xl xl:text-7xl font-black uppercase tracking-tight text-[#0F1B2D] leading-[0.95]">
-                ENGINEER YOUR <span className="text-[#0F1B2D] inline-block underline decoration-[#B8FF00] decoration-8 underline-offset-4">LIMITLESS</span> POTENTIAL
+              <h1 className="text-4xl sm:text-6xl lg:text-6xl xl:text-7xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white leading-[0.95]">
+                ENGINEER YOUR <span className="text-[#0F1B2D] dark:text-white inline-block underline decoration-[#B8FF00] decoration-8 underline-offset-4">LIMITLESS</span> POTENTIAL
               </h1>
 
-              <p className="text-sm sm:text-base text-[#0F1B2D]/60 max-w-xl leading-relaxed font-medium">
+              <p className="text-sm sm:text-base text-[#0F1B2D]/60 dark:text-slate-300 max-w-xl leading-relaxed font-medium">
                 Discover precision carbon running shoes, thermal compression apparel, and endurance hydration systems designed for professional athletes.
               </p>
 
@@ -92,14 +92,14 @@ export default async function HomePage() {
                 </Link>
 
                 <Link href="/shop?category=footwear">
-                  <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-8 py-4 text-xs font-bold uppercase tracking-wider text-[#0F1B2D] hover:border-[#B8FF00] hover:bg-gray-50 transition-all shadow-sm">
+                  <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-8 py-4 text-xs font-bold uppercase tracking-wider text-[#0F1B2D] dark:text-white hover:border-[#B8FF00] dark:hover:border-[#B8FF00] hover:bg-gray-50 dark:hover:bg-slate-800 transition-all shadow-sm">
                     FOOTWEAR COLLECTION
                   </button>
                 </Link>
               </div>
 
               {/* Trust Micro-Badges */}
-              <div className="pt-4 flex items-center gap-6 text-xs text-[#0F1B2D]/50 border-t border-gray-200/80">
+              <div className="pt-4 flex items-center gap-6 text-xs text-[#0F1B2D]/50 dark:text-slate-400 border-t border-gray-200/80 dark:border-slate-800">
                 <div className="flex items-center gap-1.5">
                   <Zap className="h-3.5 w-3.5 text-[#5B8DEF]" />
                   <span>Pro-Grade Tested</span>
@@ -113,7 +113,7 @@ export default async function HomePage() {
 
             {/* Right Athlete Action Visual */}
             <div className="lg:col-span-5 relative">
-              <div className="relative h-64 sm:h-80 lg:h-96 w-full rounded-2xl overflow-hidden shadow-xl bg-gradient-to-tr from-[#EEF8F1] via-white to-[#E9F4FE] border border-gray-200">
+              <div className="relative h-64 sm:h-80 lg:h-96 w-full rounded-2xl overflow-hidden shadow-xl bg-gradient-to-tr from-[#EEF8F1] via-white to-[#E9F4FE] dark:from-[#0B182B] dark:via-[#0F172A] dark:to-[#0A101D] border border-gray-200 dark:border-slate-800">
                 <Image
                   src="/images/shop_runner_hero.jpg"
                   alt="Athlete in sprint motion"
@@ -122,13 +122,13 @@ export default async function HomePage() {
                   className="object-cover object-center select-none [mask-image:linear-gradient(to_left,black_80%,transparent_100%)]"
                 />
                 {/* Floating Tag */}
-                <div className="absolute bottom-4 left-4 rounded-xl bg-white/90 backdrop-blur-md border border-gray-200 p-3 shadow-lg flex items-center gap-3">
+                <div className="absolute bottom-4 left-4 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-gray-200 dark:border-slate-700 p-3 shadow-lg flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#B8FF00] text-[#0F1B2D] font-black text-xs">
                     EVO
                   </div>
                   <div>
-                    <div className="text-xs font-extrabold text-[#0F1B2D]">SPEED FORM 2026</div>
-                    <div className="text-[10px] text-[#0F1B2D]/50 font-medium">Carbon Kinetic Power</div>
+                    <div className="text-xs font-extrabold text-[#0F1B2D] dark:text-white">SPEED FORM 2026</div>
+                    <div className="text-[10px] text-[#0F1B2D]/50 dark:text-slate-400 font-medium">Carbon Kinetic Power</div>
                   </div>
                 </div>
               </div>
@@ -140,12 +140,12 @@ export default async function HomePage() {
       {/* Featured Products Grid */}
       {featuredProducts.length > 0 && (
         <section className="py-16 container mx-auto px-4 max-w-7xl space-y-8">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+          <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-4">
             <div>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D]">
+              <h2 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">
                 FEATURED <span className="text-[#0F1B2D] bg-[#B8FF00] px-2 py-0.5 rounded-lg">GEAR</span>
               </h2>
-              <p className="text-xs text-[#0F1B2D]/50 mt-0.5">Top-tier athletic performance equipment</p>
+              <p className="text-xs text-[#0F1B2D]/50 dark:text-slate-400 mt-0.5">Top-tier athletic performance equipment</p>
             </div>
 
             <Link href="/shop" className="text-xs font-bold text-[#5B8DEF] hover:underline flex items-center gap-1">

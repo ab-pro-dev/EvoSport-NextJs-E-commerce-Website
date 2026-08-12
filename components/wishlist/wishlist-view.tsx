@@ -101,11 +101,11 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4 py-16">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white border border-gray-200 text-[#0F1B2D]/50 mb-6 shadow-sm">
-          <Lock className="h-10 w-10 text-[#0F1B2D]/60" />
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-[#0F1B2D]/50 dark:text-slate-400 mb-6 shadow-sm">
+          <Lock className="h-10 w-10 text-[#0F1B2D]/60 dark:text-slate-400" />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">Sign In to View Your Wishlist</h2>
-        <p className="mt-2 text-xs sm:text-sm text-[#0F1B2D]/60 max-w-sm">
+        <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">Sign In to View Your Wishlist</h2>
+        <p className="mt-2 text-xs sm:text-sm text-[#0F1B2D]/60 dark:text-slate-400 max-w-sm">
           Save your favorite sportswear, gear, and footwear to track items and buy anytime.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-md justify-center">
@@ -116,7 +116,7 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
             </Button>
           </Link>
           <Link href="/register" className="w-full sm:w-auto">
-            <Button size="lg" variant="outline" className="w-full border-gray-300 bg-white text-[#0F1B2D] font-bold text-xs uppercase tracking-wider hover:bg-gray-50 rounded-xl px-6 h-12">
+            <Button size="lg" variant="outline" className="w-full border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[#0F1B2D] dark:text-white font-bold text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl px-6 h-12">
               Create Account
             </Button>
           </Link>
@@ -128,11 +128,11 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
   if (items.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4 py-16">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white border border-gray-200 text-[#0F1B2D]/50 mb-6 shadow-sm">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-[#0F1B2D]/50 dark:text-slate-400 mb-6 shadow-sm">
           <Heart className="h-10 w-10 fill-none" />
         </div>
-        <h2 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D]">Your Wishlist is Empty</h2>
-        <p className="mt-2 text-xs text-[#0F1B2D]/50 max-w-sm">
+        <h2 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">Your Wishlist is Empty</h2>
+        <p className="mt-2 text-xs text-[#0F1B2D]/50 dark:text-slate-400 max-w-sm">
           You haven&apos;t saved any products to your wishlist yet.
         </p>
         <Link href="/shop" className="mt-6">
@@ -148,11 +148,11 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-5">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-5">
+        <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">
           YOUR WISHLIST <span className="text-[#B8FF00]">({items.length})</span>
         </h1>
-        <Link href="/shop" className="text-xs text-[#5B8DEF] hover:text-[#4a7bd1] font-medium transition-colors">
+        <Link href="/shop" className="text-xs text-[#5B8DEF] hover:text-[#4a7bd1] dark:hover:text-[#B8FF00] font-medium transition-colors">
           Continue Shopping &rarr;
         </Link>
       </div>
@@ -170,10 +170,10 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
           return (
             <div
               key={item.id}
-              className="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50"
+              className="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#0F172A] border border-gray-200 dark:border-slate-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-black/50"
             >
               {/* Image Container */}
-              <div className="relative aspect-square w-full overflow-hidden bg-[#F4F8FC] p-4">
+              <div className="relative aspect-square w-full overflow-hidden bg-[#F4F8FC] dark:bg-slate-900/60 p-4">
                 <Image
                   src={image}
                   alt={(product.images && product.images.length > 0 && product.images[0]?.altText) ? product.images[0].altText : product.name}
@@ -181,11 +181,11 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
                   className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
                 />
 
-                {/* Filled Heart Icon (Click to Remove from Wishlist) */}
+                {/* Filled Heart Icon */}
                 <button
                   onClick={() => handleRemoveFromWishlist(product.id)}
                   aria-label="Remove from wishlist"
-                  className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#0F1B2D]/30 backdrop-blur-sm transition-transform hover:scale-110 hover:text-rose-500 shadow-sm"
+                  className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 text-[#0F1B2D]/30 dark:text-slate-400 backdrop-blur-sm transition-transform hover:scale-110 hover:text-rose-500 shadow-sm"
                 >
                   <Heart className="h-4 w-4 fill-current" />
                 </button>
@@ -193,25 +193,25 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
 
               {/* Details */}
               <div className="flex flex-1 flex-col p-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">
                   {product.brand.name}
                 </span>
-                <Link href={`/products/${product.slug}`} className="hover:text-[#5B8DEF] transition-colors mt-0.5">
-                  <h3 className="line-clamp-1 text-sm font-bold text-[#0F1B2D]">
+                <Link href={`/products/${product.slug}`} className="hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors mt-0.5">
+                  <h3 className="line-clamp-1 text-sm font-bold text-[#0F1B2D] dark:text-white">
                     {product.name}
                   </h3>
                 </Link>
 
                 {/* Price */}
                 <div className="mt-3 flex items-baseline gap-2">
-                  <span className="text-base font-extrabold text-[#0F1B2D]">${price.toFixed(2)}</span>
+                  <span className="text-base font-extrabold text-[#0F1B2D] dark:text-white">${price.toFixed(2)}</span>
                   {compareAt && compareAt > price && (
-                    <span className="text-xs text-[#0F1B2D]/40 line-through">${compareAt.toFixed(2)}</span>
+                    <span className="text-xs text-[#0F1B2D]/40 dark:text-slate-500 line-through">${compareAt.toFixed(2)}</span>
                   )}
                 </div>
 
                 {/* Add to Cart Button */}
-                <div className="mt-4 pt-3 border-t border-gray-100">
+                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
                   <Button
                     onClick={() => handleAddToCart(item)}
                     size="sm"

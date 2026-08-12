@@ -135,7 +135,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D]">
+    <div className="min-h-screen bg-[#F4F8FC] dark:bg-[#090E17] text-[#0F1B2D] dark:text-[#F1F5F9] transition-colors duration-200">
       {/* Schema.org Product Structured Data */}
       <script
         type="application/ld+json"
@@ -147,7 +147,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <ProductDetails product={serializedProduct} />
 
         {/* Dynamic Product Tabs with Suspense Boundary */}
-        <Suspense fallback={<div className="h-64 bg-gray-100 animate-pulse rounded-xl my-8 border border-gray-200" />}>
+        <Suspense fallback={<div className="h-64 bg-white dark:bg-slate-900 animate-pulse rounded-xl my-8 border border-gray-200 dark:border-slate-800" />}>
           <ProductTabs
             productId={product.id}
             slug={product.slug}
@@ -161,14 +161,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Related Products Section with Suspense Boundary */}
         {serializedRelated.length > 0 && (
-          <Suspense fallback={<div className="h-48 bg-gray-100 animate-pulse rounded-xl mt-12 border border-gray-200" />}>
-            <section className="mt-16 pt-12 border-t border-gray-200">
+          <Suspense fallback={<div className="h-48 bg-white dark:bg-slate-900 animate-pulse rounded-xl mt-12 border border-gray-200 dark:border-slate-800" />}>
+            <section className="mt-16 pt-12 border-t border-gray-200 dark:border-slate-800">
               <div className="mb-8 flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-black tracking-tight text-[#0F1B2D] uppercase">
+                  <h2 className="text-2xl font-black tracking-tight text-[#0F1B2D] dark:text-white uppercase">
                     YOU MAY ALSO <span className="text-[#B8FF00]">LIKE</span>
                   </h2>
-                  <p className="text-xs text-[#0F1B2D]/50 mt-1">
+                  <p className="text-xs text-[#0F1B2D]/50 dark:text-slate-400 mt-1">
                     Hand-picked gear from the {product.category.name} collection
                   </p>
                 </div>

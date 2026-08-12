@@ -172,8 +172,8 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Multi-Step Indicator Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-6">
-        <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-6">
+        <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">
           CHECKOUT
         </h1>
 
@@ -183,46 +183,46 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
             onClick={() => setStep(1)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
               step === 1
-                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
-                : "border-gray-200 text-[#0F1B2D]/50 hover:text-[#0F1B2D]"
+                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]"
+                : "border-gray-200 dark:border-slate-800 text-[#0F1B2D]/50 dark:text-slate-400 hover:text-[#0F1B2D] dark:hover:text-white"
             }`}
           >
-            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 1 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 text-[#0F1B2D]'}`}>1</span>
+            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 1 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 dark:bg-slate-800 text-[#0F1B2D] dark:text-slate-400'}`}>1</span>
             <span>Shipping</span>
           </button>
 
-          <span className="text-gray-300">&rarr;</span>
+          <span className="text-gray-300 dark:text-slate-700">&rarr;</span>
 
           <button
             onClick={() => validateStep1() && setStep(2)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
               step === 2
-                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
-                : "border-gray-200 text-[#0F1B2D]/50 hover:text-[#0F1B2D]"
+                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]"
+                : "border-gray-200 dark:border-slate-800 text-[#0F1B2D]/50 dark:text-slate-400 hover:text-[#0F1B2D] dark:hover:text-white"
             }`}
           >
-            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 2 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 text-[#0F1B2D]'}`}>2</span>
+            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 2 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 dark:bg-slate-800 text-[#0F1B2D] dark:text-slate-400'}`}>2</span>
             <span>Payment</span>
           </button>
 
-          <span className="text-gray-300">&rarr;</span>
+          <span className="text-gray-300 dark:text-slate-700">&rarr;</span>
 
           <button
             onClick={() => validateStep1() && validateStep2() && setStep(3)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
               step === 3
-                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
-                : "border-gray-200 text-[#0F1B2D]/50 hover:text-[#0F1B2D]"
+                ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]"
+                : "border-gray-200 dark:border-slate-800 text-[#0F1B2D]/50 dark:text-slate-400 hover:text-[#0F1B2D] dark:hover:text-white"
             }`}
           >
-            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 3 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 text-[#0F1B2D]'}`}>3</span>
+            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step === 3 ? 'bg-[#B8FF00] text-[#0F1B2D]' : 'bg-gray-200 dark:bg-slate-800 text-[#0F1B2D] dark:text-slate-400'}`}>3</span>
             <span>Review</span>
           </button>
         </div>
       </div>
 
       {errorMessage && (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-xs text-rose-600 font-medium">
+        <div className="rounded-lg border border-rose-200 dark:border-rose-800/60 bg-rose-50 dark:bg-rose-950/40 p-4 text-xs text-rose-600 dark:text-rose-300 font-medium">
           {errorMessage}
         </div>
       )}
@@ -233,38 +233,38 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
         <div className="lg:col-span-7 space-y-6">
           {/* STEP 1: SHIPPING ADDRESS & METHOD */}
           {step === 1 && (
-            <form onSubmit={handleNextToPayment} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
-              <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+            <form onSubmit={handleNextToPayment} className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-6 shadow-sm space-y-6">
+              <div className="flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-4">
                 <Truck className="h-5 w-5 text-[#B8FF00]" />
-                <h2 className="text-lg font-black uppercase text-[#0F1B2D]">1. SHIPPING ADDRESS</h2>
+                <h2 className="text-lg font-black uppercase text-[#0F1B2D] dark:text-white">1. SHIPPING ADDRESS</h2>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Full Name *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Full Name *</label>
                   <Input
                     required
                     value={address.fullName}
                     onChange={(e) => handleInputChange("fullName", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Email Address *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Email Address *</label>
                   <Input
                     required
                     type="email"
                     value={address.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Phone Number *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Phone Number *</label>
                   <div className="mt-1.5 flex rounded-md shadow-sm">
-                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-200 bg-gray-100 text-xs font-bold text-[#0F1B2D] select-none">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-200 dark:border-slate-800 bg-gray-100 dark:bg-slate-800 text-xs font-bold text-[#0F1B2D] dark:text-slate-300 select-none">
                       +251
                     </span>
                     <Input
@@ -275,51 +275,51 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         const digits = e.target.value.replace(/[^\d]/g, "");
                         setPhoneNumber(digits.startsWith("0") ? digits.slice(1) : digits);
                       }}
-                      className="rounded-l-none bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                      className="rounded-l-none bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white focus-visible:ring-[#B8FF00]"
                     />
                   </div>
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Street Address *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Street Address *</label>
                   <Input
                     required
                     value={address.line1}
                     onChange={(e) => handleInputChange("line1", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Apartment, Suite, Unit (Optional)</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Apartment, Suite, Unit (Optional)</label>
                   <Input
                     value={address.line2}
                     onChange={(e) => handleInputChange("line2", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">City *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">City *</label>
                   <Input
                     required
                     value={address.city}
                     onChange={(e) => handleInputChange("city", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white focus-visible:ring-[#B8FF00]"
                   />
                 </div>
               </div>
 
               {/* Shipping Method Selection */}
-              <div className="pt-4 border-t border-gray-100">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60 mb-3">Shipping Method</h3>
+              <div className="pt-4 border-t border-gray-100 dark:border-slate-800">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400 mb-3">Shipping Method</h3>
                 <div className="space-y-2.5">
                   <label
                     onClick={() => setShippingMethod("standard")}
                     className={`flex items-center justify-between p-3.5 rounded-lg border cursor-pointer transition-all ${
                       shippingMethod === "standard"
-                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D]"
-                        : "border-gray-200 bg-[#F4F8FC] text-[#0F1B2D]/60 hover:border-gray-300"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D] dark:text-[#B8FF00]"
+                        : "border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900 text-[#0F1B2D]/60 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -331,11 +331,11 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         className="text-[#0F1B2D] focus:ring-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-[#0F1B2D]">Standard Shipping (3-5 Business Days)</div>
-                        <div className="text-[11px] text-[#0F1B2D]/40">Free on orders over $100</div>
+                        <div className="text-xs font-bold text-[#0F1B2D] dark:text-white">Standard Shipping (3-5 Business Days)</div>
+                        <div className="text-[11px] text-[#0F1B2D]/40 dark:text-slate-500">Free on orders over $100</div>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-[#0F1B2D]">
+                    <span className="text-xs font-bold text-[#0F1B2D] dark:text-white">
                       {subtotal >= 100 ? "FREE" : "$9.99"}
                     </span>
                   </label>
@@ -344,8 +344,8 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                     onClick={() => setShippingMethod("express")}
                     className={`flex items-center justify-between p-3.5 rounded-lg border cursor-pointer transition-all ${
                       shippingMethod === "express"
-                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D]"
-                        : "border-gray-200 bg-[#F4F8FC] text-[#0F1B2D]/60 hover:border-gray-300"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D] dark:text-[#B8FF00]"
+                        : "border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900 text-[#0F1B2D]/60 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -357,19 +357,19 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         className="text-[#0F1B2D] focus:ring-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-[#0F1B2D]">Express Shipping (2 Business Days)</div>
-                        <div className="text-[11px] text-[#0F1B2D]/40">Guaranteed expedited air transit</div>
+                        <div className="text-xs font-bold text-[#0F1B2D] dark:text-white">Express Shipping (2 Business Days)</div>
+                        <div className="text-[11px] text-[#0F1B2D]/40 dark:text-slate-500">Guaranteed expedited air transit</div>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-[#0F1B2D]">$12.99</span>
+                    <span className="text-xs font-bold text-[#0F1B2D] dark:text-white">$12.99</span>
                   </label>
 
                   <label
                     onClick={() => setShippingMethod("overnight")}
                     className={`flex items-center justify-between p-3.5 rounded-lg border cursor-pointer transition-all ${
                       shippingMethod === "overnight"
-                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D]"
-                        : "border-gray-200 bg-[#F4F8FC] text-[#0F1B2D]/60 hover:border-gray-300"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/10 text-[#0F1B2D] dark:text-[#B8FF00]"
+                        : "border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900 text-[#0F1B2D]/60 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -381,11 +381,11 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         className="text-[#0F1B2D] focus:ring-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-[#0F1B2D]">Overnight Priority (Next Day)</div>
-                        <div className="text-[11px] text-[#0F1B2D]/40">Delivered by 10:30 AM next business day</div>
+                        <div className="text-xs font-bold text-[#0F1B2D] dark:text-white">Overnight Priority (Next Day)</div>
+                        <div className="text-[11px] text-[#0F1B2D]/40 dark:text-slate-500">Delivered by 10:30 AM next business day</div>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-[#0F1B2D]">$24.99</span>
+                    <span className="text-xs font-bold text-[#0F1B2D] dark:text-white">$24.99</span>
                   </label>
                 </div>
               </div>
@@ -403,59 +403,59 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
 
           {/* STEP 2: PAYMENT METHOD */}
           {step === 2 && (
-            <form onSubmit={handleNextToReview} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
-              <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+            <form onSubmit={handleNextToReview} className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-6 shadow-sm space-y-6">
+              <div className="flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-4">
                 <CreditCard className="h-5 w-5 text-[#B8FF00]" />
-                <h2 className="text-lg font-black uppercase text-[#0F1B2D]">2. PAYMENT INFORMATION (MOCK)</h2>
+                <h2 className="text-lg font-black uppercase text-[#0F1B2D] dark:text-white">2. PAYMENT INFORMATION (MOCK)</h2>
               </div>
 
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800 flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-600" />
+              <div className="rounded-lg border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 p-3.5 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Test Payment Gateway Active. You can use any 16-digit card number.</span>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Card Number *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Card Number *</label>
                   <Input
                     required
                     placeholder="4242 4242 4242 4242"
                     value={payment.cardNumber}
                     onChange={(e) => handlePaymentChange("cardNumber", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Cardholder Name *</label>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Cardholder Name *</label>
                   <Input
                     required
                     placeholder="Name on card"
                     value={payment.cardHolder}
                     onChange={(e) => handlePaymentChange("cardHolder", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Expiry Date *</label>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Expiry Date *</label>
                     <Input
                       required
                       placeholder="MM/YY"
                       value={payment.expiryDate}
                       onChange={(e) => handlePaymentChange("expiryDate", e.target.value)}
-                      className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                      className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus-visible:ring-[#B8FF00]"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">CVV / CVC *</label>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">CVV / CVC *</label>
                     <Input
                       required
                       placeholder="123"
                       value={payment.cvv}
                       onChange={(e) => handlePaymentChange("cvv", e.target.value)}
-                      className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                      className="mt-1.5 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus-visible:ring-[#B8FF00]"
                     />
                   </div>
                 </div>
@@ -466,7 +466,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   type="button"
                   variant="outline"
                   onClick={() => setStep(1)}
-                  className="border-gray-200 text-[#0F1B2D] font-bold text-xs uppercase hover:border-[#B8FF00] hover:bg-[#F4F8FC] h-12 rounded-xl"
+                  className="border-gray-200 dark:border-slate-800 text-[#0F1B2D] dark:text-white font-bold text-xs uppercase hover:border-[#B8FF00] dark:hover:border-[#B8FF00] hover:bg-[#F4F8FC] dark:hover:bg-slate-800 h-12 rounded-xl"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Shipping
@@ -485,32 +485,32 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
 
           {/* STEP 3: REVIEW ORDER */}
           {step === 3 && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
-              <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+            <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-6 shadow-sm space-y-6">
+              <div className="flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-4">
                 <ShieldCheck className="h-5 w-5 text-[#B8FF00]" />
-                <h2 className="text-lg font-black uppercase text-[#0F1B2D]">3. REVIEW YOUR ORDER</h2>
+                <h2 className="text-lg font-black uppercase text-[#0F1B2D] dark:text-white">3. REVIEW YOUR ORDER</h2>
               </div>
 
               {/* Shipping Address Summary */}
-              <div className="rounded-lg border border-gray-200 bg-[#F4F8FC] p-4 text-xs space-y-1">
-                <div className="flex justify-between font-bold text-[#0F1B2D] mb-2">
-                  <span className="uppercase text-[#0F1B2D]/60">Shipping Address</span>
-                  <button onClick={() => setStep(1)} className="text-[#5B8DEF] hover:underline">Edit</button>
+              <div className="rounded-lg border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900/60 p-4 text-xs space-y-1">
+                <div className="flex justify-between font-bold text-[#0F1B2D] dark:text-white mb-2">
+                  <span className="uppercase text-[#0F1B2D]/60 dark:text-slate-400">Shipping Address</span>
+                  <button onClick={() => setStep(1)} className="text-[#5B8DEF] dark:text-[#B8FF00] hover:underline">Edit</button>
                 </div>
-                <p className="text-[#0F1B2D] font-bold">{address.fullName}</p>
-                <p className="text-[#0F1B2D]/60">{address.line1}{address.line2 ? `, ${address.line2}` : ""}</p>
-                <p className="text-[#0F1B2D]/60">{address.city}</p>
-                <p className="text-[#0F1B2D]/60">Phone: +251 {phoneNumber}</p>
+                <p className="text-[#0F1B2D] dark:text-white font-bold">{address.fullName}</p>
+                <p className="text-[#0F1B2D]/60 dark:text-slate-400">{address.line1}{address.line2 ? `, ${address.line2}` : ""}</p>
+                <p className="text-[#0F1B2D]/60 dark:text-slate-400">{address.city}</p>
+                <p className="text-[#0F1B2D]/60 dark:text-slate-400">Phone: +251 {phoneNumber}</p>
               </div>
 
               {/* Cart Items Summary List */}
               <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60">Items ({cart.items.length})</h3>
-                <div className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white p-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Items ({cart.items.length})</h3>
+                <div className="divide-y divide-gray-100 dark:divide-slate-800 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
                   {cart.items.map((item) => (
                     <div key={item.id} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-gray-100 bg-[#F4F8FC]">
+                        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-gray-100 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-950">
                           <Image
                             src={item.variant.product.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"}
                             alt={item.variant.product.name}
@@ -519,13 +519,13 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                           />
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-[#0F1B2D] line-clamp-1">{item.variant.product.name}</div>
-                          <div className="text-[10px] text-[#0F1B2D]/50">
+                          <div className="text-xs font-bold text-[#0F1B2D] dark:text-white line-clamp-1">{item.variant.product.name}</div>
+                          <div className="text-[10px] text-[#0F1B2D]/50 dark:text-slate-400">
                             {item.variant.color} • {item.variant.size} • Qty: {item.quantity}
                           </div>
                         </div>
                       </div>
-                      <span className="text-xs font-bold text-[#0F1B2D]">${item.itemTotal.toFixed(2)}</span>
+                      <span className="text-xs font-bold text-[#0F1B2D] dark:text-white">${item.itemTotal.toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -536,7 +536,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   type="button"
                   variant="outline"
                   onClick={() => setStep(2)}
-                  className="border-gray-200 text-[#0F1B2D] font-bold text-xs uppercase hover:border-[#B8FF00] hover:bg-[#F4F8FC] h-12 rounded-xl"
+                  className="border-gray-200 dark:border-slate-800 text-[#0F1B2D] dark:text-white font-bold text-xs uppercase hover:border-[#B8FF00] dark:hover:border-[#B8FF00] hover:bg-[#F4F8FC] dark:hover:bg-slate-800 h-12 rounded-xl"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
@@ -557,32 +557,32 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
 
         {/* Right Persistent Order Summary Sidebar (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-5 sticky top-6">
-            <h2 className="text-lg font-black uppercase tracking-tight text-[#0F1B2D] border-b border-gray-100 pb-4">
+          <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-6 shadow-sm space-y-5 sticky top-6">
+            <h2 className="text-lg font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4">
               ORDER SUMMARY
             </h2>
 
             <div className="space-y-3 text-xs">
-              <div className="flex justify-between text-[#0F1B2D]/60">
+              <div className="flex justify-between text-[#0F1B2D]/60 dark:text-slate-400">
                 <span>Subtotal ({cart.items.reduce((s, i) => s + i.quantity, 0)} items)</span>
-                <span className="font-bold text-[#0F1B2D]">${subtotal.toFixed(2)}</span>
+                <span className="font-bold text-[#0F1B2D] dark:text-white">${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-[#0F1B2D]/60">
+              <div className="flex justify-between text-[#0F1B2D]/60 dark:text-slate-400">
                 <span>Shipping ({shippingMethod})</span>
-                <span className="font-bold text-[#0F1B2D]">{shippingCost === 0 ? "FREE" : `$${shippingCost.toFixed(2)}`}</span>
+                <span className="font-bold text-[#0F1B2D] dark:text-white">{shippingCost === 0 ? "FREE" : `$${shippingCost.toFixed(2)}`}</span>
               </div>
-              <div className="flex justify-between text-[#0F1B2D]/60">
+              <div className="flex justify-between text-[#0F1B2D]/60 dark:text-slate-400">
                 <span>Estimated Tax (8%)</span>
-                <span className="font-bold text-[#0F1B2D]">${tax.toFixed(2)}</span>
+                <span className="font-bold text-[#0F1B2D] dark:text-white">${tax.toFixed(2)}</span>
               </div>
 
-              <div className="border-t border-gray-100 pt-4 flex justify-between items-baseline">
-                <span className="text-sm font-black uppercase text-[#0F1B2D]">Total</span>
-                <span className="text-2xl font-black text-[#0F1B2D]">${total.toFixed(2)}</span>
+              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-between items-baseline">
+                <span className="text-sm font-black uppercase text-[#0F1B2D] dark:text-white">Total</span>
+                <span className="text-2xl font-black text-[#0F1B2D] dark:text-white">${total.toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="pt-2 text-[11px] text-[#0F1B2D]/40 space-y-1">
+            <div className="pt-2 text-[11px] text-[#0F1B2D]/40 dark:text-slate-500 space-y-1">
               <p>• Fast dispatch within 24 hours</p>
               <p>• 30-day effortless returns policy</p>
             </div>

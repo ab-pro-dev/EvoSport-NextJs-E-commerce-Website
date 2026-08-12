@@ -111,13 +111,13 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-neutral-800 pb-5">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
-            <Boxes className="h-6 w-6 text-rose-500" />
+          <h1 className="text-2xl font-black uppercase tracking-tight text-neutral-900 dark:text-white flex items-center gap-2">
+            <Boxes className="h-6 w-6 text-rose-600 dark:text-rose-500" />
             INVENTORY & STOCK CONTROL
           </h1>
-          <p className="text-xs text-neutral-400 mt-0.5">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
             Monitor real-time warehouse stock levels, edit variant inventory counts, and track low stock alerts.
           </p>
         </div>
@@ -125,45 +125,45 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
 
       {/* KPI Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
-          <p className="text-[10px] font-black uppercase tracking-wider text-neutral-400">Total Variants</p>
-          <p className="text-2xl font-black text-white mt-1">{stats.totalVariants}</p>
+        <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-4 shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Total Variants</p>
+          <p className="text-2xl font-black text-neutral-900 dark:text-white mt-1">{stats.totalVariants}</p>
         </div>
 
-        <div className="rounded-xl border border-emerald-900/40 bg-emerald-950/20 p-4">
-          <p className="text-[10px] font-black uppercase tracking-wider text-emerald-400">In Stock (&gt;10)</p>
-          <p className="text-2xl font-black text-emerald-400 mt-1">{stats.inStockCount}</p>
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">In Stock (&gt;10)</p>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{stats.inStockCount}</p>
         </div>
 
-        <div className="rounded-xl border border-amber-900/40 bg-amber-950/20 p-4">
-          <p className="text-[10px] font-black uppercase tracking-wider text-amber-400">Low Stock (≤10)</p>
-          <p className="text-2xl font-black text-amber-400 mt-1">{stats.lowStockCount}</p>
+        <div className="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-4 shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">Low Stock (≤10)</p>
+          <p className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">{stats.lowStockCount}</p>
         </div>
 
-        <div className="rounded-xl border border-rose-900/40 bg-rose-950/20 p-4">
-          <p className="text-[10px] font-black uppercase tracking-wider text-rose-400">Out of Stock (0)</p>
-          <p className="text-2xl font-black text-rose-400 mt-1">{stats.outOfStockCount}</p>
+        <div className="rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 p-4 shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-400">Out of Stock (0)</p>
+          <p className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">{stats.outOfStockCount}</p>
         </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-neutral-900/60 p-4 rounded-xl border border-neutral-800">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-neutral-900/60 p-4 rounded-xl border border-gray-200 dark:border-neutral-800 shadow-sm">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400 dark:text-neutral-500" />
           <Input
             placeholder="Search SKU, product name, color, size..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-neutral-950 border-neutral-800 text-xs text-white"
+            className="pl-9 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white"
           />
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Filter className="h-4 w-4 text-neutral-400" />
+          <Filter className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
           <select
             value={stockFilter}
             onChange={(e) => setStockFilter(e.target.value)}
-            className="bg-neutral-950 border border-neutral-800 text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-rose-500"
+            className="bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:border-rose-500"
           >
             <option value="ALL">All Stock Levels</option>
             <option value="LOW">Low Stock (≤ 10)</option>
@@ -174,10 +174,10 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
       </div>
 
       {/* Inventory Table */}
-      <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 overflow-hidden">
+      <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-neutral-800 bg-neutral-950/80 text-[10px] font-black uppercase text-neutral-400">
+            <thead className="border-b border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950/80 text-[10px] font-black uppercase text-neutral-500 dark:text-neutral-400">
               <tr>
                 <th className="py-3.5 px-4">SKU</th>
                 <th className="py-3.5 px-4">Product Name</th>
@@ -187,10 +187,10 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-800/60 text-neutral-300">
+            <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/60 text-neutral-700 dark:text-neutral-300">
               {filteredVariants.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-xs text-neutral-500 italic">
+                  <td colSpan={6} className="py-8 text-center text-xs text-neutral-400 dark:text-neutral-500 italic">
                     No product variants found.
                   </td>
                 </tr>
@@ -201,17 +201,17 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
                   const isOut = v.stock === 0;
 
                   return (
-                    <tr key={v.id} className="hover:bg-neutral-900/90 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-rose-400 text-xs">{v.sku}</td>
+                    <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-neutral-900/90 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-rose-600 dark:text-rose-400 text-xs">{v.sku}</td>
 
-                      <td className="py-3.5 px-4 font-bold text-white">
+                      <td className="py-3.5 px-4 font-bold text-neutral-900 dark:text-white">
                         <Link href={`/admin/products`} className="hover:underline">
                           {v.productName}
                         </Link>
                       </td>
 
-                      <td className="py-3.5 px-4 text-neutral-300">
-                        {v.color} / <span className="font-bold text-white">{v.size}</span>
+                      <td className="py-3.5 px-4 text-neutral-600 dark:text-neutral-300">
+                        {v.color} / <span className="font-bold text-neutral-900 dark:text-white">{v.size}</span>
                       </td>
 
                       <td className="py-3.5 px-4">
@@ -222,7 +222,7 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
                               min="0"
                               value={editStockValue}
                               onChange={(e) => setEditStockValue(e.target.value)}
-                              className="w-20 h-7 text-xs bg-neutral-950 border-rose-500 text-white font-bold"
+                              className="w-20 h-7 text-xs bg-gray-50 dark:bg-neutral-950 border-rose-500 text-neutral-900 dark:text-white font-bold"
                             />
                             <Button
                               onClick={() => handleSaveStock(v.id)}
@@ -233,7 +233,7 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
                             </Button>
                           </div>
                         ) : (
-                          <span className={`font-black text-sm ${isOut ? "text-rose-400" : isLow ? "text-amber-400" : "text-white"}`}>
+                          <span className={`font-black text-sm ${isOut ? "text-rose-600 dark:text-rose-400" : isLow ? "text-amber-600 dark:text-amber-400" : "text-neutral-900 dark:text-white"}`}>
                             {v.stock} units
                           </span>
                         )}
@@ -241,15 +241,15 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
 
                       <td className="py-3.5 px-4">
                         {isOut ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-rose-400 border border-rose-900/60 bg-rose-950/40 px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded">
                             <XCircle className="h-3 w-3" /> Out of Stock
                           </span>
                         ) : isLow ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-400 border border-amber-900/60 bg-amber-950/40 px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded">
                             <AlertTriangle className="h-3 w-3" /> Low Stock
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-400 border border-emerald-900/60 bg-emerald-950/40 px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
                             <CheckCircle2 className="h-3 w-3" /> In Stock
                           </span>
                         )}
@@ -259,9 +259,9 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
                         {!isEditing && (
                           <button
                             onClick={() => handleStartEdit(v)}
-                            className="text-neutral-400 hover:text-white font-bold text-xs inline-flex items-center gap-1"
+                            className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white font-bold text-xs inline-flex items-center gap-1"
                           >
-                            <Edit2 className="h-3.5 w-3.5 text-rose-400" />
+                            <Edit2 className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
                             Edit Stock
                           </button>
                         )}

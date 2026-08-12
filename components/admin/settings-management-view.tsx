@@ -70,99 +70,99 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-neutral-800 pb-5">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
-            <Settings className="h-6 w-6 text-rose-500" />
+          <h1 className="text-2xl font-black uppercase tracking-tight text-neutral-900 dark:text-white flex items-center gap-2">
+            <Settings className="h-6 w-6 text-rose-600 dark:text-rose-500" />
             STORE & SYSTEM SETTINGS
           </h1>
-          <p className="text-xs text-neutral-400 mt-0.5">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
             Configure functional store parameters: tax rates, free shipping thresholds, contact information, and maintenance mode.
           </p>
         </div>
       </div>
 
       {successMsg && (
-        <div className="rounded-xl border border-emerald-900/60 bg-emerald-950/40 p-4 text-xs text-emerald-300 font-medium flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-xs text-emerald-700 dark:text-emerald-300 font-medium flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="rounded-xl border border-rose-900/60 bg-rose-950/40 p-4 text-xs text-rose-300 font-medium flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
+        <div className="rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 p-4 text-xs text-rose-700 dark:text-rose-300 font-medium flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       <form onSubmit={handleSaveSettings} className="space-y-6">
         {/* Section 1: General Store Settings */}
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6 space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-wide text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
-            <Store className="h-4 w-4 text-rose-500" />
+        <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-6 space-y-4 shadow-sm">
+          <h2 className="text-sm font-black uppercase tracking-wide text-neutral-900 dark:text-white flex items-center gap-2 border-b border-gray-100 dark:border-neutral-800 pb-3">
+            <Store className="h-4 w-4 text-rose-600 dark:text-rose-500" />
             General Store Settings
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Store Name</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Store Name</label>
               <Input
                 value={settings.storeName}
                 onChange={(e) => handleInputChange("storeName", e.target.value)}
-                className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white"
+                className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Contact Email</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Contact Email</label>
               <Input
                 type="email"
                 value={settings.contactEmail}
                 onChange={(e) => handleInputChange("contactEmail", e.target.value)}
-                className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white"
+                className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Support Phone</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Support Phone</label>
               <Input
                 value={settings.supportPhone}
                 onChange={(e) => handleInputChange("supportPhone", e.target.value)}
-                className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white"
+                className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white"
               />
             </div>
           </div>
         </div>
 
         {/* Section 2: Shipping & Freight Rules */}
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6 space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-wide text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
-            <Truck className="h-4 w-4 text-emerald-400" />
+        <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-6 space-y-4 shadow-sm">
+          <h2 className="text-sm font-black uppercase tracking-wide text-neutral-900 dark:text-white flex items-center gap-2 border-b border-gray-100 dark:border-neutral-800 pb-3">
+            <Truck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Shipping & Freight Rules
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Free Shipping Threshold ($)</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Free Shipping Threshold ($)</label>
               <Input
                 type="number"
                 step="0.01"
                 value={settings.freeShippingThreshold}
                 onChange={(e) => handleInputChange("freeShippingThreshold", parseFloat(e.target.value))}
-                className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white font-bold"
+                className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white font-bold"
               />
               <p className="text-[10px] text-neutral-500 mt-1">Orders with subtotal at or above this amount receive free shipping at checkout.</p>
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Flat Rate Shipping Fee ($)</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Flat Rate Shipping Fee ($)</label>
               <Input
                 type="number"
                 step="0.01"
                 value={settings.flatRateShipping}
                 onChange={(e) => handleInputChange("flatRateShipping", parseFloat(e.target.value))}
-                className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white font-bold"
+                className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white font-bold"
               />
               <p className="text-[10px] text-neutral-500 mt-1">Standard shipping fee applied when subtotal is under free shipping threshold.</p>
             </div>
@@ -170,30 +170,30 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
         </div>
 
         {/* Section 3: Tax Calculation Settings */}
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-6 space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-wide text-white flex items-center gap-2 border-b border-neutral-800 pb-3">
-            <Percent className="h-4 w-4 text-blue-400" />
+        <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-6 space-y-4 shadow-sm">
+          <h2 className="text-sm font-black uppercase tracking-wide text-neutral-900 dark:text-white flex items-center gap-2 border-b border-gray-100 dark:border-neutral-800 pb-3">
+            <Percent className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             Sales Tax Calculation Rate
           </h2>
 
           <div className="max-w-xs space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Store Sales Tax Rate (as decimal, e.g. 0.10 for 10%)</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Store Sales Tax Rate (as decimal, e.g. 0.10 for 10%)</label>
             <Input
               type="number"
               step="0.01"
               value={settings.taxRate}
               onChange={(e) => handleInputChange("taxRate", parseFloat(e.target.value))}
-              className="mt-1 bg-neutral-950 border-neutral-800 text-xs text-white font-mono font-bold text-rose-400"
+              className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white font-mono font-bold text-rose-600 dark:text-rose-400"
             />
             <p className="text-[10px] text-neutral-500">Currently set to {(settings.taxRate * 100).toFixed(0)}% sales tax on checkout orders.</p>
           </div>
         </div>
 
         {/* Section 4: System Maintenance Mode */}
-        <div className="rounded-xl border border-rose-900/40 bg-rose-950/20 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-rose-900/40 pb-3">
-            <h2 className="text-sm font-black uppercase tracking-wide text-rose-400 flex items-center gap-2">
-              <Wrench className="h-4 w-4 text-rose-500" />
+        <div className="rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between border-b border-rose-200 dark:border-rose-900/40 pb-3">
+            <h2 className="text-sm font-black uppercase tracking-wide text-rose-600 dark:text-rose-400 flex items-center gap-2">
+              <Wrench className="h-4 w-4 text-rose-600 dark:text-rose-500" />
               Maintenance Mode Control
             </h2>
 
@@ -204,11 +204,11 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
                 onChange={(e) => handleInputChange("maintenanceMode", e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+              <div className="w-11 h-6 bg-gray-200 dark:bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
             </label>
           </div>
 
-          <p className="text-xs text-neutral-300">
+          <p className="text-xs text-neutral-700 dark:text-neutral-300">
             When Maintenance Mode is enabled, all non-admin customer traffic visiting public shop pages will be redirected to the maintenance page (`/maintenance`). Admin users remain unaffected.
           </p>
         </div>
@@ -218,7 +218,7 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
           <Button
             type="submit"
             disabled={isSaving}
-            className="bg-rose-600 text-white font-black uppercase text-xs tracking-wider hover:bg-rose-500 rounded-lg h-10 px-8"
+            className="bg-rose-600 text-white font-black uppercase text-xs tracking-wider hover:bg-rose-500 rounded-lg h-10 px-8 shadow-sm"
           >
             <Save className="mr-2 h-4 w-4" />
             {isSaving ? "Saving Settings..." : "Save All Settings"}

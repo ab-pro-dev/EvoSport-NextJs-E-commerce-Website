@@ -118,29 +118,29 @@ export function ProfileFormView({ user }: ProfileFormViewProps) {
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Header */}
-      <div className="border-b border-gray-200 pb-5">
-        <h1 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D]">
+      <div className="border-b border-gray-200 dark:border-slate-800 pb-5">
+        <h1 className="text-2xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">
           ACCOUNT SETTINGS
         </h1>
-        <p className="text-xs text-[#0F1B2D]/50 mt-0.5">Manage your personal profile and security</p>
+        <p className="text-xs text-[#0F1B2D]/50 dark:text-slate-400 mt-0.5">Manage your personal profile and security</p>
       </div>
 
       {/* 1. Profile Information Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
-        <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+      <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-6 shadow-sm space-y-6">
+        <div className="flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-4">
           <User className="h-5 w-5 text-[#B8FF00]" />
-          <h2 className="text-base font-black uppercase text-[#0F1B2D]">PROFILE DETAILS</h2>
+          <h2 className="text-base font-black uppercase text-[#0F1B2D] dark:text-white">PROFILE DETAILS</h2>
         </div>
 
         {profileSuccess && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-600 font-medium flex items-center gap-2">
+          <div className="rounded-lg border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 p-3.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4" />
             <span>{profileSuccess}</span>
           </div>
         )}
 
         {profileError && (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-600 font-medium flex items-center gap-2">
+          <div className="rounded-lg border border-rose-200 dark:border-rose-800/60 bg-rose-50 dark:bg-rose-950/40 p-3.5 text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             <span>{profileError}</span>
           </div>
@@ -149,33 +149,33 @@ export function ProfileFormView({ user }: ProfileFormViewProps) {
         <form onSubmit={handleUpdateProfile} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Full Name</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Full Name</label>
               <Input
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D]"
+                className="mt-1 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Email Address</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Email Address</label>
               <Input
                 required
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D]"
+                className="mt-1 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Avatar Image URL (Optional)</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Avatar Image URL (Optional)</label>
               <Input
                 placeholder="https://images.unsplash.com/..."
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
-                className="mt-1 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D]"
+                className="mt-1 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500"
               />
             </div>
           </div>
@@ -194,21 +194,21 @@ export function ProfileFormView({ user }: ProfileFormViewProps) {
       </div>
 
       {/* 2. Security / Change Password Card */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
-        <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
+      <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-6 shadow-sm space-y-6">
+        <div className="flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-4">
           <Lock className="h-5 w-5 text-[#B8FF00]" />
-          <h2 className="text-base font-black uppercase text-[#0F1B2D]">CHANGE PASSWORD</h2>
+          <h2 className="text-base font-black uppercase text-[#0F1B2D] dark:text-white">CHANGE PASSWORD</h2>
         </div>
 
         {passwordSuccess && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-600 font-medium flex items-center gap-2">
+          <div className="rounded-lg border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 p-3.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4" />
             <span>{passwordSuccess}</span>
           </div>
         )}
 
         {passwordError && (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-600 font-medium flex items-center gap-2">
+          <div className="rounded-lg border border-rose-200 dark:border-rose-800/60 bg-rose-50 dark:bg-rose-950/40 p-3.5 text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             <span>{passwordError}</span>
           </div>
@@ -217,38 +217,38 @@ export function ProfileFormView({ user }: ProfileFormViewProps) {
         <form onSubmit={handleUpdatePassword} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Current Password *</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Current Password *</label>
               <Input
                 required
                 type="password"
                 placeholder="••••••••"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="mt-1 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D]"
+                className="mt-1 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">New Password *</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">New Password *</label>
               <Input
                 required
                 type="password"
                 placeholder="••••••••"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D]"
+                className="mt-1 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Confirm New Password *</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">Confirm New Password *</label>
               <Input
                 required
                 type="password"
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D]"
+                className="mt-1 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-xs text-[#0F1B2D] dark:text-white"
               />
             </div>
           </div>

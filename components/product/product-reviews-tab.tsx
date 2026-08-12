@@ -101,11 +101,11 @@ export function ProductReviewsTab({
   };
 
   return (
-    <div className="space-y-8 text-xs text-[#0F1B2D]/70">
+    <div className="space-y-8 text-xs text-[#0F1B2D]/70 dark:text-slate-300">
       {/* Overview Rating Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-gray-200 bg-[#F4F8FC] p-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900/60 p-6 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="text-3xl font-black text-[#0F1B2D]">{avgRating.toFixed(1)}</div>
+          <div className="text-3xl font-black text-[#0F1B2D] dark:text-white">{avgRating.toFixed(1)}</div>
           <div>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -114,12 +114,12 @@ export function ProductReviewsTab({
                   className={`h-4 w-4 ${
                     star <= Math.round(avgRating)
                       ? "fill-amber-400 text-amber-400"
-                      : "text-gray-300"
+                      : "text-gray-300 dark:text-slate-700"
                   }`}
                 />
               ))}
             </div>
-            <p className="text-[11px] text-[#0F1B2D]/50 mt-1 font-medium">
+            <p className="text-[11px] text-[#0F1B2D]/50 dark:text-slate-400 mt-1 font-medium">
               Based on {totalCount} verified customer {totalCount === 1 ? "review" : "reviews"}
             </p>
           </div>
@@ -127,32 +127,32 @@ export function ProductReviewsTab({
       </div>
 
       {/* Write a Review Section */}
-      <div className="rounded-xl border border-gray-200 bg-[#F4F8FC] p-6 space-y-4 shadow-sm">
-        <h3 className="text-sm font-black uppercase text-[#0F1B2D] flex items-center gap-2">
+      <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900/60 p-6 space-y-4 shadow-sm">
+        <h3 className="text-sm font-black uppercase text-[#0F1B2D] dark:text-white flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-[#B8FF00]" />
           WRITE A CUSTOMER REVIEW
         </h3>
 
         {submitSuccess ? (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-700 font-medium space-y-1">
+          <div className="rounded-lg border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-emerald-700 dark:text-emerald-300 font-medium space-y-1">
             <div className="flex items-center gap-2 font-bold text-xs uppercase">
               <CheckCircle2 className="h-4 w-4" />
               Review Submitted for Moderation
             </div>
-            <p className="text-[11px] text-emerald-600/80">
+            <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80">
               Thank you for your feedback! Your review is in the moderation queue and will appear publicly once approved.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmitReview} className="space-y-4">
             {submitError && (
-              <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-rose-700 text-[11px] font-medium">
+              <div className="rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 p-3 text-rose-700 dark:text-rose-300 text-[11px] font-medium">
                 {submitError}
               </div>
             )}
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/50 block mb-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/50 dark:text-slate-400 block mb-1.5">
                 Your Rating *
               </label>
               <div className="flex items-center gap-1">
@@ -171,20 +171,20 @@ export function ProductReviewsTab({
                         className={`h-5 w-5 ${
                           star <= currentDisplayRating
                             ? "fill-amber-400 text-amber-400"
-                            : "text-gray-300"
+                            : "text-gray-300 dark:text-slate-700"
                         }`}
                       />
                     </button>
                   );
                 })}
-                <span className="ml-2 font-mono text-xs font-bold text-[#0F1B2D]">
+                <span className="ml-2 font-mono text-xs font-bold text-[#0F1B2D] dark:text-white">
                   {rating} / 5
                 </span>
               </div>
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/50 block mb-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/50 dark:text-slate-400 block mb-1.5">
                 Review Details (Optional)
               </label>
               <textarea
@@ -192,7 +192,7 @@ export function ProductReviewsTab({
                 placeholder="Share performance insights, fit details, or endurance tests..."
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white p-3 text-xs text-[#0F1B2D] placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#B8FF00]"
+                className="w-full rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 text-xs text-[#0F1B2D] dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-[#B8FF00]"
               />
             </div>
 
@@ -210,27 +210,27 @@ export function ProductReviewsTab({
 
       {/* Reviews List */}
       <div className="space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/50">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/50 dark:text-slate-400">
           APPROVED REVIEWS ({reviews.length})
         </h3>
 
         {isLoading ? (
           <div className="p-8 text-center text-gray-500">Loading reviews...</div>
         ) : reviews.length > 0 ? (
-          <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+          <div className="divide-y divide-gray-100 dark:divide-slate-800 rounded-xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
             {reviews.map((r) => (
               <div key={r.id} className="py-4 first:pt-0 last:pb-0 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#0F1B2D] text-xs">{r.userName}</span>
+                    <span className="font-bold text-[#0F1B2D] dark:text-white text-xs">{r.userName}</span>
                     {r.verifiedPurchase && (
-                      <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 text-[9px] uppercase font-bold px-2 py-0.2 flex items-center gap-1">
+                      <Badge className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-[9px] uppercase font-bold px-2 py-0.2 flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" />
                         Verified Purchase
                       </Badge>
                     )}
                   </div>
-                  <span className="text-[10px] text-gray-400">
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500">
                     {new Date(r.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -246,20 +246,20 @@ export function ProductReviewsTab({
                       className={`h-3.5 w-3.5 ${
                         star <= r.rating
                           ? "fill-amber-400 text-amber-400"
-                          : "text-gray-300"
+                          : "text-gray-300 dark:text-slate-700"
                       }`}
                     />
                   ))}
                 </div>
 
                 {r.comment && (
-                  <p className="text-xs text-[#0F1B2D]/70 leading-relaxed pt-1">{r.comment}</p>
+                  <p className="text-xs text-[#0F1B2D]/70 dark:text-slate-300 leading-relaxed pt-1">{r.comment}</p>
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center text-xs text-gray-500 rounded-xl border border-dashed border-gray-200">
+          <div className="p-8 text-center text-xs text-gray-500 dark:text-slate-400 rounded-xl border border-dashed border-gray-200 dark:border-slate-800">
             No approved public reviews yet for this product. Be the first to leave a review above!
           </div>
         )}

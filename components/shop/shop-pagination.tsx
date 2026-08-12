@@ -29,7 +29,7 @@ export function ShopPagination({ currentPage, totalPages }: ShopPaginationProps)
         size="icon"
         disabled={currentPage <= 1}
         onClick={() => goToPage(currentPage - 1)}
-        className="h-9 w-9 border-gray-200 bg-white text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D] disabled:opacity-40 rounded-lg"
+        className="h-9 w-9 border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-[#0F1B2D]/50 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-[#0F1B2D] dark:hover:text-white disabled:opacity-40 rounded-lg"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -42,7 +42,7 @@ export function ShopPagination({ currentPage, totalPages }: ShopPaginationProps)
           className={
             page === currentPage
               ? "h-9 w-9 bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a8ef00] rounded-lg"
-              : "h-9 w-9 border-gray-200 bg-white text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D] rounded-lg font-bold text-xs"
+              : "h-9 w-9 border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-[#0F1B2D]/50 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-[#0F1B2D] dark:hover:text-white rounded-lg font-bold text-xs"
           }
         >
           {page}
@@ -54,7 +54,7 @@ export function ShopPagination({ currentPage, totalPages }: ShopPaginationProps)
         size="icon"
         disabled={currentPage >= totalPages}
         onClick={() => goToPage(currentPage + 1)}
-        className="h-9 w-9 border-gray-200 bg-white text-[#0F1B2D]/50 hover:bg-gray-50 hover:text-[#0F1B2D] disabled:opacity-40 rounded-lg"
+        className="h-9 w-9 border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-[#0F1B2D]/50 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-[#0F1B2D] dark:hover:text-white disabled:opacity-40 rounded-lg"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

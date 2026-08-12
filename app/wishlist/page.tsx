@@ -13,7 +13,7 @@ export default async function WishlistPage() {
 
   if (!session?.user?.id) {
     return (
-      <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D]">
+      <div className="min-h-screen bg-[#F4F8FC] dark:bg-[#090E17] text-[#0F1B2D] dark:text-[#F1F5F9] transition-colors duration-200">
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           <WishlistView initialItems={[]} isAuthenticated={false} />
         </main>
@@ -51,7 +51,7 @@ export default async function WishlistPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D]">
+    <div className="min-h-screen bg-[#F4F8FC] dark:bg-[#090E17] text-[#0F1B2D] dark:text-[#F1F5F9] transition-colors duration-200">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <WishlistView initialItems={initialItems} isAuthenticated={true} />
       </main>

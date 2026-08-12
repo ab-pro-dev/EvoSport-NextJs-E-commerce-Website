@@ -87,9 +87,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const colors = Array.from(new Set(product.variants?.map((v) => v.color).filter(Boolean) || []));
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-black/50">
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden bg-[#F4F8FC] p-4">
+      <div className="relative aspect-square w-full overflow-hidden bg-[#F4F8FC] dark:bg-slate-900/60 p-4">
         <Image
           src={mainImage}
           alt={product.name}
@@ -121,7 +121,7 @@ export function ProductCard({ product }: ProductCardProps) {
               router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
             }
           }}
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#0F1B2D]/40 backdrop-blur-sm shadow-sm transition-all hover:text-rose-500 hover:bg-white hover:shadow-md"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 text-[#0F1B2D]/40 dark:text-slate-400 backdrop-blur-sm shadow-sm transition-all hover:text-rose-500 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md"
         >
           <Heart className="h-4 w-4" />
         </button>
@@ -131,7 +131,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleQuickAdd}
             disabled={isAdding}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F1B2D] py-2.5 text-xs font-extrabold uppercase text-white hover:bg-[#0F1B2D]/90 transition-colors shadow-lg disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F1B2D] dark:bg-[#B8FF00] py-2.5 text-xs font-extrabold uppercase text-white dark:text-[#0F1B2D] hover:bg-[#0F1B2D]/90 dark:hover:bg-[#a8ef00] transition-colors shadow-lg disabled:opacity-50"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
             {isAdding ? "Adding..." : added ? "Added!" : "Quick Add"}
@@ -141,11 +141,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Details */}
       <div className="flex flex-1 flex-col p-4">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">
           {product.brand.name}
         </span>
-        <Link href={`/products/${product.slug}`} className="hover:text-[#5B8DEF] transition-colors mt-0.5">
-          <h3 className="line-clamp-1 text-sm font-bold text-[#0F1B2D]">
+        <Link href={`/products/${product.slug}`} className="hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors mt-0.5">
+          <h3 className="line-clamp-1 text-sm font-bold text-[#0F1B2D] dark:text-white">
             {product.name}
           </h3>
         </Link>
@@ -159,34 +159,34 @@ export function ProductCard({ product }: ProductCardProps) {
                 className={`h-3 w-3 ${
                   i < Math.floor(avgRating)
                     ? "fill-amber-400 text-amber-400"
-                    : "fill-gray-200 text-gray-200"
+                    : "fill-gray-200 dark:fill-slate-700 text-gray-200 dark:text-slate-700"
                 }`}
               />
             ))}
           </div>
-          <span className="text-[11px] text-[#0F1B2D]/40 font-medium">({reviewCount})</span>
+          <span className="text-[11px] text-[#0F1B2D]/40 dark:text-slate-400 font-medium">({reviewCount})</span>
         </div>
 
         {/* Price & Real Color Variants */}
-        <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
+        <div className="mt-3 flex items-center justify-between border-t border-gray-100 dark:border-slate-800 pt-3">
           <div className="flex items-baseline gap-2">
-            <span className="text-base font-extrabold text-[#0F1B2D]">${price.toFixed(2)}</span>
+            <span className="text-base font-extrabold text-[#0F1B2D] dark:text-white">${price.toFixed(2)}</span>
             {compareAt && compareAt > price && (
-              <span className="text-xs text-[#0F1B2D]/30 line-through">${compareAt.toFixed(2)}</span>
+              <span className="text-xs text-[#0F1B2D]/30 dark:text-slate-500 line-through">${compareAt.toFixed(2)}</span>
             )}
           </div>
 
-          {/* Real Color Swatches Preview strictly from real variants */}
+          {/* Real Color Swatches Preview */}
           {colors.length > 1 && (
             <div className="flex items-center gap-1" title={`${colors.length} colors available`}>
               {colors.slice(0, 3).map((c, i) => (
                 <span
                   key={i}
-                  className="h-2.5 w-2.5 rounded-full border border-gray-300 bg-gray-200 inline-block"
+                  className="h-2.5 w-2.5 rounded-full border border-gray-300 dark:border-slate-600 bg-gray-200 dark:bg-slate-700 inline-block"
                 />
               ))}
               {colors.length > 3 && (
-                <span className="text-[9px] font-bold text-[#0F1B2D]/40">+{colors.length - 3}</span>
+                <span className="text-[9px] font-bold text-[#0F1B2D]/40 dark:text-slate-500">+{colors.length - 3}</span>
               )}
             </div>
           )}

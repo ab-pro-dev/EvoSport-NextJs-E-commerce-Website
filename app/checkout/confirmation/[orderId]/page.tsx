@@ -78,80 +78,80 @@ export default async function OrderConfirmationPage({ params }: ConfirmationPage
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D]">
+    <div className="min-h-screen bg-[#F4F8FC] dark:bg-[#090E17] text-[#0F1B2D] dark:text-[#F1F5F9] transition-colors duration-200">
       <main className="container mx-auto px-4 py-12 max-w-3xl">
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 sm:p-12 shadow-sm text-center space-y-8">
+        <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-8 sm:p-12 shadow-sm text-center space-y-8">
           {/* Success Icon */}
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 border border-emerald-200">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 border border-emerald-200 dark:border-emerald-800">
             <CheckCircle2 className="h-10 w-10" />
           </div>
 
           <div>
-            <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D]">
+            <h1 className="text-3xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">
               ORDER CONFIRMED!
             </h1>
-            <p className="mt-2 text-xs text-[#0F1B2D]/50">
+            <p className="mt-2 text-xs text-[#0F1B2D]/50 dark:text-slate-400">
               Thank you for your purchase. We&apos;ve received your order and are preparing your gear.
             </p>
           </div>
 
-          <div className="inline-flex items-center gap-2 rounded-xl bg-[#F4F8FC] px-4 py-2 text-xs font-mono text-[#0F1B2D]/60 border border-gray-200">
+          <div className="inline-flex items-center gap-2 rounded-xl bg-[#F4F8FC] dark:bg-slate-900 px-4 py-2 text-xs font-mono text-[#0F1B2D]/60 dark:text-slate-400 border border-gray-200 dark:border-slate-800">
             <span>Order ID:</span>
-            <strong className="text-[#0F1B2D] font-bold">{order.id}</strong>
+            <strong className="text-[#0F1B2D] dark:text-white font-bold">{order.id}</strong>
           </div>
 
           {/* Details Breakdown */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left pt-4 border-t border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left pt-4 border-t border-gray-100 dark:border-slate-800">
             {/* Shipping Info */}
-            <div className="rounded-xl border border-gray-200 bg-[#F4F8FC] p-4 space-y-1.5 text-xs">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40">Shipping Address</span>
-              <div className="font-bold text-[#0F1B2D] text-sm">{order.shippingAddress.fullName}</div>
-              <div className="text-[#0F1B2D]/50">{order.shippingAddress.line1}</div>
-              <div className="text-[#0F1B2D]/50">{order.shippingAddress.city}</div>
-              <div className="text-[#0F1B2D]/50">Phone: {order.shippingAddress.phone}</div>
+            <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900/60 p-4 space-y-1.5 text-xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">Shipping Address</span>
+              <div className="font-bold text-[#0F1B2D] dark:text-white text-sm">{order.shippingAddress.fullName}</div>
+              <div className="text-[#0F1B2D]/50 dark:text-slate-400">{order.shippingAddress.line1}</div>
+              <div className="text-[#0F1B2D]/50 dark:text-slate-400">{order.shippingAddress.city}</div>
+              <div className="text-[#0F1B2D]/50 dark:text-slate-400">Phone: {order.shippingAddress.phone}</div>
             </div>
 
             {/* Payment Summary */}
-            <div className="rounded-xl border border-gray-200 bg-[#F4F8FC] p-4 space-y-2 text-xs">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40">Payment Details</span>
+            <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900/60 p-4 space-y-2 text-xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">Payment Details</span>
               <div className="flex justify-between">
-                <span className="text-[#0F1B2D]/50">Status:</span>
-                <span className="font-extrabold text-emerald-600 uppercase">{order.status}</span>
+                <span className="text-[#0F1B2D]/50 dark:text-slate-400">Status:</span>
+                <span className="font-extrabold text-emerald-600 dark:text-emerald-400 uppercase">{order.status}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#0F1B2D]/50">Provider:</span>
-                <span className="font-mono text-[#0F1B2D]/70">{order.payment?.provider || "MOCK"}</span>
+                <span className="text-[#0F1B2D]/50 dark:text-slate-400">Provider:</span>
+                <span className="font-mono text-[#0F1B2D]/70 dark:text-slate-300">{order.payment?.provider || "MOCK"}</span>
               </div>
-              <div className="flex justify-between border-t border-gray-200 pt-2 font-bold">
-                <span className="text-[#0F1B2D]">Total Paid:</span>
+              <div className="flex justify-between border-t border-gray-200 dark:border-slate-800 pt-2 font-bold">
+                <span className="text-[#0F1B2D] dark:text-white">Total Paid:</span>
                 <span className="text-[#B8FF00] text-sm bg-[#0F1B2D] px-2 py-0.5 rounded-lg">${order.total.toFixed(2)}</span>
               </div>
             </div>
           </div>
 
           {/* Items Summary */}
-          <div className="text-left space-y-3 pt-4 border-t border-gray-100">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/40">Ordered Items ({order.items.length})</h3>
-            <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-[#F4F8FC] p-4">
+          <div className="text-left space-y-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">Ordered Items ({order.items.length})</h3>
+            <div className="divide-y divide-gray-100 dark:divide-slate-800 rounded-xl border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900/60 p-4">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0 text-xs">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-white">
+                    <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950">
                       <Image src={item.image} alt={item.productName} fill className="object-cover" />
                     </div>
                     <div>
-                      <div className="font-bold text-[#0F1B2D] text-sm line-clamp-1">{item.productName}</div>
-                      <div className="text-[#0F1B2D]/50">{item.variantName} • Qty: {item.quantity}</div>
+                      <div className="font-bold text-[#0F1B2D] dark:text-white text-sm line-clamp-1">{item.productName}</div>
+                      <div className="text-[#0F1B2D]/50 dark:text-slate-400">{item.variantName} • Qty: {item.quantity}</div>
                     </div>
                   </div>
-                  <div className="font-extrabold text-[#0F1B2D]">${item.total.toFixed(2)}</div>
+                  <div className="font-extrabold text-[#0F1B2D] dark:text-white">${item.total.toFixed(2)}</div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Action CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
             <Link href="/shop" className="w-full sm:w-auto">
               <Button size="lg" className="w-full bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] text-xs uppercase tracking-wider rounded-xl px-8 shadow-sm">
                 <ShoppingBag className="mr-2 h-4 w-4" />
@@ -159,7 +159,7 @@ export default async function OrderConfirmationPage({ params }: ConfirmationPage
               </Button>
             </Link>
             <Link href="/dashboard/orders" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full border-gray-200 text-[#0F1B2D] font-bold text-xs uppercase hover:border-[#B8FF00] hover:bg-[#F4F8FC] rounded-xl px-8">
+              <Button size="lg" variant="outline" className="w-full border-gray-200 dark:border-slate-800 text-[#0F1B2D] dark:text-white font-bold text-xs uppercase hover:border-[#B8FF00] dark:hover:border-[#B8FF00] hover:bg-[#F4F8FC] dark:hover:bg-slate-800 rounded-xl px-8">
                 View My Orders
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

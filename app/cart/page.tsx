@@ -89,7 +89,7 @@ export default async function CartPage() {
   const initialCart = await getInitialCart();
 
   return (
-    <div className="min-h-screen bg-[#F4F8FC] text-[#0F1B2D]">
+    <div className="min-h-screen bg-[#F4F8FC] dark:bg-[#090E17] text-[#0F1B2D] dark:text-[#F1F5F9] transition-colors duration-200">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <CartView initialCart={initialCart} isAuthenticated={Boolean(userId)} />
       </main>

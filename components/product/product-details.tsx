@@ -132,17 +132,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Real Breadcrumb built strictly from category and product name */}
-      <nav className="flex items-center gap-2 text-xs text-[#0F1B2D]/40 font-medium">
-        <Link href="/" className="hover:text-[#5B8DEF] transition-colors">Home</Link>
-        <ChevronRight className="h-3 w-3 text-gray-300" />
-        <Link href="/shop" className="hover:text-[#5B8DEF] transition-colors">Shop</Link>
-        <ChevronRight className="h-3 w-3 text-gray-300" />
-        <Link href={`/shop?category=${product.category.slug}`} className="hover:text-[#5B8DEF] transition-colors">
+      {/* Real Breadcrumb */}
+      <nav className="flex items-center gap-2 text-xs text-[#0F1B2D]/40 dark:text-slate-400 font-medium">
+        <Link href="/" className="hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors">Home</Link>
+        <ChevronRight className="h-3 w-3 text-gray-300 dark:text-slate-700" />
+        <Link href="/shop" className="hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors">Shop</Link>
+        <ChevronRight className="h-3 w-3 text-gray-300 dark:text-slate-700" />
+        <Link href={`/shop?category=${product.category.slug}`} className="hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors">
           {product.category.name}
         </Link>
-        <ChevronRight className="h-3 w-3 text-gray-300" />
-        <span className="text-[#0F1B2D] font-bold truncate max-w-[250px]">{product.name}</span>
+        <ChevronRight className="h-3 w-3 text-gray-300 dark:text-slate-700" />
+        <span className="text-[#0F1B2D] dark:text-white font-bold truncate max-w-[250px]">{product.name}</span>
       </nav>
 
       {/* Main Grid: Left Gallery + Right Panel */}
@@ -158,7 +158,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                     selectedImage === img.url
                       ? "border-[#B8FF00] ring-2 ring-[#B8FF00]/30 scale-105"
-                      : "border-gray-200 hover:border-gray-300 opacity-60 hover:opacity-100"
+                      : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 opacity-60 hover:opacity-100"
                   }`}
                 >
                   <Image src={img.url} alt={img.altText || product.name} fill className="object-cover" />
@@ -168,7 +168,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           )}
 
           {/* Main Product Image */}
-          <div className="relative aspect-square flex-1 overflow-hidden rounded-2xl border border-gray-200 bg-[#F4F8FC] p-6 shadow-sm">
+          <div className="relative aspect-square flex-1 overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-[#0F172A] p-6 shadow-sm">
             <Image
               src={selectedImage}
               alt={product.name}
@@ -193,7 +193,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
                 }
               }}
-              className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-[#0F1B2D]/40 backdrop-blur-md transition-colors hover:text-rose-400 border border-gray-200"
+              className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 dark:bg-slate-900/80 text-[#0F1B2D]/40 dark:text-slate-400 backdrop-blur-md transition-colors hover:text-rose-400 border border-gray-200 dark:border-slate-700"
             >
               <Heart className="h-4 w-4" />
             </button>
@@ -204,14 +204,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         <div className="lg:col-span-6 flex flex-col space-y-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="border-gray-200 text-[#0F1B2D]/40 bg-white text-[10px] uppercase font-bold">
+              <Badge variant="outline" className="border-gray-200 dark:border-slate-800 text-[#0F1B2D]/40 dark:text-slate-400 bg-white dark:bg-slate-900 text-[10px] uppercase font-bold">
                 {product.brand.name}
               </Badge>
               {currentVariant?.sku && (
-                <span className="text-[11px] text-[#0F1B2D]/40 font-mono">SKU: {currentVariant.sku}</span>
+                <span className="text-[11px] text-[#0F1B2D]/40 dark:text-slate-500 font-mono">SKU: {currentVariant.sku}</span>
               )}
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-[#0F1B2D] uppercase">
+            <h1 className="text-3xl font-black tracking-tight text-[#0F1B2D] dark:text-white uppercase">
               {product.name}
             </h1>
             
@@ -224,15 +224,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     className={`h-3.5 w-3.5 ${
                       i < Math.floor(product.avgRating)
                         ? "fill-amber-400 text-amber-400"
-                        : "text-gray-200"
+                        : "text-gray-200 dark:text-slate-700"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-xs font-bold text-[#0F1B2D]/70">
+              <span className="text-xs font-bold text-[#0F1B2D]/70 dark:text-slate-300">
                 {product.avgRating > 0 ? product.avgRating.toFixed(1) : "0.0"}
               </span>
-              <span className="text-xs text-[#0F1B2D]/50">
+              <span className="text-xs text-[#0F1B2D]/50 dark:text-slate-400">
                 ({product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"})
               </span>
             </div>
@@ -240,22 +240,22 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           {/* Real Price Header */}
           <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-black text-[#0F1B2D]">${price.toFixed(2)}</span>
+            <span className="text-3xl font-black text-[#0F1B2D] dark:text-white">${price.toFixed(2)}</span>
             {compareAt && compareAt > price && (
-              <span className="text-base text-[#0F1B2D]/30 line-through">${compareAt.toFixed(2)}</span>
+              <span className="text-base text-[#0F1B2D]/30 dark:text-slate-500 line-through">${compareAt.toFixed(2)}</span>
             )}
           </div>
 
           {/* Real Description from Database */}
-          <p className="text-xs leading-relaxed text-[#0F1B2D]/70">
+          <p className="text-xs leading-relaxed text-[#0F1B2D]/70 dark:text-slate-300">
             {product.description}
           </p>
 
-          {/* Dynamic Color Selection from real variants */}
+          {/* Dynamic Color Selection */}
           {uniqueColors.length > 0 && (
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60">
-                Color: <span className="text-[#0F1B2D] font-normal">{selectedColor}</span>
+              <div className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">
+                Color: <span className="text-[#0F1B2D] dark:text-white font-normal">{selectedColor}</span>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {uniqueColors.map((color) => (
@@ -264,8 +264,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={() => setSelectedColor(color)}
                     className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-all ${
                       selectedColor === color
-                        ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
-                        : "border-gray-200 bg-white text-[#0F1B2D]/60 hover:border-gray-300 hover:text-[#0F1B2D]"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]"
+                        : "border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-[#0F1B2D]/60 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-700 hover:text-[#0F1B2D] dark:hover:text-white"
                     }`}
                   >
                     {color}
@@ -275,11 +275,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </div>
           )}
 
-          {/* Dynamic Size Selection from real variants */}
+          {/* Dynamic Size Selection */}
           {uniqueSizes.length > 0 && (
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60">
-                Size: <span className="text-[#0F1B2D] font-normal">{selectedSize}</span>
+              <div className="text-xs font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">
+                Size: <span className="text-[#0F1B2D] dark:text-white font-normal">{selectedSize}</span>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {uniqueSizes.map((size) => (
@@ -288,8 +288,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     onClick={() => setSelectedSize(size)}
                     className={`h-9 min-w-10 rounded-md border px-3 text-xs font-bold transition-all ${
                       selectedSize === size
-                        ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
-                        : "border-gray-200 bg-white text-[#0F1B2D]/60 hover:border-gray-300 hover:text-[#0F1B2D]"
+                        ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]"
+                        : "border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-[#0F1B2D]/60 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-700 hover:text-[#0F1B2D] dark:hover:text-white"
                     }`}
                   >
                     {size}
@@ -301,8 +301,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
           {/* Real Stock Status Indicator */}
           <div className="flex items-center gap-2 text-xs font-bold">
-            <span className={`h-2 w-2 rounded-full ${inStock ? "bg-emerald-600 animate-pulse" : "bg-rose-500"}`} />
-            <span className={inStock ? "text-emerald-600" : "text-rose-500"}>
+            <span className={`h-2 w-2 rounded-full ${inStock ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
+            <span className={inStock ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"}>
               {inStock ? `In Stock (${stockCount} available)` : "Out of Stock"}
             </span>
           </div>
@@ -310,17 +310,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           {/* Quantity & Action Buttons */}
           <div className="space-y-4 pt-2">
             <div className="flex gap-3">
-              <div className="flex items-center rounded-lg border border-gray-200 bg-white px-2 shadow-sm">
+              <div className="flex items-center rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 shadow-sm">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-1.5 text-[#0F1B2D]/50 hover:text-[#0F1B2D] transition-colors"
+                  className="p-1.5 text-[#0F1B2D]/50 dark:text-slate-400 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"
                 >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
-                <span className="w-8 text-center text-xs font-black text-[#0F1B2D]">{quantity}</span>
+                <span className="w-8 text-center text-xs font-black text-[#0F1B2D] dark:text-white">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="p-1.5 text-[#0F1B2D]/50 hover:text-[#0F1B2D] transition-colors"
+                  className="p-1.5 text-[#0F1B2D]/50 dark:text-slate-400 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"
                 >
                   <Plus className="h-3.5 w-3.5" />
                 </button>
@@ -341,14 +341,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 variant="outline"
                 disabled={!inStock || isAdding}
                 onClick={handleBuyNow}
-                className="flex-1 border-[#0F1B2D] text-white hover:bg-[#0F1B2D]/90 h-11 text-xs uppercase tracking-wider font-black rounded-lg bg-[#0F1B2D] shadow-sm"
+                className="flex-1 border-[#0F1B2D] dark:border-white text-white dark:text-[#0F1B2D] hover:bg-[#0F1B2D]/90 dark:hover:bg-slate-100 h-11 text-xs uppercase tracking-wider font-black rounded-lg bg-[#0F1B2D] dark:bg-white shadow-sm"
               >
-                <Zap className="mr-2 h-4 w-4 text-[#B8FF00]" />
+                <Zap className="mr-2 h-4 w-4 text-[#B8FF00] dark:text-[#0F1B2D]" />
                 BUY NOW
               </Button>
             </div>
 
-            <div className="flex items-center gap-6 pt-2 text-xs font-semibold text-[#0F1B2D]/60">
+            <div className="flex items-center gap-6 pt-2 text-xs font-semibold text-[#0F1B2D]/60 dark:text-slate-400">
               <button
                 onClick={() => {
                   if (status !== "authenticated") {
@@ -356,12 +356,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
                   }
                 }}
-                className="flex items-center gap-1.5 hover:text-[#5B8DEF] transition-colors"
+                className="flex items-center gap-1.5 hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors"
               >
                 <Heart className="h-3.5 w-3.5" />
                 <span>Add to Wishlist</span>
               </button>
-              <button className="flex items-center gap-1.5 hover:text-[#5B8DEF] transition-colors">
+              <button className="flex items-center gap-1.5 hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors">
                 <RefreshCw className="h-3.5 w-3.5" />
                 <span>Compare</span>
               </button>
@@ -369,28 +369,28 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
 
           {/* Static Trust Badges Bar */}
-          <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200 text-left">
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white border border-gray-100 shadow-sm">
+          <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200 dark:border-slate-800 text-left">
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 shadow-sm">
               <Truck className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
               <div>
-                <div className="text-[11px] font-bold text-[#0F1B2D] uppercase">Free Shipping</div>
-                <div className="text-[10px] text-[#0F1B2D]/60">On orders over $100</div>
+                <div className="text-[11px] font-bold text-[#0F1B2D] dark:text-white uppercase">Free Shipping</div>
+                <div className="text-[10px] text-[#0F1B2D]/60 dark:text-slate-400">On orders over $100</div>
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white border border-gray-100 shadow-sm">
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 shadow-sm">
               <RefreshCw className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
               <div>
-                <div className="text-[11px] font-bold text-[#0F1B2D] uppercase">Easy Returns</div>
-                <div className="text-[10px] text-[#0F1B2D]/60">30 days return policy</div>
+                <div className="text-[11px] font-bold text-[#0F1B2D] dark:text-white uppercase">Easy Returns</div>
+                <div className="text-[10px] text-[#0F1B2D]/60 dark:text-slate-400">30 days return policy</div>
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white border border-gray-100 shadow-sm">
+            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 shadow-sm">
               <ShieldCheck className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
               <div>
-                <div className="text-[11px] font-bold text-[#0F1B2D] uppercase">Secure Payment</div>
-                <div className="text-[10px] text-[#0F1B2D]/60">100% secure payment</div>
+                <div className="text-[11px] font-bold text-[#0F1B2D] dark:text-white uppercase">Secure Payment</div>
+                <div className="text-[10px] text-[#0F1B2D]/60 dark:text-slate-400">100% secure payment</div>
               </div>
             </div>
           </div>

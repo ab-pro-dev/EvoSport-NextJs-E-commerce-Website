@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SiteHeader } from "@/components/navigation/site-header";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
@@ -34,31 +35,30 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#F4F8FC] text-[#0F1B2D] selection:bg-[#B8FF00] selection:text-[#0F1B2D]">
+      <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-[#B8FF00] selection:text-[#0F1B2D]">
         <NextTopLoader color="#B8FF00" showSpinner={false} height={3} crawl={true} />
-        <SessionProvider>
-          <SmoothScrollProvider>
-            <SiteHeader />
-            {children}
-            <Toaster
-              position="top-right"
-              theme="light"
-              toastOptions={{
-                style: {
-                  background: "#ffffff",
-                  color: "#0F1B2D",
-                  border: "1px solid #e5e7eb",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  borderRadius: "16px",
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)",
-                },
-              }}
-            />
-          </SmoothScrollProvider>
-        </SessionProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange={false}
+        >
+          <SessionProvider>
+            <SmoothScrollProvider>
+              <SiteHeader />
+              {children}
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  className: "dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 bg-white text-[#0F1B2D] border-gray-200 shadow-lg rounded-2xl",
+                }}
+              />
+            </SmoothScrollProvider>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

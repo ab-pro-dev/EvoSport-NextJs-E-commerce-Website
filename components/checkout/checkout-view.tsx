@@ -46,13 +46,19 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
   const [address, setAddress] = useState({
     fullName: "",
     email: "",
-    phone: "",
     line1: "",
     line2: "",
     city: "",
-    state: "",
-    zip: "",
-    country: "US",
+  });
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  // Payment form state
+  const [payment, setPayment] = useState({
+    cardNumber: "",
+    cardHolder: "",
+    expiryDate: "",
+    cvv: "",
   });
 
   // Shipping method selection
@@ -74,17 +80,33 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
     setAddress((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handlePaymentChange = (field: string, value: string) => {
+    setPayment((prev) => ({ ...prev, [field]: value }));
+  };
+
   const validateStep1 = () => {
     if (
-      !address.fullName ||
-      !address.email ||
-      !address.phone ||
-      !address.line1 ||
-      !address.city ||
-      !address.state ||
-      !address.zip
+      !address.fullName.trim() ||
+      !address.email.trim() ||
+      !phoneNumber.trim() ||
+      !address.line1.trim() ||
+      !address.city.trim()
     ) {
       setErrorMessage("Please fill in all required shipping address fields.");
+      return false;
+    }
+    setErrorMessage(null);
+    return true;
+  };
+
+  const validateStep2 = () => {
+    if (
+      !payment.cardNumber.trim() ||
+      !payment.cardHolder.trim() ||
+      !payment.expiryDate.trim() ||
+      !payment.cvv.trim()
+    ) {
+      setErrorMessage("Please fill in all mock payment details.");
       return false;
     }
     setErrorMessage(null);
@@ -98,24 +120,30 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
     }
   };
 
+  const handleNextToReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateStep2()) {
+      setStep(3);
+    }
+  };
+
   const handlePlaceOrder = async () => {
     try {
       setIsPlacingOrder(true);
       setErrorMessage(null);
+
+      const formattedPhone = `+251 ${phoneNumber.trim()}`;
 
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           shippingAddress: {
-            fullName: address.fullName,
-            phone: address.phone,
-            line1: address.line1,
-            line2: address.line2 || undefined,
-            city: address.city,
-            state: address.state,
-            zip: address.zip,
-            country: address.country,
+            fullName: address.fullName.trim(),
+            phone: formattedPhone,
+            line1: address.line1.trim(),
+            line2: address.line2.trim() || undefined,
+            city: address.city.trim(),
           },
         }),
       });
@@ -180,7 +208,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
           <span className="text-gray-300">&rarr;</span>
 
           <button
-            onClick={() => validateStep1() && setStep(3)}
+            onClick={() => validateStep1() && validateStep2() && setStep(3)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
               step === 3
                 ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D]"
@@ -216,10 +244,9 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Full Name *</label>
                   <Input
                     required
-                    placeholder="Alex Morgan"
                     value={address.fullName}
                     onChange={(e) => handleInputChange("fullName", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
@@ -228,86 +255,57 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   <Input
                     required
                     type="email"
-                    placeholder="alex@example.com"
                     value={address.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div>
                   <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Phone Number *</label>
-                  <Input
-                    required
-                    placeholder="+1 (555) 000-0000"
-                    value={address.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
-                  />
+                  <div className="mt-1.5 flex rounded-md shadow-sm">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-200 bg-gray-100 text-xs font-bold text-[#0F1B2D] select-none">
+                      +251
+                    </span>
+                    <Input
+                      required
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/[^\d]/g, "");
+                        setPhoneNumber(digits.startsWith("0") ? digits.slice(1) : digits);
+                      }}
+                      className="rounded-l-none bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    />
+                  </div>
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Street Address *</label>
                   <Input
                     required
-                    placeholder="123 Performance Way"
                     value={address.line1}
                     onChange={(e) => handleInputChange("line1", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Apartment, Suite, Unit (Optional)</label>
                   <Input
-                    placeholder="Apt 4B"
                     value={address.line2}
                     onChange={(e) => handleInputChange("line2", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
                   />
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">City *</label>
                   <Input
                     required
-                    placeholder="New York"
                     value={address.city}
                     onChange={(e) => handleInputChange("city", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">State / Province *</label>
-                  <Input
-                    required
-                    placeholder="NY"
-                    value={address.state}
-                    onChange={(e) => handleInputChange("state", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Postal / Zip Code *</label>
-                  <Input
-                    required
-                    placeholder="10001"
-                    value={address.zip}
-                    onChange={(e) => handleInputChange("zip", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Country *</label>
-                  <Input
-                    required
-                    placeholder="US"
-                    value={address.country}
-                    onChange={(e) => handleInputChange("country", e.target.value)}
-                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] placeholder:text-[#0F1B2D]/40 focus-visible:ring-[#B8FF00]"
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
                   />
                 </div>
               </div>
@@ -330,14 +328,14 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         name="shippingMethod"
                         checked={shippingMethod === "standard"}
                         onChange={() => setShippingMethod("standard")}
-                        className="accent-[#B8FF00]"
+                        className="text-[#0F1B2D] focus:ring-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-[#0F1B2D]">Standard Delivery</div>
-                        <div className="text-[10px] text-[#0F1B2D]/50">3-5 Business Days</div>
+                        <div className="text-xs font-bold text-[#0F1B2D]">Standard Shipping (3-5 Business Days)</div>
+                        <div className="text-[11px] text-[#0F1B2D]/40">Free on orders over $100</div>
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-[#B8FF00]">
+                    <span className="text-xs font-bold text-[#0F1B2D]">
                       {subtotal >= 100 ? "FREE" : "$9.99"}
                     </span>
                   </label>
@@ -356,11 +354,11 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         name="shippingMethod"
                         checked={shippingMethod === "express"}
                         onChange={() => setShippingMethod("express")}
-                        className="accent-[#B8FF00]"
+                        className="text-[#0F1B2D] focus:ring-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-[#0F1B2D]">Express Air Shipping</div>
-                        <div className="text-[10px] text-[#0F1B2D]/50">1-2 Business Days</div>
+                        <div className="text-xs font-bold text-[#0F1B2D]">Express Shipping (2 Business Days)</div>
+                        <div className="text-[11px] text-[#0F1B2D]/40">Guaranteed expedited air transit</div>
                       </div>
                     </div>
                     <span className="text-xs font-bold text-[#0F1B2D]">$12.99</span>
@@ -380,11 +378,11 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                         name="shippingMethod"
                         checked={shippingMethod === "overnight"}
                         onChange={() => setShippingMethod("overnight")}
-                        className="accent-[#B8FF00]"
+                        className="text-[#0F1B2D] focus:ring-[#B8FF00]"
                       />
                       <div>
-                        <div className="text-xs font-bold text-[#0F1B2D]">Priority Overnight</div>
-                        <div className="text-[10px] text-[#0F1B2D]/50">Next Business Day</div>
+                        <div className="text-xs font-bold text-[#0F1B2D]">Overnight Priority (Next Day)</div>
+                        <div className="text-[11px] text-[#0F1B2D]/40">Delivered by 10:30 AM next business day</div>
                       </div>
                     </div>
                     <span className="text-xs font-bold text-[#0F1B2D]">$24.99</span>
@@ -403,30 +401,67 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
             </form>
           )}
 
-          {/* STEP 2: MOCK PAYMENT PLACEHOLDER */}
+          {/* STEP 2: PAYMENT METHOD */}
           {step === 2 && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
+            <form onSubmit={handleNextToReview} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-6">
               <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
                 <CreditCard className="h-5 w-5 text-[#B8FF00]" />
-                <h2 className="text-lg font-black uppercase text-[#0F1B2D]">2. PAYMENT METHOD</h2>
+                <h2 className="text-lg font-black uppercase text-[#0F1B2D]">2. PAYMENT INFORMATION (MOCK)</h2>
               </div>
 
-              <div className="rounded-xl border border-[#B8FF00]/50 bg-[#F4F8FC] p-6 text-center space-y-3">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#B8FF00]/20 text-[#0F1B2D]">
-                  <Check className="h-6 w-6" />
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800 flex items-center gap-2">
+                <Check className="h-4 w-4 text-emerald-600" />
+                <span>Test Payment Gateway Active. You can use any 16-digit card number.</span>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Card Number *</label>
+                  <Input
+                    required
+                    placeholder="4242 4242 4242 4242"
+                    value={payment.cardNumber}
+                    onChange={(e) => handlePaymentChange("cardNumber", e.target.value)}
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                  />
                 </div>
-                <h3 className="text-sm font-bold uppercase text-[#0F1B2D]">Mock Checkout Enabled</h3>
-                <p className="text-xs text-[#0F1B2D]/60 max-w-md mx-auto">
-                  Instant mock payment simulation is active for testing. No real credit card or gateway processing required.
-                </p>
-                <div className="pt-2">
-                  <span className="inline-block rounded-md bg-white border border-gray-200 px-3 py-1 text-[11px] font-mono text-[#0F1B2D]">
-                    Provider: MOCK_PAYMENT (Instant Approval)
-                  </span>
+
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Cardholder Name *</label>
+                  <Input
+                    required
+                    placeholder="Name on card"
+                    value={payment.cardHolder}
+                    onChange={(e) => handlePaymentChange("cardHolder", e.target.value)}
+                    className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">Expiry Date *</label>
+                    <Input
+                      required
+                      placeholder="MM/YY"
+                      value={payment.expiryDate}
+                      onChange={(e) => handlePaymentChange("expiryDate", e.target.value)}
+                      className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60">CVV / CVC *</label>
+                    <Input
+                      required
+                      placeholder="123"
+                      value={payment.cvv}
+                      onChange={(e) => handlePaymentChange("cvv", e.target.value)}
+                      className="mt-1.5 bg-[#F4F8FC] border-gray-200 text-xs text-[#0F1B2D] focus-visible:ring-[#B8FF00]"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 pt-2">
                 <Button
                   type="button"
                   variant="outline"
@@ -437,8 +472,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   Back to Shipping
                 </Button>
                 <Button
-                  type="button"
-                  onClick={() => setStep(3)}
+                  type="submit"
                   size="lg"
                   className="flex-1 bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-12 text-xs uppercase tracking-wider rounded-xl shadow-sm"
                 >
@@ -446,7 +480,7 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
-            </div>
+            </form>
           )}
 
           {/* STEP 3: REVIEW ORDER */}
@@ -464,9 +498,9 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   <button onClick={() => setStep(1)} className="text-[#5B8DEF] hover:underline">Edit</button>
                 </div>
                 <p className="text-[#0F1B2D] font-bold">{address.fullName}</p>
-                <p className="text-[#0F1B2D]/60">{address.line1} {address.line2}</p>
-                <p className="text-[#0F1B2D]/60">{address.city}, {address.state} {address.zip}, {address.country}</p>
-                <p className="text-[#0F1B2D]/60">Phone: {address.phone}</p>
+                <p className="text-[#0F1B2D]/60">{address.line1}{address.line2 ? `, ${address.line2}` : ""}</p>
+                <p className="text-[#0F1B2D]/60">{address.city}</p>
+                <p className="text-[#0F1B2D]/60">Phone: +251 {phoneNumber}</p>
               </div>
 
               {/* Cart Items Summary List */}
@@ -528,57 +562,29 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
               ORDER SUMMARY
             </h2>
 
-            {/* Thumbnail Mini-List */}
-            <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
-              {cart.items.map((item) => (
-                <div key={item.id} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="relative h-10 w-10 rounded border border-gray-100 bg-[#F4F8FC] flex-shrink-0 overflow-hidden">
-                      <Image
-                        src={item.variant.product.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"}
-                        alt={item.variant.product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <div className="font-bold text-[#0F1B2D] line-clamp-1 max-w-[150px]">{item.variant.product.name}</div>
-                      <div className="text-[10px] text-[#0F1B2D]/50">Qty: {item.quantity}</div>
-                    </div>
-                  </div>
-                  <span className="font-bold text-[#0F1B2D]">${item.itemTotal.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Totals Breakdown */}
-            <div className="border-t border-gray-100 pt-4 space-y-2.5 text-xs">
+            <div className="space-y-3 text-xs">
               <div className="flex justify-between text-[#0F1B2D]/60">
-                <span>Subtotal</span>
+                <span>Subtotal ({cart.items.reduce((s, i) => s + i.quantity, 0)} items)</span>
                 <span className="font-bold text-[#0F1B2D]">${subtotal.toFixed(2)}</span>
               </div>
-
               <div className="flex justify-between text-[#0F1B2D]/60">
-                <span>Shipping ({shippingMethod.toUpperCase()})</span>
-                <span className="font-bold text-[#0F1B2D]">
-                  {shippingCost === 0 ? "FREE" : `$${shippingCost.toFixed(2)}`}
-                </span>
+                <span>Shipping ({shippingMethod})</span>
+                <span className="font-bold text-[#0F1B2D]">{shippingCost === 0 ? "FREE" : `$${shippingCost.toFixed(2)}`}</span>
               </div>
-
               <div className="flex justify-between text-[#0F1B2D]/60">
                 <span>Estimated Tax (8%)</span>
                 <span className="font-bold text-[#0F1B2D]">${tax.toFixed(2)}</span>
               </div>
 
-              <div className="border-t border-gray-100 pt-3 flex justify-between items-baseline">
+              <div className="border-t border-gray-100 pt-4 flex justify-between items-baseline">
                 <span className="text-sm font-black uppercase text-[#0F1B2D]">Total</span>
                 <span className="text-2xl font-black text-[#0F1B2D]">${total.toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2 pt-2 text-[11px] text-[#0F1B2D]/50 font-medium border-t border-gray-100">
-              <ShieldCheck className="h-4 w-4 text-[#B8FF00]" />
-              <span>Instant Order Guarantee</span>
+            <div className="pt-2 text-[11px] text-[#0F1B2D]/40 space-y-1">
+              <p>• Fast dispatch within 24 hours</p>
+              <p>• 30-day effortless returns policy</p>
             </div>
           </div>
         </div>

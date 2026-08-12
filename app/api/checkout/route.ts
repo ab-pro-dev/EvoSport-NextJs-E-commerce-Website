@@ -69,7 +69,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
     }
 
-    // 2. Validate shipping address fields and optional coupon code
+    // 2. Validate shipping address fields (fullName, phone, line1, city) and optional coupon code
     const body = await req.json();
     const { shippingAddress, couponCode } = body || {};
 
@@ -78,15 +78,12 @@ export async function POST(req: Request) {
       !shippingAddress.fullName ||
       !shippingAddress.phone ||
       !shippingAddress.line1 ||
-      !shippingAddress.city ||
-      !shippingAddress.state ||
-      !shippingAddress.zip ||
-      !shippingAddress.country
+      !shippingAddress.city
     ) {
       return NextResponse.json(
         {
           error:
-            "Invalid shipping address. Please provide fullName, phone, line1, city, state, zip, and country.",
+            "Invalid shipping address. Please provide fullName, phone, street address, and city.",
         },
         { status: 400 }
       );
@@ -182,18 +179,18 @@ export async function POST(req: Request) {
     // 6. Execute atomic DB transaction
     const completedOrder = await prisma.$transaction(
       async (tx) => {
-        // Create Address linked to authenticated user
+        // Create Address linked to authenticated user (State/Zip/Country optional)
         const address = await tx.address.create({
           data: {
             userId: authUserId,
-            fullName: shippingAddress.fullName,
-            phone: shippingAddress.phone,
-            line1: shippingAddress.line1,
-            line2: shippingAddress.line2 || null,
-            city: shippingAddress.city,
-            state: shippingAddress.state,
-            zip: shippingAddress.zip,
-            country: shippingAddress.country,
+            fullName: shippingAddress.fullName.trim(),
+            phone: shippingAddress.phone.trim(),
+            line1: shippingAddress.line1.trim(),
+            line2: shippingAddress.line2 ? shippingAddress.line2.trim() : null,
+            city: shippingAddress.city.trim(),
+            state: (shippingAddress.state || "").trim(),
+            zip: (shippingAddress.zip || "").trim(),
+            country: (shippingAddress.country || "ET").trim(),
           },
         });
 

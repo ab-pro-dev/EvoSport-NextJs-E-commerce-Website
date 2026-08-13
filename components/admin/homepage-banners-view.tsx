@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export interface BannerItem {
   id: string;
@@ -127,16 +128,20 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to upload image.");
+        toast.error(data.error || "Failed to upload image.");
         return;
       }
 
-      if (data.url) {
-        setBackgroundImageUrl(data.url);
+      const uploadedUrl = data.secure_url || data.url;
+      if (uploadedUrl) {
+        setBackgroundImageUrl(uploadedUrl);
+        toast.success("Image uploaded to Cloudinary successfully!");
+      } else {
+        toast.error("Failed to parse uploaded image URL.");
       }
     } catch (err) {
       console.error("Upload error:", err);
-      alert("Error uploading image file.");
+      toast.error("Error uploading image file.");
     } finally {
       setIsUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -146,6 +151,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
   const handleApplyUrl = () => {
     if (!imageUrlInput.trim()) return;
     setBackgroundImageUrl(imageUrlInput.trim());
+    toast.success("Image URL applied!");
   };
 
   // Form Submit: Create or Update

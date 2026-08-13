@@ -63,6 +63,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
+      url: secureUrl,
       secure_url: secureUrl,
       public_id: publicId,
     }, { status: 201 });

@@ -14,6 +14,7 @@ import {
   Ticket,
   BarChart3,
   FileText,
+  Megaphone,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { name: "Reviews", href: "/admin/reviews", icon: Star },
   { name: "Inventory", href: "/admin/inventory", icon: Boxes },
   { name: "Coupons", href: "/admin/coupons", icon: Ticket },
+  { name: "Banners", href: "/admin/homepage-banners", icon: Megaphone },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Blog", href: "/admin/blog", icon: FileText },
   { name: "Settings", href: "/admin/settings", icon: Settings },

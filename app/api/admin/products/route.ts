@@ -55,6 +55,7 @@ export async function GET(req: Request) {
         name: p.name,
         slug: p.slug,
         description: p.description,
+        gender: p.gender,
         basePrice: Number(p.basePrice),
         compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
         status: p.status,
@@ -98,6 +99,7 @@ export async function POST(req: Request) {
       description,
       brandId,
       categoryId,
+      gender,
       basePrice,
       compareAtPrice,
       status,
@@ -105,9 +107,10 @@ export async function POST(req: Request) {
       images,
     } = body || {};
 
-    if (!name || !slug || !brandId || !categoryId || basePrice === undefined) {
+    // name, slug, categoryId, basePrice are required. Brand and Description are OPTIONAL.
+    if (!name || !slug || !categoryId || basePrice === undefined) {
       return NextResponse.json(
-        { error: "Missing required fields: name, slug, brandId, categoryId, basePrice" },
+        { error: "Missing required fields: name, slug, categoryId, basePrice" },
         { status: 400 }
       );
     }
@@ -124,7 +127,38 @@ export async function POST(req: Request) {
       );
     }
 
-    // Aggregate images
+    // Validate categoryId
+    const categoryExists = await prisma.category.findUnique({
+      where: { id: categoryId },
+    });
+    if (!categoryExists) {
+      return NextResponse.json(
+        { error: "Selected category does not exist." },
+        { status: 400 }
+      );
+    }
+
+    // Validate brandId if provided
+    if (brandId && brandId.trim()) {
+      const brandExists = await prisma.brand.findUnique({
+        where: { id: brandId.trim() },
+      });
+      if (!brandExists) {
+        return NextResponse.json(
+          { error: "Selected brand does not exist." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate gender enum
+    const validGenders = ["MEN", "WOMEN", "KIDS", "UNISEX"];
+    const parsedGender =
+      gender && validGenders.includes(gender.toString().toUpperCase())
+        ? (gender.toString().toUpperCase() as "MEN" | "WOMEN" | "KIDS" | "UNISEX")
+        : "UNISEX";
+
+    // Aggregate images (support any number of images, no limit)
     const imageList: string[] = [];
     if (imageUrl && typeof imageUrl === "string" && imageUrl.trim()) {
       imageList.push(imageUrl.trim());
@@ -133,6 +167,8 @@ export async function POST(req: Request) {
       images.forEach((img) => {
         if (typeof img === "string" && img.trim() && !imageList.includes(img.trim())) {
           imageList.push(img.trim());
+        } else if (img && typeof img === "object" && typeof img.url === "string" && img.url.trim() && !imageList.includes(img.url.trim())) {
+          imageList.push(img.url.trim());
         }
       });
     }
@@ -141,9 +177,10 @@ export async function POST(req: Request) {
       data: {
         name: name.trim(),
         slug: slug.trim().toLowerCase(),
-        description: description ? description.trim() : "",
-        brandId,
+        description: description && description.trim() ? description.trim() : null,
+        brandId: brandId && brandId.trim() ? brandId.trim() : null,
         categoryId,
+        gender: parsedGender,
         basePrice: Number(basePrice),
         compareAtPrice: compareAtPrice ? Number(compareAtPrice) : null,
         status: status || "ACTIVE",

@@ -6,8 +6,8 @@ import { ProductReviewsTab } from "@/components/product/product-reviews-tab";
 interface ProductTabsProps {
   productId: string;
   slug: string;
-  description: string;
-  brandName: string;
+  description?: string | null;
+  brandName?: string | null;
   categoryName: string;
   reviewCount: number;
   avgRating: number;
@@ -54,16 +54,18 @@ export function ProductTabs({
 
         <TabsContent value="description" className="mt-6 space-y-4 text-xs text-[#0F1B2D]/70 dark:text-slate-300">
           <p className="leading-relaxed text-[#0F1B2D]/70 dark:text-slate-300">
-            {description}
+            {description || "High-performance athletic gear designed for maximum endurance, comfort, and durability."}
           </p>
         </TabsContent>
 
         <TabsContent value="details" className="mt-6 space-y-4">
           <div className="divide-y divide-gray-100 dark:divide-slate-800 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs shadow-sm">
-            <div className="grid grid-cols-3 p-3">
-              <span className="font-bold text-[#0F1B2D] dark:text-white">Brand</span>
-              <span className="col-span-2 text-[#0F1B2D]/70 dark:text-slate-300">{brandName}</span>
-            </div>
+            {brandName && (
+              <div className="grid grid-cols-3 p-3">
+                <span className="font-bold text-[#0F1B2D] dark:text-white">Brand</span>
+                <span className="col-span-2 text-[#0F1B2D]/70 dark:text-slate-300">{brandName}</span>
+              </div>
+            )}
             <div className="grid grid-cols-3 p-3">
               <span className="font-bold text-[#0F1B2D] dark:text-white">Category</span>
               <span className="col-span-2 text-[#0F1B2D]/70 dark:text-slate-300">{categoryName}</span>

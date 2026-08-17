@@ -29,13 +29,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   return {
     title: `${product.name} | EvoSport`,
-    description: product.description,
+    description: product.description || undefined,
     alternates: {
       canonical: `/products/${product.slug}`,
     },
     openGraph: {
       title: `${product.name} | EvoSport`,
-      description: product.description,
+      description: product.description || undefined,
       images: firstImageUrl ? [{ url: firstImageUrl, alt: product.name }] : [],
     },
   };
@@ -116,7 +116,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: product.description,
+    description: product.description || undefined,
     image: productImages.length > 0 ? productImages : undefined,
     offers: {
       "@type": "Offer",
@@ -146,13 +146,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Main Product Details & Gallery */}
         <ProductDetails product={serializedProduct} />
 
-        {/* Dynamic Product Tabs with Suspense Boundary */}
+        {/* Product Tabs with Reviews & Specifications */}
         <Suspense fallback={<div className="h-64 bg-white dark:bg-slate-900 animate-pulse rounded-xl my-8 border border-gray-200 dark:border-slate-800" />}>
           <ProductTabs
             productId={product.id}
             slug={product.slug}
             description={product.description}
-            brandName={product.brand.name}
+            brandName={product.brand?.name || null}
             categoryName={product.category.name}
             reviewCount={serializedProduct.reviewCount}
             avgRating={serializedProduct.avgRating}

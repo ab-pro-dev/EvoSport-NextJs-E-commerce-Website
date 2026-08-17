@@ -23,30 +23,48 @@ interface ProductImageItem {
   position: number;
 }
 
+interface CategoryItem {
+  id: string;
+  name: string;
+  slug?: string;
+  parentId?: string | null;
+  parent?: { id: string; name: string; slug: string } | null;
+}
+
 interface ProductDetailProps {
   product: {
     id: string;
     name: string;
     slug: string;
-    description: string;
+    description: string | null;
+    gender?: string;
     basePrice: number;
     compareAtPrice: number | null;
     status: string;
-    brandId: string;
+    brandId: string | null;
     categoryId: string;
     images: ProductImageItem[];
     variants: Variant[];
   };
   brands: { id: string; name: string }[];
-  categories: { id: string; name: string }[];
+  categories: CategoryItem[];
 }
 
 export function ProductDetailEditView({ product, brands, categories }: ProductDetailProps) {
+  // 1. Categories Hierarchy
+  const mainCategories = categories.filter((c) => !c.parentId);
+  const currentCat = categories.find((c) => c.id === product.categoryId);
+  const initialMainId = currentCat?.parentId || (currentCat && !currentCat.parentId ? currentCat.id : (mainCategories[0]?.id || ""));
+
+  const [selectedMainCatId, setSelectedMainCatId] = useState(initialMainId);
+  const availableSubcategories = categories.filter((c) => c.parentId === selectedMainCatId);
+
   // Basic Info Form State
   const [name, setName] = useState(product.name);
   const [slug, setSlug] = useState(product.slug);
-  const [description, setDescription] = useState(product.description);
-  const [brandId, setBrandId] = useState(product.brandId);
+  const [description, setDescription] = useState(product.description || "");
+  const [gender, setGender] = useState(product.gender || "UNISEX");
+  const [brandId, setBrandId] = useState(product.brandId || "");
   const [categoryId, setCategoryId] = useState(product.categoryId);
   const [basePrice, setBasePrice] = useState(product.basePrice.toString());
   const [compareAtPrice, setCompareAtPrice] = useState(product.compareAtPrice ? product.compareAtPrice.toString() : "");
@@ -54,6 +72,16 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [productSuccessMsg, setProductSuccessMsg] = useState<string | null>(null);
   const [productErrorMsg, setProductErrorMsg] = useState<string | null>(null);
+
+  const handleMainCategoryChange = (mainCatId: string) => {
+    setSelectedMainCatId(mainCatId);
+    const subcats = categories.filter((c) => c.parentId === mainCatId);
+    if (subcats.length > 0) {
+      setCategoryId(subcats[0].id);
+    } else {
+      setCategoryId(mainCatId);
+    }
+  };
 
   // Images State
   const [images, setImages] = useState<ProductImageItem[]>(product.images);
@@ -81,11 +109,12 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
-          slug,
-          description,
-          brandId,
-          categoryId,
+          name: name.trim(),
+          slug: slug.trim(),
+          description: description.trim() || null,
+          brandId: brandId.trim() || null,
+          categoryId: categoryId || selectedMainCatId,
+          gender,
           basePrice: parseFloat(basePrice),
           compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
           status,
@@ -291,14 +320,34 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Gender & Brand (Optional) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Brand *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                    GENDER *
+                  </label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 font-bold focus:outline-none focus:border-rose-500"
+                  >
+                    <option value="MEN">Men</option>
+                    <option value="WOMEN">Women</option>
+                    <option value="KIDS">Kids</option>
+                    <option value="UNISEX">Unisex</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                    Brand (Optional)
+                  </label>
                   <select
                     value={brandId}
                     onChange={(e) => setBrandId(e.target.value)}
-                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5"
+                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
                   >
+                    <option value="">-- No Brand / Generic (Optional) --</option>
                     {brands.map((b) => (
                       <option key={b.id} value={b.id}>
                         {b.name}
@@ -306,20 +355,56 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
                     ))}
                   </select>
                 </div>
+              </div>
 
-                <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Category *</label>
-                  <select
-                    value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
-                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5"
-                  >
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+              {/* Two-step Category Picker */}
+              <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950/60 p-4 space-y-3">
+                <div className="text-[11px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                  <span>Category Tree Selection</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Step 1: Main Category */}
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                      MAIN CATEGORY *
+                    </label>
+                    <select
+                      value={selectedMainCatId}
+                      onChange={(e) => handleMainCategoryChange(e.target.value)}
+                      className="mt-1 w-full bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 font-bold focus:outline-none focus:border-rose-500"
+                    >
+                      {mainCategories.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Step 2: Subcategory */}
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                      SUBCATEGORY *
+                    </label>
+                    <select
+                      value={categoryId}
+                      onChange={(e) => setCategoryId(e.target.value)}
+                      className="mt-1 w-full bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 font-bold focus:outline-none focus:border-rose-500"
+                    >
+                      {availableSubcategories.length > 0 ? (
+                        availableSubcategories.map((sub) => (
+                          <option key={sub.id} value={sub.id}>
+                            {sub.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value={selectedMainCatId}>
+                          {mainCategories.find((p) => p.id === selectedMainCatId)?.name || "General"}
+                        </option>
+                      )}
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -352,7 +437,7 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5"
+                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
                   >
                     <option value="ACTIVE">ACTIVE</option>
                     <option value="DRAFT">DRAFT</option>
@@ -362,12 +447,15 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
               </div>
 
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Description</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                  Description (Optional)
+                </label>
                 <textarea
                   rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
+                  placeholder="Detailed product features, technical specifications, and materials (optional)..."
+                  className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500 placeholder:text-neutral-400"
                 />
               </div>
 

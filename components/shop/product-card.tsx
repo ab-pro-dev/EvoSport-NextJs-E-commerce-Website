@@ -13,11 +13,11 @@ interface ProductCardProps {
     id: string;
     name: string;
     slug: string;
-    description: string;
+    description?: string | null;
     basePrice: number;
     compareAtPrice: number | null;
     images: { url: string; altText: string | null }[];
-    brand: { name: string };
+    brand?: { name: string } | null;
     category: { name: string };
     variants?: { id?: string; color: string }[];
     avgRating?: number;
@@ -99,39 +99,34 @@ export function ProductCard({ product }: ProductCardProps) {
         
         {/* Badges */}
         <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10">
-          {discountPercent ? (
-            <span className="inline-flex items-center rounded-lg bg-[#B8FF00] px-2.5 py-1 text-[11px] font-extrabold text-[#0F1B2D]">
+          {discountPercent && (
+            <span className="rounded-md bg-[#B8FF00] px-2 py-0.5 text-[10px] font-black uppercase text-[#0F1B2D] shadow-sm">
               -{discountPercent}%
             </span>
-          ) : (
-            <span className="inline-flex items-center rounded-lg bg-[#B8FF00] px-2.5 py-1 text-[10px] font-extrabold tracking-wider uppercase text-[#0F1B2D]">
-              BEST SELLER
+          )}
+          {product.category && (
+            <span className="rounded-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold text-[#0F1B2D] dark:text-slate-200 shadow-sm border border-gray-100 dark:border-slate-800">
+              {product.category.name}
             </span>
           )}
         </div>
 
-        {/* Wishlist Icon */}
-        <button
-          aria-label="Add to wishlist"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (status !== "authenticated") {
-              toast.error("Please log in to save items to your wishlist.");
-              router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
-            }
-          }}
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 text-[#0F1B2D]/40 dark:text-slate-400 backdrop-blur-sm shadow-sm transition-all hover:text-rose-500 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md"
-        >
-          <Heart className="h-4 w-4" />
-        </button>
+        {/* Action Buttons: Wishlist & Quick Add */}
+        <div className="absolute right-3 top-3 flex flex-col gap-2 z-10">
+          <Link
+            href={`/products/${product.slug}`}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-[#0F1B2D] dark:text-white shadow-sm transition-all hover:bg-white dark:hover:bg-slate-800 hover:text-rose-500"
+            title="View Details"
+          >
+            <Heart className="h-4 w-4" />
+          </Link>
+        </div>
 
-        {/* Quick Add - appears on hover */}
-        <div className="absolute bottom-3 left-3 right-3 z-10 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+        <div className="absolute inset-x-3 bottom-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10">
           <button
             onClick={handleQuickAdd}
             disabled={isAdding}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F1B2D] dark:bg-[#B8FF00] py-2.5 text-xs font-extrabold uppercase text-white dark:text-[#0F1B2D] hover:bg-[#0F1B2D]/90 dark:hover:bg-[#a8ef00] transition-colors shadow-lg disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#B8FF00] py-2.5 text-xs font-black uppercase tracking-wider text-[#0F1B2D] shadow-lg shadow-[#B8FF00]/20 hover:bg-[#a8ef00] transition-colors"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
             {isAdding ? "Adding..." : added ? "Added!" : "Quick Add"}
@@ -141,9 +136,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Details */}
       <div className="flex flex-1 flex-col p-4">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">
-          {product.brand.name}
-        </span>
+        {product.brand?.name && (
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">
+            {product.brand.name}
+          </span>
+        )}
         <Link href={`/products/${product.slug}`} className="hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors mt-0.5">
           <h3 className="line-clamp-1 text-sm font-bold text-[#0F1B2D] dark:text-white">
             {product.name}

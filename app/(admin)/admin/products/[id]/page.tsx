@@ -39,7 +39,16 @@ export default async function AdminEditProductPage({
       },
     }),
     prisma.brand.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    prisma.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        parentId: true,
+        parent: { select: { id: true, name: true, slug: true } },
+      },
+      orderBy: { name: "asc" },
+    }),
   ]);
 
   if (!productRaw) {
@@ -50,11 +59,12 @@ export default async function AdminEditProductPage({
     id: productRaw.id,
     name: productRaw.name,
     slug: productRaw.slug,
-    description: productRaw.description,
+    description: productRaw.description || "",
+    gender: productRaw.gender,
     basePrice: Number(productRaw.basePrice),
     compareAtPrice: productRaw.compareAtPrice ? Number(productRaw.compareAtPrice) : null,
     status: productRaw.status,
-    brandId: productRaw.brandId,
+    brandId: productRaw.brandId || "",
     categoryId: productRaw.categoryId,
     images: productRaw.images.map((img) => ({
       id: img.id,

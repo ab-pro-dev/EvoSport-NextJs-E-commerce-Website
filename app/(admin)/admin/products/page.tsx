@@ -62,6 +62,7 @@ export default async function AdminProductsPage() {
       name: p.name,
       slug: p.slug,
       description: p.description,
+      gender: p.gender,
       basePrice: Number(p.basePrice),
       compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : null,
       status: p.status,

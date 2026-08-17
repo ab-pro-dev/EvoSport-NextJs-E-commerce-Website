@@ -12,11 +12,13 @@ interface ProductItem {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
+  gender?: string;
   basePrice: number;
   compareAtPrice: number | null;
   status: string;
-  brand: { id: string; name: string };
-  category: { id: string; name: string };
+  brand?: { id: string; name: string } | null;
+  category?: { id: string; name: string } | null;
   image: string | null;
   imagesCount: number;
   variantsCount: number;
@@ -46,31 +48,32 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Group categories into Parents (Genders) and Subcategories
-  const parentCategories = useMemo(() => {
+  // 1. Parent Categories (Main Categories)
+  const mainCategories = useMemo(() => {
     return categories.filter((c) => !c.parentId);
   }, [categories]);
 
-  const defaultGenderId = parentCategories[0]?.id || "";
-  const [selectedGenderId, setSelectedGenderId] = useState(defaultGenderId);
+  const defaultMainCatId = mainCategories[0]?.id || "";
+  const [selectedMainCatId, setSelectedMainCatId] = useState(defaultMainCatId);
 
-  // Subcategories for the selected gender
+  // 2. Subcategories dynamically filtered to selected Main Category
   const availableSubcategories = useMemo(() => {
-    return categories.filter((c) => c.parentId === selectedGenderId);
-  }, [categories, selectedGenderId]);
+    return categories.filter((c) => c.parentId === selectedMainCatId);
+  }, [categories, selectedMainCatId]);
 
   // Form State for Add Product
   const [newProductName, setNewProductName] = useState("");
   const [newProductSlug, setNewProductSlug] = useState("");
   const [newProductDesc, setNewProductDesc] = useState("");
-  const [newBrandId, setNewBrandId] = useState(brands[0]?.id || "");
+  const [newGender, setNewGender] = useState<"MEN" | "WOMEN" | "KIDS" | "UNISEX">("UNISEX");
+  const [newBrandId, setNewBrandId] = useState("");
   const [newCategoryId, setNewCategoryId] = useState(availableSubcategories[0]?.id || "");
   const [newBasePrice, setNewBasePrice] = useState("");
   const [newComparePrice, setNewComparePrice] = useState("");
   const [newStatus, setNewStatus] = useState("ACTIVE");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Image Upload State
+  // Image Upload State (unlimited images support)
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [imageUrlInput, setImageUrlInput] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -81,7 +84,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
     const matchesSearch =
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.brand.name.toLowerCase().includes(searchQuery.toLowerCase());
+      (p.brand?.name && p.brand.name.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === "ALL" || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -96,14 +99,32 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
     );
   };
 
-  const handleGenderChange = (genderId: string) => {
-    setSelectedGenderId(genderId);
-    const subcats = categories.filter((c) => c.parentId === genderId);
+  const handleMainCategoryChange = (mainCatId: string) => {
+    setSelectedMainCatId(mainCatId);
+    const subcats = categories.filter((c) => c.parentId === mainCatId);
     if (subcats.length > 0) {
       setNewCategoryId(subcats[0].id);
     } else {
-      setNewCategoryId(genderId);
+      setNewCategoryId(mainCatId);
     }
+  };
+
+  const openAddModal = () => {
+    setIsAddModalOpen(true);
+    const initialMain = mainCategories[0]?.id || "";
+    setSelectedMainCatId(initialMain);
+    const subcats = categories.filter((c) => c.parentId === initialMain);
+    setNewCategoryId(subcats[0]?.id || initialMain);
+    setNewGender("UNISEX");
+    setNewBrandId("");
+    setNewProductName("");
+    setNewProductSlug("");
+    setNewProductDesc("");
+    setNewBasePrice("");
+    setNewComparePrice("");
+    setImageUrls([]);
+    setImageUrlInput("");
+    setErrorMsg(null);
   };
 
   // Image Upload via File
@@ -157,12 +178,20 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
       setIsSubmitting(true);
       setErrorMsg(null);
 
+      const targetCategoryId = newCategoryId || selectedMainCatId;
+      if (!targetCategoryId) {
+        setErrorMsg("Please select a valid subcategory.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const payload = {
-        name: newProductName,
-        slug: newProductSlug,
-        description: newProductDesc,
-        brandId: newBrandId,
-        categoryId: newCategoryId || selectedGenderId,
+        name: newProductName.trim(),
+        slug: newProductSlug.trim(),
+        description: newProductDesc.trim() || undefined,
+        brandId: newBrandId.trim() || undefined,
+        categoryId: targetCategoryId,
+        gender: newGender,
         basePrice: parseFloat(newBasePrice),
         compareAtPrice: newComparePrice ? parseFloat(newComparePrice) : null,
         status: newStatus,
@@ -185,17 +214,27 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
       }
 
       toast.success("Product created successfully!");
-      setProducts([data, ...products]);
-      setIsAddModalOpen(false);
+      const createdProduct = data.product;
+      const formattedCreated: ProductItem = {
+        id: createdProduct.id,
+        name: createdProduct.name,
+        slug: createdProduct.slug,
+        description: createdProduct.description,
+        gender: createdProduct.gender,
+        basePrice: Number(createdProduct.basePrice),
+        compareAtPrice: createdProduct.compareAtPrice ? Number(createdProduct.compareAtPrice) : null,
+        status: createdProduct.status,
+        brand: createdProduct.brand,
+        category: createdProduct.category,
+        image: createdProduct.images?.[0]?.url || null,
+        imagesCount: createdProduct.images?.length || 0,
+        variantsCount: createdProduct.variants?.length || 0,
+        totalStock: createdProduct.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0,
+        createdAt: createdProduct.createdAt || new Date().toISOString(),
+      };
 
-      // Reset Form
-      setNewProductName("");
-      setNewProductSlug("");
-      setNewProductDesc("");
-      setNewBasePrice("");
-      setNewComparePrice("");
-      setImageUrls([]);
-      setImageUrlInput("");
+      setProducts([formattedCreated, ...products]);
+      setIsAddModalOpen(false);
     } catch (err: any) {
       console.error("Error adding product:", err);
       const msg = err?.message || "Failed to create product.";
@@ -246,12 +285,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
         </div>
 
         <Button
-          onClick={() => {
-            setIsAddModalOpen(true);
-            if (parentCategories.length > 0) {
-              handleGenderChange(parentCategories[0].id);
-            }
-          }}
+          onClick={openAddModal}
           className="bg-rose-600 text-white font-black uppercase text-xs tracking-wider hover:bg-rose-500 rounded-lg h-10 px-5 shadow-sm"
         >
           <Plus className="mr-1.5 h-4 w-4" />
@@ -293,7 +327,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
             <thead className="border-b border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950/80 text-[10px] font-black uppercase text-neutral-500 dark:text-neutral-400">
               <tr>
                 <th className="py-3.5 px-4">Product</th>
-                <th className="py-3.5 px-4">Category</th>
+                <th className="py-3.5 px-4">Category & Gender</th>
                 <th className="py-3.5 px-4">Price</th>
                 <th className="py-3.5 px-4">Variants / Stock</th>
                 <th className="py-3.5 px-4">Status</th>
@@ -329,8 +363,13 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="font-semibold text-neutral-900 dark:text-white">{p.category?.name}</span>
-                      <span className="block text-[10px] text-neutral-400 dark:text-neutral-500">{p.brand?.name}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-neutral-900 dark:text-white">{p.category?.name || "Uncategorized"}</span>
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-gray-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+                          {p.gender || "UNISEX"}
+                        </span>
+                      </div>
+                      <span className="block text-[10px] text-neutral-400 dark:text-neutral-500">{p.brand?.name || "No Brand"}</span>
                     </td>
 
                     <td className="py-3.5 px-4 font-bold text-neutral-900 dark:text-white">
@@ -413,6 +452,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
             )}
 
             <form onSubmit={handleAddProduct} className="space-y-4">
+              {/* Product Name & Slug */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Product Name *</label>
@@ -437,40 +477,61 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                 </div>
               </div>
 
-              {/* Brand Selector */}
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Brand *</label>
-                <select
-                  value={newBrandId}
-                  onChange={(e) => setNewBrandId(e.target.value)}
-                  className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
-                >
-                  {brands.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
+              {/* 1. GENDER DROPDOWN & BRAND (OPTIONAL) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                    GENDER *
+                  </label>
+                  <select
+                    value={newGender}
+                    onChange={(e) => setNewGender(e.target.value as "MEN" | "WOMEN" | "KIDS" | "UNISEX")}
+                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 font-bold focus:outline-none focus:border-rose-500"
+                  >
+                    <option value="MEN">Men</option>
+                    <option value="WOMEN">Women</option>
+                    <option value="KIDS">Kids</option>
+                    <option value="UNISEX">Unisex</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                    Brand (Optional)
+                  </label>
+                  <select
+                    value={newBrandId}
+                    onChange={(e) => setNewBrandId(e.target.value)}
+                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
+                  >
+                    <option value="">-- No Brand / Generic (Optional) --</option>
+                    {brands.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {/* TWO-STEP GENDER + CATEGORY PICKER */}
+              {/* 2. TWO-STEP MAIN CATEGORY + SUBCATEGORY PICKER */}
               <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950/60 p-4 space-y-3">
                 <div className="text-[11px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                  <span>Category & Department Selection</span>
+                  <span>Category Tree Selection</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Step 1: Gender Selector */}
+                  {/* Step 1: Main Category */}
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
-                      1. Gender / Department *
+                      MAIN CATEGORY *
                     </label>
                     <select
-                      value={selectedGenderId}
-                      onChange={(e) => handleGenderChange(e.target.value)}
+                      value={selectedMainCatId}
+                      onChange={(e) => handleMainCategoryChange(e.target.value)}
                       className="mt-1 w-full bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 font-bold focus:outline-none focus:border-rose-500"
                     >
-                      {parentCategories.map((p) => (
+                      {mainCategories.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
                         </option>
@@ -478,10 +539,10 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                     </select>
                   </div>
 
-                  {/* Step 2: Specific Subcategory within Gender */}
+                  {/* Step 2: Subcategory dynamically filtered */}
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
-                      2. Subcategory *
+                      SUBCATEGORY *
                     </label>
                     <select
                       value={newCategoryId}
@@ -495,26 +556,30 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                           </option>
                         ))
                       ) : (
-                        <option value={selectedGenderId}>General ({parentCategories.find(p => p.id === selectedGenderId)?.name})</option>
+                        <option value={selectedMainCatId}>
+                          {mainCategories.find((p) => p.id === selectedMainCatId)?.name || "General"}
+                        </option>
                       )}
                     </select>
                   </div>
                 </div>
               </div>
 
-              {/* IMAGE UPLOAD SECTION */}
+              {/* 3. MULTIPLE IMAGES SECTION (Unlimited) */}
               <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950/60 p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
                     <ImageIcon className="h-3.5 w-3.5" />
-                    Product Images
+                    Product Images ({imageUrls.length} added)
                   </span>
                   <div className="flex rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-0.5 text-[10px] font-bold">
                     <button
                       type="button"
                       onClick={() => setImageInputMode("upload")}
                       className={`px-2.5 py-1 rounded-md transition-colors ${
-                        imageInputMode === "upload" ? "bg-rose-600 text-white" : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+                        imageInputMode === "upload"
+                          ? "bg-rose-600 text-white"
+                          : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
                       }`}
                     >
                       Upload File
@@ -523,7 +588,9 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                       type="button"
                       onClick={() => setImageInputMode("url")}
                       className={`px-2.5 py-1 rounded-md transition-colors ${
-                        imageInputMode === "url" ? "bg-rose-600 text-white" : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+                        imageInputMode === "url"
+                          ? "bg-rose-600 text-white"
+                          : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
                       }`}
                     >
                       Paste URL
@@ -549,7 +616,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                       <span className="text-xs font-bold text-neutral-900 dark:text-white">
                         {isUploadingImage ? "Uploading to Cloudinary..." : "Click to browse and upload image"}
                       </span>
-                      <span className="text-[10px] text-neutral-500 mt-0.5">PNG, JPG, WEBP up to 10MB</span>
+                      <span className="text-[10px] text-neutral-500 mt-0.5">PNG, JPG, WEBP up to 10MB (Unlimited uploads)</span>
                     </label>
                   </div>
                 ) : (
@@ -570,11 +637,14 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                   </div>
                 )}
 
-                {/* Thumbnails of Added Images */}
+                {/* Thumbnails of Added Images (Unlimited images) */}
                 {imageUrls.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-neutral-800/80">
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-neutral-800/80 max-h-48 overflow-y-auto p-1">
                     {imageUrls.map((url, idx) => (
-                      <div key={idx} className="relative h-16 w-16 rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 group">
+                      <div
+                        key={idx}
+                        className="relative h-16 w-16 rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 group shrink-0"
+                      >
                         <Image src={url} alt={`Preview ${idx + 1}`} fill className="object-cover" />
                         <button
                           type="button"
@@ -583,9 +653,13 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                         >
                           <X className="h-4 w-4" />
                         </button>
-                        {idx === 0 && (
-                          <span className="absolute bottom-0 inset-x-0 bg-rose-600/90 text-white text-[8px] font-black uppercase text-center py-0.5">
-                            Primary
+                        {idx === 0 ? (
+                          <span className="absolute bottom-0 inset-x-0 bg-rose-600 text-white text-[7px] font-black uppercase text-center py-0.5">
+                            Card Primary
+                          </span>
+                        ) : (
+                          <span className="absolute bottom-0 inset-x-0 bg-neutral-900/80 text-neutral-300 text-[7px] font-bold text-center py-0.5">
+                            Gallery #{idx + 1}
                           </span>
                         )}
                       </div>
@@ -594,6 +668,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                 )}
               </div>
 
+              {/* Price & Compare Price */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Base Price ($) *</label>
@@ -607,7 +682,6 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                     className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white"
                   />
                 </div>
-
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Compare Price ($)</label>
                   <Input
@@ -621,6 +695,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                 </div>
               </div>
 
+              {/* Status */}
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Status</label>
                 <select
@@ -634,14 +709,17 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                 </select>
               </div>
 
+              {/* 4. OPTIONAL DESCRIPTION */}
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Description</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                  Description (Optional)
+                </label>
                 <textarea
                   rows={3}
                   value={newProductDesc}
                   onChange={(e) => setNewProductDesc(e.target.value)}
-                  placeholder="Pro-grade athletic gear description..."
-                  className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
+                  placeholder="Detailed product features, technical specifications, and materials (optional)..."
+                  className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500 placeholder:text-neutral-400"
                 />
               </div>
 
@@ -650,14 +728,14 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                   type="button"
                   variant="outline"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="border-gray-300 dark:border-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 font-bold hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white"
+                  className="border-gray-300 dark:border-neutral-700 text-xs font-bold"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-rose-600 text-white font-black uppercase text-xs hover:bg-rose-500 rounded-lg px-6 h-10 shadow-sm"
+                  className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-black uppercase tracking-wider px-5"
                 >
                   {isSubmitting ? "Creating..." : "Create Product"}
                 </Button>

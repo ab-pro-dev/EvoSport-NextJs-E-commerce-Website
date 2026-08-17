@@ -72,13 +72,19 @@ export async function PATCH(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const { name, slug, description, brandId, categoryId, basePrice, compareAtPrice, status } = body;
+    const { name, slug, description, brandId, categoryId, gender, basePrice, compareAtPrice, status } = body;
 
     const updateData: any = {};
     if (name !== undefined) updateData.name = name.trim();
-    if (description !== undefined) updateData.description = description.trim();
-    if (brandId !== undefined) updateData.brandId = brandId;
+    if (description !== undefined) updateData.description = description && description.trim() ? description.trim() : null;
+    if (brandId !== undefined) updateData.brandId = brandId && brandId.trim() ? brandId.trim() : null;
     if (categoryId !== undefined) updateData.categoryId = categoryId;
+    if (gender !== undefined) {
+      const validGenders = ["MEN", "WOMEN", "KIDS", "UNISEX"];
+      if (validGenders.includes(gender.toString().toUpperCase())) {
+        updateData.gender = gender.toString().toUpperCase();
+      }
+    }
     if (basePrice !== undefined) updateData.basePrice = Number(basePrice);
     if (compareAtPrice !== undefined) updateData.compareAtPrice = compareAtPrice ? Number(compareAtPrice) : null;
     if (status !== undefined) updateData.status = status;

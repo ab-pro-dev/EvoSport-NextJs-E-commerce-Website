@@ -15,10 +15,11 @@ interface ProductDetailsProps {
     id: string;
     name: string;
     slug: string;
-    description: string;
+    description?: string | null;
+    gender?: string;
     basePrice: number;
     compareAtPrice: number | null;
-    brand: { name: string; slug: string };
+    brand?: { name: string; slug: string } | null;
     category: { name: string; slug: string };
     images: { id: string; url: string; altText: string | null }[];
     variants: { id: string; sku: string; color: string; size: string; price: number | null; stock: number }[];
@@ -104,24 +105,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
       if (res.ok) {
         window.dispatchEvent(new Event("cart-updated"));
-        if (status !== "authenticated") {
-          toast.info("Please log in with your account to complete checkout.");
-          router.push("/login?callbackUrl=/checkout");
-        } else {
-          router.push("/checkout");
-        }
+        router.push("/checkout");
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to proceed to checkout");
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to proceed to checkout");
+      toast.error(err.message || "Checkout failed");
     } finally {
       setIsAdding(false);
     }
   };
 
-  const price = currentVariant?.price ? Number(currentVariant.price) : Number(product.basePrice);
+  const price = Number(currentVariant?.price ?? product.basePrice);
   const compareAt = product.compareAtPrice ? Number(product.compareAtPrice) : null;
   const discountPercent = compareAt && compareAt > price
     ? Math.round(((compareAt - price) / compareAt) * 100)
@@ -150,10 +146,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         {/* Left Column: Vertical Thumbnails + Main Image */}
         <div className="lg:col-span-6 flex gap-4">
           {images.length > 1 && (
-            <div className="flex flex-col gap-3">
-              {images.slice(0, 5).map((img) => (
+            <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
+              {images.map((img, idx) => (
                 <button
-                  key={img.id}
+                  key={img.id || idx}
                   onClick={() => setSelectedImage(img.url)}
                   className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                     selectedImage === img.url
@@ -204,9 +200,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         <div className="lg:col-span-6 flex flex-col space-y-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className="border-gray-200 dark:border-slate-800 text-[#0F1B2D]/40 dark:text-slate-400 bg-white dark:bg-slate-900 text-[10px] uppercase font-bold">
-                {product.brand.name}
-              </Badge>
+              {product.brand?.name && (
+                <Badge variant="outline" className="border-gray-200 dark:border-slate-800 text-[#0F1B2D]/40 dark:text-slate-400 bg-white dark:bg-slate-900 text-[10px] uppercase font-bold">
+                  {product.brand.name}
+                </Badge>
+              )}
               {currentVariant?.sku && (
                 <span className="text-[11px] text-[#0F1B2D]/40 dark:text-slate-500 font-mono">SKU: {currentVariant.sku}</span>
               )}

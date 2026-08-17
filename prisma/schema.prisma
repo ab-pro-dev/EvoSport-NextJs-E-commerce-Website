@@ -21,6 +21,13 @@ enum ProductStatus {
   ARCHIVED
 }
 
+enum GenderType {
+  MEN
+  WOMEN
+  KIDS
+  UNISEX
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -207,6 +214,7 @@ model Product {
   brand          Brand         @relation(fields: [brandId], references: [id], onDelete: Restrict)
   categoryId     String
   category       Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  gender         GenderType    @default(UNISEX)
   basePrice      Decimal       @db.Decimal(10, 2)
   compareAtPrice Decimal?      @db.Decimal(10, 2)
   status         ProductStatus @default(DRAFT)
@@ -221,6 +229,7 @@ model Product {
   @@index([slug])
   @@index([brandId])
   @@index([categoryId])
+  @@index([gender])
   @@index([status])
 }
 

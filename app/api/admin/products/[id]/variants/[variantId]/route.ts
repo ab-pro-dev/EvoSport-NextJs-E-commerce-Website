@@ -46,7 +46,12 @@ export async function PATCH(
     const updateData: any = {};
     if (color !== undefined) updateData.color = color.trim();
     if (size !== undefined) updateData.size = size.trim();
-    if (stock !== undefined) updateData.stock = parseInt(stock, 10);
+    if (stock !== undefined) {
+      updateData.stock =
+        stock === null || stock === "" || isNaN(parseInt(stock.toString(), 10))
+          ? null
+          : parseInt(stock.toString(), 10);
+    }
     if (price !== undefined) updateData.price = Number(price);
 
     if (sku && sku.trim() !== existingVariant.sku) {

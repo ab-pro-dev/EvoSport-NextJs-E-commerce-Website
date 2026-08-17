@@ -173,12 +173,13 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
               className="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#0F172A] border border-gray-200 dark:border-slate-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-black/50"
             >
               {/* Image Container */}
-              <div className="relative aspect-square w-full overflow-hidden bg-[#F4F8FC] dark:bg-slate-900/60 p-4">
+              <div className="relative aspect-square w-full overflow-hidden bg-white dark:bg-slate-900/60 p-4">
                 <Image
                   src={image}
                   alt={(product.images && product.images.length > 0 && product.images[0]?.altText) ? product.images[0].altText : product.name}
                   fill
-                  className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                  className="object-contain object-center transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
 
                 {/* Filled Heart Icon */}
@@ -193,9 +194,11 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
 
               {/* Details */}
               <div className="flex flex-1 flex-col p-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">
-                  {product.brand.name}
-                </span>
+                {product.brand?.name && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F1B2D]/40 dark:text-slate-400">
+                    {product.brand.name}
+                  </span>
+                )}
                 <Link href={`/products/${product.slug}`} className="hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors mt-0.5">
                   <h3 className="line-clamp-1 text-sm font-bold text-[#0F1B2D] dark:text-white">
                     {product.name}

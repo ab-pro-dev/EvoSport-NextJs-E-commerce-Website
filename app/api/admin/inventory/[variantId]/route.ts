@@ -46,10 +46,12 @@ export async function PATCH(
 
     let newStock = existingVariant.stock;
 
-    if (stock !== undefined && stock !== null) {
+    if (stock === null || stock === "") {
+      newStock = null;
+    } else if (stock !== undefined) {
       const stockInt = parseInt(stock, 10);
       if (isNaN(stockInt) || stockInt < 0) {
-        return NextResponse.json({ error: "Invalid stock value. Must be a non-negative integer." }, { status: 400 });
+        return NextResponse.json({ error: "Invalid stock value. Must be a non-negative integer or null for unlimited." }, { status: 400 });
       }
       newStock = stockInt;
     } else if (adjustment !== undefined && adjustment !== null) {
@@ -57,7 +59,7 @@ export async function PATCH(
       if (isNaN(adjInt)) {
         return NextResponse.json({ error: "Invalid adjustment value." }, { status: 400 });
       }
-      newStock = Math.max(0, existingVariant.stock + adjInt);
+      newStock = Math.max(0, (existingVariant.stock ?? 0) + adjInt);
     } else {
       return NextResponse.json({ error: "Must provide stock or adjustment field." }, { status: 400 });
     }

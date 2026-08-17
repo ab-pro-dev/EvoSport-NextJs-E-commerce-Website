@@ -18,14 +18,15 @@ interface ProductCardProps {
     compareAtPrice: number | null;
     images: { url: string; altText: string | null }[];
     brand?: { name: string } | null;
-    category: { name: string };
+    category?: { name: string } | null;
     variants?: { id?: string; color: string }[];
     avgRating?: number;
     reviewCount?: number;
   };
+  showDiscountBadge?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, showDiscountBadge = false }: ProductCardProps) {
   const router = useRouter();
   const { status } = useSession();
   const [isAdding, setIsAdding] = useState(false);
@@ -89,27 +90,23 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-black/50">
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden bg-[#F4F8FC] dark:bg-slate-900/60 p-4">
+      <div className="relative aspect-square w-full overflow-hidden bg-white dark:bg-slate-900/60 p-4">
         <Image
           src={mainImage}
           alt={product.name}
           fill
-          className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+          className="object-contain object-center transition-transform duration-500 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
         />
         
-        {/* Badges */}
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5 z-10">
-          {discountPercent && (
+        {/* Optional Discount Badge (Controlled via Admin Settings) */}
+        {showDiscountBadge && discountPercent && (
+          <div className="absolute left-3 top-3 z-10">
             <span className="rounded-md bg-[#B8FF00] px-2 py-0.5 text-[10px] font-black uppercase text-[#0F1B2D] shadow-sm">
               -{discountPercent}%
             </span>
-          )}
-          {product.category && (
-            <span className="rounded-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold text-[#0F1B2D] dark:text-slate-200 shadow-sm border border-gray-100 dark:border-slate-800">
-              {product.category.name}
-            </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Action Buttons: Wishlist & Quick Add */}
         <div className="absolute right-3 top-3 flex flex-col gap-2 z-10">

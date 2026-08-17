@@ -12,7 +12,7 @@ interface Variant {
   sku: string;
   color: string;
   size: string;
-  stock: number;
+  stock: number | null;
   price: number;
 }
 
@@ -208,10 +208,10 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sku: newSku,
-          color: newColor,
-          size: newSize,
-          stock: parseInt(newStock, 10),
+          sku: newSku.trim(),
+          color: newColor.trim(),
+          size: newSize.trim(),
+          stock: newStock.trim() ? parseInt(newStock, 10) : null,
           price: parseFloat(newPrice),
         }),
       });
@@ -227,6 +227,7 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
       setNewSku("");
       setNewColor("");
       setNewSize("");
+      setNewStock("");
     } catch (err) {
       console.error("Error adding variant:", err);
       alert("Failed to add variant.");
@@ -499,7 +500,13 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
                         <td className="py-2.5 px-3 font-mono font-bold text-neutral-900 dark:text-white">{v.sku}</td>
                         <td className="py-2.5 px-3">{v.color}</td>
                         <td className="py-2.5 px-3">{v.size}</td>
-                        <td className="py-2.5 px-3 font-bold text-neutral-900 dark:text-white">{v.stock}</td>
+                        <td className="py-2.5 px-3 font-bold text-neutral-900 dark:text-white">
+                          {v.stock === null ? (
+                            <span className="text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] uppercase">Unlimited</span>
+                          ) : (
+                            v.stock
+                          )}
+                        </td>
                         <td className="py-2.5 px-3 font-bold text-neutral-900 dark:text-white">${Number(v.price).toFixed(2)}</td>
                         <td className="py-2.5 px-3 text-right">
                           <button
@@ -543,9 +550,9 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
                   className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white"
                 />
                 <Input
-                  required
                   type="number"
-                  placeholder="Stock"
+                  min="0"
+                  placeholder="Stock (blank=Unlimited)"
                   value={newStock}
                   onChange={(e) => setNewStock(e.target.value)}
                   className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white"
@@ -586,8 +593,8 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
             {/* Cloudinary Images Grid */}
             <div className="grid grid-cols-2 gap-3">
               {images.map((img) => (
-                <div key={img.id} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-neutral-950 aspect-square">
-                  <Image src={img.url} alt={img.altText || "Product Image"} fill sizes="200px" className="object-cover" />
+                <div key={img.id} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 aspect-square p-1">
+                  <Image src={img.url} alt={img.altText || "Product Image"} fill sizes="200px" className="object-contain" />
                 </div>
               ))}
             </div>

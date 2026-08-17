@@ -40,9 +40,9 @@ export async function POST(
     const body = await req.json();
     const { sku, color, size, stock, price } = body || {};
 
-    if (!sku || !color || !size || stock === undefined) {
+    if (!sku || !color || !size) {
       return NextResponse.json(
-        { error: "Missing required variant fields: sku, color, size, stock" },
+        { error: "Missing required variant fields: sku, color, size" },
         { status: 400 }
       );
     }
@@ -59,13 +59,18 @@ export async function POST(
       );
     }
 
+    const parsedStock =
+      stock !== undefined && stock !== null && stock !== "" && !isNaN(parseInt(stock.toString(), 10))
+        ? parseInt(stock.toString(), 10)
+        : null;
+
     const variant = await prisma.productVariant.create({
       data: {
         productId,
         sku: sku.trim(),
         color: color.trim(),
         size: size.trim(),
-        stock: parseInt(stock, 10),
+        stock: parsedStock,
         price: price ? Number(price) : Number(product.basePrice),
       },
     });

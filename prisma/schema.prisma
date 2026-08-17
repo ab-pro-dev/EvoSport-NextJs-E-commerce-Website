@@ -252,7 +252,7 @@ model ProductVariant {
   color     String
   size      String
   price     Decimal? @db.Decimal(10, 2)
-  stock     Int      @default(0)
+  stock     Int?
   createdAt DateTime @default(now())
 
   cartItems  CartItem[]

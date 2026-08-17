@@ -510,12 +510,13 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                   {cart.items.map((item) => (
                     <div key={item.id} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-gray-100 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-950">
+                        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-950 p-1">
                           <Image
                             src={item.variant.product.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600"}
                             alt={item.variant.product.name}
                             fill
-                            className="object-cover"
+                            className="object-contain"
+                            sizes="48px"
                           />
                         </div>
                         <div>

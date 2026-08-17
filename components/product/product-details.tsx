@@ -123,8 +123,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     ? Math.round(((compareAt - price) / compareAt) * 100)
     : null;
 
-  const stockCount = currentVariant?.stock ?? 0;
-  const inStock = stockCount > 0;
+  const stockCount = currentVariant?.stock ?? null;
+  const inStock = stockCount === null || stockCount > 0;
+  const isUnlimited = stockCount === null;
 
   return (
     <div className="space-y-6">
@@ -151,26 +152,27 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 <button
                   key={img.id || idx}
                   onClick={() => setSelectedImage(img.url)}
-                  className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+                  className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all bg-white dark:bg-slate-900 p-1 ${
                     selectedImage === img.url
                       ? "border-[#B8FF00] ring-2 ring-[#B8FF00]/30 scale-105"
                       : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 opacity-60 hover:opacity-100"
                   }`}
                 >
-                  <Image src={img.url} alt={img.altText || product.name} fill className="object-cover" />
+                  <Image src={img.url} alt={img.altText || product.name} fill className="object-contain" />
                 </button>
               ))}
             </div>
           )}
 
           {/* Main Product Image */}
-          <div className="relative aspect-square flex-1 overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-[#0F172A] p-6 shadow-sm">
+          <div className="relative aspect-square flex-1 overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-4 shadow-sm">
             <Image
               src={selectedImage}
               alt={product.name}
               fill
               priority
-              className="object-cover object-center transition-all duration-300"
+              className="object-contain object-center transition-all duration-300"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
 
             {discountPercent && (
@@ -222,17 +224,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     className={`h-3.5 w-3.5 ${
                       i < Math.floor(product.avgRating)
                         ? "fill-amber-400 text-amber-400"
-                        : "text-gray-200 dark:text-slate-700"
+                        : "fill-gray-200 dark:fill-slate-700 text-gray-200 dark:text-slate-700"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-xs font-bold text-[#0F1B2D]/70 dark:text-slate-300">
-                {product.avgRating > 0 ? product.avgRating.toFixed(1) : "0.0"}
-              </span>
-              <span className="text-xs text-[#0F1B2D]/50 dark:text-slate-400">
-                ({product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"})
-              </span>
+              <span className="text-xs font-bold text-[#0F1B2D] dark:text-white">{product.avgRating.toFixed(1)}</span>
+              <span className="text-xs text-[#0F1B2D]/40 dark:text-slate-400">({product.reviewCount} reviews)</span>
             </div>
           </div>
 
@@ -245,9 +243,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           </div>
 
           {/* Real Description from Database */}
-          <p className="text-xs leading-relaxed text-[#0F1B2D]/70 dark:text-slate-300">
-            {product.description}
-          </p>
+          {product.description && (
+            <p className="text-xs leading-relaxed text-[#0F1B2D]/70 dark:text-slate-300">
+              {product.description}
+            </p>
+          )}
 
           {/* Dynamic Color Selection */}
           {uniqueColors.length > 0 && (
@@ -301,7 +301,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <div className="flex items-center gap-2 text-xs font-bold">
             <span className={`h-2 w-2 rounded-full ${inStock ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
             <span className={inStock ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"}>
-              {inStock ? `In Stock (${stockCount} available)` : "Out of Stock"}
+              {inStock
+                ? isUnlimited
+                  ? "In Stock"
+                  : stockCount <= 5
+                  ? `Only ${stockCount} left in stock!`
+                  : `In Stock (${stockCount} available)`
+                : "Out of Stock"}
             </span>
           </div>
 

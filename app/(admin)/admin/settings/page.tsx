@@ -17,6 +17,7 @@ const DEFAULT_SETTINGS = {
   flatRateShipping: 9.99,
   taxRate: 0.08,
   maintenanceMode: false,
+  showDiscountBadge: false,
 };
 
 export default async function AdminSettingsPage() {
@@ -40,7 +41,7 @@ export default async function AdminSettingsPage() {
   for (const s of settingsRows) {
     if (s.key === "taxRate" || s.key === "freeShippingThreshold" || s.key === "flatRateShipping") {
       settingsMap[s.key] = parseFloat(s.value);
-    } else if (s.key === "maintenanceMode") {
+    } else if (s.key === "maintenanceMode" || s.key === "showDiscountBadge") {
       settingsMap[s.key] = s.value === "true";
     } else {
       settingsMap[s.key] = s.value;

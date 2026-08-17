@@ -70,6 +70,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
   const [newCategoryId, setNewCategoryId] = useState(availableSubcategories[0]?.id || "");
   const [newBasePrice, setNewBasePrice] = useState("");
   const [newComparePrice, setNewComparePrice] = useState("");
+  const [newStock, setNewStock] = useState("");
   const [newStatus, setNewStatus] = useState("ACTIVE");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -122,6 +123,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
     setNewProductDesc("");
     setNewBasePrice("");
     setNewComparePrice("");
+    setNewStock("");
     setImageUrls([]);
     setImageUrlInput("");
     setErrorMsg(null);
@@ -195,6 +197,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
         basePrice: parseFloat(newBasePrice),
         compareAtPrice: newComparePrice ? parseFloat(newComparePrice) : null,
         status: newStatus,
+        stock: newStock.trim() ? parseInt(newStock, 10) : null,
         images: imageUrls.map((url, idx) => ({ url, position: idx })),
       };
 
@@ -228,110 +231,111 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
         category: createdProduct.category,
         image: createdProduct.images?.[0]?.url || null,
         imagesCount: createdProduct.images?.length || 0,
-        variantsCount: createdProduct.variants?.length || 0,
-        totalStock: createdProduct.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0,
-        createdAt: createdProduct.createdAt || new Date().toISOString(),
+        variantsCount: createdProduct.variants?.length || 1,
+        totalStock: createdProduct.variants?.some((v: any) => v.stock === null) ? null : createdProduct.variants?.reduce((s: number, v: any) => s + (v.stock ?? 0), 0) ?? null,
+        createdAt: createdProduct.createdAt,
       };
 
-      setProducts([formattedCreated, ...products]);
+      setProducts((prev) => [formattedCreated, ...prev]);
       setIsAddModalOpen(false);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error adding product:", err);
-      const msg = err?.message || "Failed to create product.";
-      setErrorMsg(msg);
-      toast.error(msg);
+      setErrorMsg("Network error. Please try again.");
+      toast.error("Network error creating product.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteProduct = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    if (!confirm(`Are you sure you want to delete "${name}"? This will remove all its images and variants.`)) {
+      return;
+    }
 
     try {
-      setIsDeleting(id);
+      setDeletingId(id);
       const res = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
       });
 
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to delete product.");
+        toast.error(data.error || "Failed to delete product.");
+        return;
       }
 
       toast.success("Product deleted successfully!");
-      setProducts(products.filter((p) => p.id !== id));
-    } catch (err: any) {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
       console.error("Error deleting product:", err);
-      const msg = err?.message || "Failed to delete product.";
-      toast.error(msg);
+      toast.error("Network error deleting product.");
     } finally {
-      setIsDeleting(null);
+      setDeletingId(null);
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-neutral-800 pb-5">
+      {/* Top Header Card */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-6 shadow-sm">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-neutral-900 dark:text-white flex items-center gap-2">
-            <Package className="h-6 w-6 text-rose-600 dark:text-rose-500" />
-            PRODUCT MANAGEMENT
+          <h1 className="text-xl font-black tracking-tight text-neutral-900 dark:text-white uppercase flex items-center gap-2">
+            <Package className="h-5 w-5 text-rose-600 dark:text-rose-500" />
+            PRODUCTS CATALOG
           </h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-            Manage product catalog, inventory stock, and Cloudinary media assets.
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+            Manage your store items, category hierarchy, variants, and stock status ({products.length} products total)
           </p>
         </div>
 
         <Button
           onClick={openAddModal}
-          className="bg-rose-600 text-white font-black uppercase text-xs tracking-wider hover:bg-rose-500 rounded-lg h-10 px-5 shadow-sm"
+          className="bg-rose-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-rose-500 rounded-xl px-5 shadow-sm"
         >
           <Plus className="mr-1.5 h-4 w-4" />
           Add New Product
         </Button>
       </div>
 
-      {/* Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-neutral-900/60 p-4 rounded-xl border border-gray-200 dark:border-neutral-800 shadow-sm">
+      {/* Filters & Search Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-4 shadow-sm">
         <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
           <Input
-            placeholder="Search by name, slug, brand..."
+            placeholder="Search products by name, slug, brand..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white pl-9"
+            className="pl-9 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white placeholder:text-neutral-400"
           />
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400 dark:text-neutral-500" />
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Filter className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Status:</span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:border-rose-500"
+            className="bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg px-3 py-2 font-medium"
           >
             <option value="ALL">All Statuses</option>
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="DRAFT">DRAFT</option>
-            <option value="ARCHIVED">ARCHIVED</option>
+            <option value="ACTIVE">Active Only</option>
+            <option value="DRAFT">Drafts</option>
+            <option value="ARCHIVED">Archived</option>
           </select>
         </div>
       </div>
 
       {/* Products Table */}
-      <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 overflow-hidden shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="border-b border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950/80 text-[10px] font-black uppercase text-neutral-500 dark:text-neutral-400">
+            <thead className="border-b border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950/60 text-[10px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
               <tr>
-                <th className="py-3.5 px-4">Product</th>
-                <th className="py-3.5 px-4">Category & Gender</th>
-                <th className="py-3.5 px-4">Price</th>
-                <th className="py-3.5 px-4">Variants / Stock</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+                <th className="py-3 px-4">Product</th>
+                <th className="py-3 px-4">Category & Gender</th>
+                <th className="py-3 px-4">Price</th>
+                <th className="py-3 px-4">Inventory</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/60 text-neutral-700 dark:text-neutral-300">
@@ -346,9 +350,9 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                   <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-neutral-900/90 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 relative rounded bg-gray-100 dark:bg-neutral-950 overflow-hidden border border-gray-200 dark:border-neutral-800 shrink-0">
+                        <div className="h-10 w-10 relative rounded bg-white dark:bg-neutral-950 overflow-hidden border border-gray-200 dark:border-neutral-800 shrink-0 p-0.5">
                           {p.image ? (
-                            <Image src={p.image} alt={p.name} fill sizes="40px" className="object-cover" />
+                            <Image src={p.image} alt={p.name} fill sizes="40px" className="object-contain" />
                           ) : (
                             <div className="h-full w-full flex items-center justify-center text-neutral-400 dark:text-neutral-600">
                               <Package className="h-4 w-4" />
@@ -383,7 +387,9 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
 
                     <td className="py-3.5 px-4">
                       <span className="font-bold text-neutral-900 dark:text-white">{p.variantsCount} variants</span>
-                      <span className="block text-[10px] text-neutral-500 dark:text-neutral-400">Total Stock: {p.totalStock}</span>
+                      <span className="block text-[10px] text-neutral-500 dark:text-neutral-400">
+                        Total Stock: {p.totalStock === null ? "Unlimited" : p.totalStock}
+                      </span>
                     </td>
 
                     <td className="py-3.5 px-4">
@@ -695,18 +701,34 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                 </div>
               </div>
 
-              {/* Status */}
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Status</label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
-                >
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="DRAFT">DRAFT</option>
-                  <option value="ARCHIVED">ARCHIVED</option>
-                </select>
+              {/* Stock / Quantity & Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                    Stock / Quantity (Leave blank for Unlimited)
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 50 (or blank for Unlimited)"
+                    value={newStock}
+                    onChange={(e) => setNewStock(e.target.value)}
+                    className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Status</label>
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value)}
+                    className="mt-1 w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-rose-500"
+                  >
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="ARCHIVED">ARCHIVED</option>
+                  </select>
+                </div>
               </div>
 
               {/* 4. OPTIONAL DESCRIPTION */}

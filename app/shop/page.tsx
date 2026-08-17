@@ -113,7 +113,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     orderBy = { basePrice: "desc" };
   }
 
-  const [rawProducts, rawCategories, totalCount, brands] = await Promise.all([
+  const [rawProducts, rawCategories, totalCount, brands, discountBadgeSetting] = await Promise.all([
     prisma.product.findMany({
       where,
       orderBy,
@@ -153,7 +153,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     }),
     prisma.product.count({ where }),
     prisma.brand.findMany({ orderBy: { name: "asc" } }),
+    prisma.setting.findUnique({ where: { key: "showDiscountBadge" } }),
   ]);
+
+  const showDiscountBadge = discountBadgeSetting?.value === "true";
 
   const parentOrder = [
     "footwear",
@@ -272,7 +275,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             {products.length > 0 ? (
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                 {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} showDiscountBadge={showDiscountBadge} />
                 ))}
               </div>
             ) : (

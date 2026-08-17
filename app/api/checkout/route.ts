@@ -89,9 +89,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Re-check stock availability at checkout time
+    // 3. Re-check stock availability at checkout time (if stock is not unlimited / null)
     for (const item of cartItems) {
-      if (item.quantity > item.variant.stock) {
+      if (item.variant.stock !== null && item.quantity > item.variant.stock) {
         return NextResponse.json(
           {
             error: `Stock unavailable for "${item.variant.product.name}" (${item.variant.color}/${item.variant.size}). Available: ${item.variant.stock}, requested: ${item.quantity}.`,
@@ -237,18 +237,20 @@ export async function POST(req: Request) {
           },
         });
 
-        // Decrement stock in parallel
+        // Decrement stock in parallel (for variants with non-null stock)
         await Promise.all(
-          itemsToPurchase.map((item) =>
-            tx.productVariant.update({
-              where: { id: item.variantId },
-              data: {
-                stock: {
-                  decrement: item.quantity,
+          itemsToPurchase
+            .filter((item) => item.variant.stock !== null)
+            .map((item) =>
+              tx.productVariant.update({
+                where: { id: item.variantId },
+                data: {
+                  stock: {
+                    decrement: item.quantity,
+                  },
                 },
-              },
-            })
-          )
+              })
+            )
         );
 
         // Increment coupon usage count if coupon applied

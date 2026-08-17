@@ -172,12 +172,13 @@ export function CartView({ initialCart, isAuthenticated = false }: CartViewProps
                 <div key={item.id} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-[#F4F8FC]/50 dark:hover:bg-slate-800/40">
                   {/* Product Details Left */}
                   <div className="flex items-center gap-4">
-                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900">
+                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-1">
                       <Image
                         src={image}
                         alt={item.variant.product.altText || item.variant.product.name}
                         fill
-                        className="object-cover object-center"
+                        className="object-contain object-center"
+                        sizes="80px"
                       />
                     </div>
                     <div className="space-y-1">

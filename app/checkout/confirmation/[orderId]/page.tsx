@@ -136,8 +136,8 @@ export default async function OrderConfirmationPage({ params }: ConfirmationPage
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0 text-xs">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-                      <Image src={item.image} alt={item.productName} fill className="object-cover" />
+                    <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-1">
+                      <Image src={item.image} alt={item.productName} fill className="object-contain" sizes="48px" />
                     </div>
                     <div>
                       <div className="font-bold text-[#0F1B2D] dark:text-white text-sm line-clamp-1">{item.productName}</div>

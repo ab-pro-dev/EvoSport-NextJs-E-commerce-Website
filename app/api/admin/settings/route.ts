@@ -28,6 +28,7 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   flatRateShipping: "9.99",
   taxRate: "0.08",
   maintenanceMode: "false",
+  showDiscountBadge: "false",
 };
 
 // GET /api/admin/settings — List all settings dictionary
@@ -44,7 +45,7 @@ export async function GET() {
     for (const s of settingsRows) {
       if (s.key === "taxRate" || s.key === "freeShippingThreshold" || s.key === "flatRateShipping") {
         settingsMap[s.key] = parseFloat(s.value);
-      } else if (s.key === "maintenanceMode") {
+      } else if (s.key === "maintenanceMode" || s.key === "showDiscountBadge") {
         settingsMap[s.key] = s.value === "true";
       } else {
         settingsMap[s.key] = s.value;
@@ -86,7 +87,7 @@ export async function PATCH(req: Request) {
     for (const s of settingsRows) {
       if (s.key === "taxRate" || s.key === "freeShippingThreshold" || s.key === "flatRateShipping") {
         settingsMap[s.key] = parseFloat(s.value);
-      } else if (s.key === "maintenanceMode") {
+      } else if (s.key === "maintenanceMode" || s.key === "showDiscountBadge") {
         settingsMap[s.key] = s.value === "true";
       } else {
         settingsMap[s.key] = s.value;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Search, RotateCcw, Filter, Check, Star, ChevronDown, ChevronRight, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -49,10 +49,16 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
   const currentMaxPrice = searchParams.get("maxPrice") || "";
   const currentSearch = searchParams.get("search") || "";
 
+  const [searchInput, setSearchInput] = useState(currentSearch);
   const [minPriceInput, setMinPriceInput] = useState(currentMinPrice);
   const [maxPriceInput, setMaxPriceInput] = useState(currentMaxPrice);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+
+  // Sync search input if URL changes externally
+  useEffect(() => {
+    setSearchInput(currentSearch);
+  }, [currentSearch]);
 
   // Expand parent categories if active child matches or initialize
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(() => {
@@ -93,10 +99,24 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
     [searchParams]
   );
 
-  const updateFilter = (key: string, value: string | null) => {
-    const queryString = createQueryString({ [key]: value });
-    router.push(`${pathname}?${queryString}`);
-  };
+  const updateFilter = useCallback(
+    (key: string, value: string | null) => {
+      const queryString = createQueryString({ [key]: value });
+      router.push(`${pathname}?${queryString}`);
+    },
+    [createQueryString, pathname, router]
+  );
+
+  // Debounced search trigger (350ms)
+  useEffect(() => {
+    if (searchInput === currentSearch) return;
+
+    const timer = setTimeout(() => {
+      updateFilter("search", searchInput.trim() || null);
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchInput, currentSearch, updateFilter]);
 
   const handlePriceApply = () => {
     const queryString = createQueryString({
@@ -107,6 +127,7 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
   };
 
   const handleClearAll = () => {
+    setSearchInput("");
     setMinPriceInput("");
     setMaxPriceInput("");
     setSelectedSize("");
@@ -149,8 +170,14 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
           <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#0F1B2D]/40 dark:text-slate-500" />
           <Input
             placeholder="Search products..."
-            value={currentSearch}
-            onChange={(e) => updateFilter("search", e.target.value || null)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                updateFilter("search", searchInput.trim() || null);
+              }
+            }}
             className="pl-9 bg-[#F4F8FC] dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-[#0F1B2D] dark:text-white placeholder:text-[#0F1B2D]/40 dark:placeholder:text-slate-500 focus-visible:ring-[#B8FF00]"
           />
         </div>

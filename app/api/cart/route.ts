@@ -177,8 +177,8 @@ export async function POST(req: Request) {
     const currentQtyInCart = existingItem ? existingItem.quantity : 0;
     const targetQuantity = currentQtyInCart + quantity;
 
-    // Enforce stock limits
-    if (targetQuantity > variant.stock) {
+    // Enforce stock limits (if not unlimited / null)
+    if (variant.stock !== null && targetQuantity > variant.stock) {
       return NextResponse.json(
         {
           error: `Requested quantity (${targetQuantity}) exceeds available stock (${variant.stock}).`,
@@ -243,7 +243,7 @@ export async function PATCH(req: Request) {
         where: { id: cartItem.id },
       });
     } else {
-      if (quantity > cartItem.variant.stock) {
+      if (cartItem.variant.stock !== null && quantity > cartItem.variant.stock) {
         return NextResponse.json(
           {
             error: `Requested quantity (${quantity}) exceeds available stock (${cartItem.variant.stock}).`,

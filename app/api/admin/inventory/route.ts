@@ -68,9 +68,9 @@ export async function GET(req: Request) {
       select: { stock: true },
     });
 
-    const inStockCount = allStockValues.filter((v) => v.stock > 10).length;
-    const lowStockCount = allStockValues.filter((v) => v.stock <= 10 && v.stock > 0).length;
-    const outOfStockCount = allStockValues.filter((v) => v.stock === 0).length;
+    const inStockCount = allStockValues.filter((v) => v.stock === null || v.stock > 10).length;
+    const lowStockCount = allStockValues.filter((v) => v.stock !== null && v.stock <= 10 && v.stock > 0).length;
+    const outOfStockCount = allStockValues.filter((v) => v.stock !== null && v.stock <= 0).length;
 
     const formattedVariants = variants.map((v) => ({
       id: v.id,

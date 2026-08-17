@@ -68,22 +68,27 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const avgRating = reviewStats._avg.rating ? Number(reviewStats._avg.rating.toFixed(1)) : 0;
   const reviewCount = reviewStats._count.rating || 0;
 
-  // Real Related Products from Database (excluding current product)
-  const rawRelated = await prisma.product.findMany({
-    where: {
-      categoryId: product.categoryId,
-      id: { not: product.id },
-      status: "ACTIVE",
-    },
-    take: 4,
-    include: {
-      brand: true,
-      category: true,
-      images: { orderBy: { position: "asc" } },
-      variants: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  // Real Related Products from Database (excluding current product) and settings
+  const [rawRelated, discountBadgeSetting] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        categoryId: product.categoryId,
+        id: { not: product.id },
+        status: "ACTIVE",
+      },
+      take: 4,
+      include: {
+        brand: true,
+        category: true,
+        images: { orderBy: { position: "asc" } },
+        variants: true,
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.setting.findUnique({ where: { key: "showDiscountBadge" } }),
+  ]);
+
+  const showDiscountBadge = discountBadgeSetting?.value === "true";
 
   const serializedProduct = {
     ...product,
@@ -108,8 +113,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }));
 
   // JSON-LD Structured Data Schema.org/Product
-  const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
-  const inStock = totalStock > 0;
+  const hasUnlimited = product.variants.some((v) => v.stock === null);
+  const totalStock = product.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0);
+  const inStock = hasUnlimited || totalStock > 0;
   const productImages = product.images.map((img) => img.url);
 
   const jsonLd: any = {
@@ -142,31 +148,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Main Product Details & Gallery */}
+      <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-7xl space-y-12">
+        {/* Main Product Info Section */}
         <ProductDetails product={serializedProduct} />
 
-        {/* Product Tabs with Reviews & Specifications */}
-        <Suspense fallback={<div className="h-64 bg-white dark:bg-slate-900 animate-pulse rounded-xl my-8 border border-gray-200 dark:border-slate-800" />}>
-          <ProductTabs
-            productId={product.id}
-            slug={product.slug}
-            description={product.description}
-            brandName={product.brand?.name || null}
-            categoryName={product.category.name}
-            reviewCount={serializedProduct.reviewCount}
-            avgRating={serializedProduct.avgRating}
-          />
-        </Suspense>
+        {/* Product Details Tabs (Reviews, Specs, Shipping) */}
+        <ProductTabs product={serializedProduct} />
 
-        {/* Related Products Section with Suspense Boundary */}
+        {/* Related Products Grid */}
         {serializedRelated.length > 0 && (
-          <Suspense fallback={<div className="h-48 bg-white dark:bg-slate-900 animate-pulse rounded-xl mt-12 border border-gray-200 dark:border-slate-800" />}>
-            <section className="mt-16 pt-12 border-t border-gray-200 dark:border-slate-800">
-              <div className="mb-8 flex items-center justify-between">
+          <Suspense fallback={<div className="h-64 rounded-2xl bg-gray-100 dark:bg-slate-900 animate-pulse" />}>
+            <section className="pt-8 border-t border-gray-200 dark:border-slate-800">
+              <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-black tracking-tight text-[#0F1B2D] dark:text-white uppercase">
-                    YOU MAY ALSO <span className="text-[#B8FF00]">LIKE</span>
+                  <h2 className="text-xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">
+                    Related <span className="text-[#5B8DEF] dark:text-[#B8FF00]">Equipment</span>
                   </h2>
                   <p className="text-xs text-[#0F1B2D]/50 dark:text-slate-400 mt-1">
                     Hand-picked gear from the {product.category.name} collection
@@ -176,7 +172,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                 {serializedRelated.map((relProduct) => (
-                  <ProductCard key={relProduct.id} product={relProduct} />
+                  <ProductCard key={relProduct.id} product={relProduct} showDiscountBadge={showDiscountBadge} />
                 ))}
               </div>
             </section>

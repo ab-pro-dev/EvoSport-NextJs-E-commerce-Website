@@ -31,7 +31,7 @@ export default async function AdminInventoryPage() {
         product: { select: { id: true, name: true, slug: true, status: true } },
       },
     }),
-    prisma.productVariant.count({ where: { stock: { gt: 10 } } }),
+    prisma.productVariant.count({ where: { OR: [{ stock: { gt: 10 } }, { stock: null }] } }),
     prisma.productVariant.count({ where: { stock: { lte: 10, gt: 0 } } }),
     prisma.productVariant.count({ where: { stock: 0 } }),
   ]);

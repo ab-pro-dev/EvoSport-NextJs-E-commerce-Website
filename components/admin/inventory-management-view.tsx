@@ -11,7 +11,7 @@ interface InventoryVariant {
   sku: string;
   color: string;
   size: string;
-  stock: number;
+  stock: number | null;
   price: number | null;
   productId: string;
   productName: string;
@@ -51,23 +51,23 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
 
     if (!matchesSearch) return false;
 
-    if (stockFilter === "LOW") return v.stock <= 10 && v.stock > 0;
-    if (stockFilter === "OUT") return v.stock === 0;
-    if (stockFilter === "IN") return v.stock > 10;
+    if (stockFilter === "LOW") return v.stock !== null && v.stock <= 10 && v.stock > 0;
+    if (stockFilter === "OUT") return v.stock !== null && v.stock === 0;
+    if (stockFilter === "IN") return v.stock === null || v.stock > 10;
     return true;
   });
 
   const handleStartEdit = (variant: InventoryVariant) => {
     setEditingId(variant.id);
-    setEditStockValue(variant.stock.toString());
+    setEditStockValue(variant.stock === null ? "" : variant.stock.toString());
   };
 
   const handleSaveStock = async (variantId: string) => {
     try {
       setIsSaving(true);
-      const stockInt = parseInt(editStockValue, 10);
-      if (isNaN(stockInt) || stockInt < 0) {
-        alert("Please enter a valid non-negative integer for stock.");
+      const stockInt = editStockValue.trim() === "" ? null : parseInt(editStockValue.trim(), 10);
+      if (stockInt !== null && (isNaN(stockInt) || stockInt < 0)) {
+        alert("Please enter a valid non-negative integer for stock or leave blank for unlimited.");
         setIsSaving(false);
         return;
       }
@@ -90,9 +90,9 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
       setEditingId(null);
 
       // Recalculate stats
-      const inStock = newVariants.filter((v) => v.stock > 10).length;
-      const lowStock = newVariants.filter((v) => v.stock <= 10 && v.stock > 0).length;
-      const outOfStock = newVariants.filter((v) => v.stock === 0).length;
+      const inStock = newVariants.filter((v) => v.stock === null || v.stock > 10).length;
+      const lowStock = newVariants.filter((v) => v.stock !== null && v.stock <= 10 && v.stock > 0).length;
+      const outOfStock = newVariants.filter((v) => v.stock !== null && v.stock === 0).length;
 
       setStats({
         totalVariants: newVariants.length,
@@ -197,8 +197,9 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
               ) : (
                 filteredVariants.map((v) => {
                   const isEditing = editingId === v.id;
-                  const isLow = v.stock <= 10 && v.stock > 0;
-                  const isOut = v.stock === 0;
+                  const isUnlimited = v.stock === null;
+                  const isLow = v.stock !== null && v.stock <= 10 && v.stock > 0;
+                  const isOut = v.stock !== null && v.stock === 0;
 
                   return (
                     <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-neutral-900/90 transition-colors">
@@ -220,9 +221,10 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
                             <Input
                               type="number"
                               min="0"
+                              placeholder="Blank=Unlimited"
                               value={editStockValue}
                               onChange={(e) => setEditStockValue(e.target.value)}
-                              className="w-20 h-7 text-xs bg-gray-50 dark:bg-neutral-950 border-rose-500 text-neutral-900 dark:text-white font-bold"
+                              className="w-24 h-7 text-xs bg-gray-50 dark:bg-neutral-950 border-rose-500 text-neutral-900 dark:text-white font-bold"
                             />
                             <Button
                               onClick={() => handleSaveStock(v.id)}
@@ -232,6 +234,10 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
                               <Save className="h-3 w-3" />
                             </Button>
                           </div>
+                        ) : isUnlimited ? (
+                          <span className="font-black text-sm text-emerald-600 dark:text-emerald-400">
+                            Unlimited
+                          </span>
                         ) : (
                           <span className={`font-black text-sm ${isOut ? "text-rose-600 dark:text-rose-400" : isLow ? "text-amber-600 dark:text-amber-400" : "text-neutral-900 dark:text-white"}`}>
                             {v.stock} units
@@ -240,7 +246,11 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
                       </td>
 
                       <td className="py-3.5 px-4">
-                        {isOut ? (
+                        {isUnlimited ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
+                            <CheckCircle2 className="h-3 w-3" /> Unlimited
+                          </span>
+                        ) : isOut ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded">
                             <XCircle className="h-3 w-3" /> Out of Stock
                           </span>

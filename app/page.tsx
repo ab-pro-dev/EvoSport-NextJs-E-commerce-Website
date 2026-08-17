@@ -46,18 +46,23 @@ export default async function HomePage() {
     order: b.order,
   }));
 
-  // Fetch real featured products from DB
-  const rawProducts = await prisma.product.findMany({
-    take: 4,
-    orderBy: { createdAt: "desc" },
-    include: {
-      brand: true,
-      category: true,
-      images: { orderBy: { position: "asc" } },
-      variants: true,
-      reviews: { select: { rating: true } },
-    },
-  });
+  // Fetch real featured products and settings from DB
+  const [rawProducts, discountBadgeSetting] = await Promise.all([
+    prisma.product.findMany({
+      take: 4,
+      orderBy: { createdAt: "desc" },
+      include: {
+        brand: true,
+        category: true,
+        images: { orderBy: { position: "asc" } },
+        variants: true,
+        reviews: { select: { rating: true } },
+      },
+    }),
+    prisma.setting.findUnique({ where: { key: "showDiscountBadge" } }),
+  ]);
+
+  const showDiscountBadge = discountBadgeSetting?.value === "true";
 
   const featuredProducts = rawProducts.map((p) => {
     const reviewCount = p.reviews.length;
@@ -101,7 +106,7 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} showDiscountBadge={showDiscountBadge} />
             ))}
           </div>
         </section>

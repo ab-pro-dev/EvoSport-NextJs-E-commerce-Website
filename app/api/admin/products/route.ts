@@ -49,7 +49,8 @@ export async function GET(req: Request) {
     ]);
 
     const formattedProducts = products.map((p) => {
-      const totalStock = p.variants.reduce((sum, v) => sum + v.stock, 0);
+      const isUnlimited = p.variants.some((v) => v.stock === null);
+      const totalStock = p.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0);
       return {
         id: p.id,
         name: p.name,
@@ -64,7 +65,7 @@ export async function GET(req: Request) {
         image: p.images[0]?.url || null,
         imagesCount: p.images.length,
         variantsCount: p.variants.length,
-        totalStock,
+        totalStock: isUnlimited ? null : totalStock,
         createdAt: p.createdAt,
       };
     });
@@ -84,7 +85,7 @@ export async function GET(req: Request) {
   }
 }
 
-// POST /api/admin/products — Create new product with image attachment support
+// POST /api/admin/products — Create new product with image attachment and variant support
 export async function POST(req: Request) {
   try {
     const authResult = await verifyAdmin();
@@ -103,8 +104,10 @@ export async function POST(req: Request) {
       basePrice,
       compareAtPrice,
       status,
+      stock,
       imageUrl,
       images,
+      variants,
     } = body || {};
 
     // name, slug, categoryId, basePrice are required. Brand and Description are OPTIONAL.
@@ -173,6 +176,34 @@ export async function POST(req: Request) {
       });
     }
 
+    // Parse stock (null means unlimited)
+    const parsedStock =
+      stock !== undefined && stock !== null && stock !== "" && !isNaN(parseInt(stock.toString(), 10))
+        ? parseInt(stock.toString(), 10)
+        : null;
+
+    const variantsCreate = Array.isArray(variants) && variants.length > 0
+      ? {
+          create: variants.map((v, i) => ({
+            sku: v.sku ? v.sku.trim() : `${slug.trim().toLowerCase()}-${v.color || 'std'}-${v.size || 'os'}-${i}`,
+            color: v.color ? v.color.trim() : "Standard",
+            size: v.size ? v.size.trim() : "One Size",
+            price: v.price ? Number(v.price) : Number(basePrice),
+            stock: v.stock !== undefined && v.stock !== null && v.stock !== "" ? parseInt(v.stock.toString(), 10) : null,
+          })),
+        }
+      : {
+          create: [
+            {
+              sku: `${slug.trim().toLowerCase()}-std`,
+              color: "Standard",
+              size: "One Size",
+              price: Number(basePrice),
+              stock: parsedStock,
+            },
+          ],
+        };
+
     const newProduct = await prisma.product.create({
       data: {
         name: name.trim(),
@@ -194,6 +225,7 @@ export async function POST(req: Request) {
                 })),
               }
             : undefined,
+        variants: variantsCreate,
       },
       include: {
         brand: true,

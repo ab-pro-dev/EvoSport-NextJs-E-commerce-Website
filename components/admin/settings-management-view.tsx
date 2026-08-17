@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Save, Store, Truck, Percent, Wrench, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Settings, Save, Store, Truck, Percent, Wrench, AlertCircle, CheckCircle2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -13,6 +13,7 @@ interface SettingsMap {
   flatRateShipping: number;
   taxRate: number;
   maintenanceMode: boolean;
+  showDiscountBadge: boolean;
 }
 
 interface SettingsManagementViewProps {
@@ -47,6 +48,7 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
           flatRateShipping: settings.flatRateShipping,
           taxRate: settings.taxRate,
           maintenanceMode: settings.maintenanceMode,
+          showDiscountBadge: settings.showDiscountBadge,
         }),
       });
 
@@ -189,7 +191,36 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
           </div>
         </div>
 
-        {/* Section 4: System Maintenance Mode */}
+        {/* Section 4: Product Display & Badges */}
+        <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-neutral-800 pb-3">
+            <h2 className="text-sm font-black uppercase tracking-wide text-neutral-900 dark:text-white flex items-center gap-2">
+              <Tag className="h-4 w-4 text-rose-600 dark:text-rose-500" />
+              Product Cards & Display
+            </h2>
+
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.showDiscountBadge}
+                onChange={(e) => handleInputChange("showDiscountBadge", e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 dark:bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+            </label>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <p className="text-xs font-bold text-neutral-900 dark:text-white">
+              Show Discount Badge on Product Cards
+            </p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              When ON, product cards with comparison prices will display discount tags (e.g. -20% OFF). When OFF, cards site-wide remain clean with no discount badge. Default is OFF.
+            </p>
+          </div>
+        </div>
+
+        {/* Section 5: System Maintenance Mode */}
         <div className="rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between border-b border-rose-200 dark:border-rose-900/40 pb-3">
             <h2 className="text-sm font-black uppercase tracking-wide text-rose-600 dark:text-rose-400 flex items-center gap-2">

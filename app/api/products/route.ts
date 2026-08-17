@@ -23,34 +23,22 @@ export async function GET(req: Request) {
       status: "ACTIVE",
     };
 
-    const categoryConditions: Prisma.ProductWhereInput[] = [];
-
     if (gender && gender !== "all") {
-      categoryConditions.push({
-        category: {
-          OR: [
-            { slug: gender },
-            { parent: { slug: gender } },
-          ],
-        },
-      });
+      const genderUpper = gender.toUpperCase();
+      if (["MEN", "WOMEN", "KIDS", "UNISEX"].includes(genderUpper)) {
+        where.gender = genderUpper as any;
+      }
     }
 
     if (category && category !== "all") {
-      categoryConditions.push({
-        category: {
-          OR: [
-            { id: category },
-            { slug: category },
-            { slug: { endsWith: `-${category}` } },
-            { parent: { slug: category } },
-          ],
-        },
-      });
-    }
-
-    if (categoryConditions.length > 0) {
-      where.AND = categoryConditions;
+      where.category = {
+        OR: [
+          { id: category },
+          { slug: category },
+          { parent: { slug: category } },
+          { parent: { id: category } },
+        ],
+      };
     }
 
     if (brand) {

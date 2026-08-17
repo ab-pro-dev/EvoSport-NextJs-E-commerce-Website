@@ -71,35 +71,22 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     status: "ACTIVE",
   };
 
-  const categoryConditions: Prisma.ProductWhereInput[] = [];
-
   if (genderSlug && genderSlug !== "all") {
-    categoryConditions.push({
-      category: {
-        OR: [
-          { slug: genderSlug },
-          { parent: { slug: genderSlug } },
-        ],
-      },
-    });
+    const genderUpper = genderSlug.toUpperCase();
+    if (["MEN", "WOMEN", "KIDS", "UNISEX"].includes(genderUpper)) {
+      where.gender = genderUpper as any;
+    }
   }
 
   if (categorySlug && categorySlug !== "all") {
-    categoryConditions.push({
-      category: {
-        OR: [
-          { id: categorySlug },
-          { slug: categorySlug },
-          { slug: { endsWith: `-${categorySlug}` } },
-          { parent: { slug: categorySlug } },
-          ...(categorySlug === "footwear" ? [{ slug: { endsWith: "-running-shoes" } }] : []),
-        ],
-      },
-    });
-  }
-
-  if (categoryConditions.length > 0) {
-    where.AND = categoryConditions;
+    where.category = {
+      OR: [
+        { id: categorySlug },
+        { slug: categorySlug },
+        { parent: { slug: categorySlug } },
+        { parent: { id: categorySlug } },
+      ],
+    };
   }
 
   if (brandSlug) {
@@ -126,25 +113,70 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     orderBy = { basePrice: "desc" };
   }
 
-  const rawProducts = await prisma.product.findMany({
-    where,
-    orderBy,
-    skip,
-    take: limit,
-    include: {
-      brand: true,
-      category: {
-        include: {
-          parent: true,
+  const [rawProducts, rawCategories, totalCount, brands] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        brand: true,
+        category: {
+          include: {
+            parent: true,
+          },
+        },
+        images: { orderBy: { position: "asc" } },
+        variants: true,
+      },
+    }),
+    prisma.category.findMany({
+      where: {
+        parentId: null,
+        slug: {
+          in: [
+            "footwear",
+            "apparel-parent",
+            "jerseys-teamwear",
+            "gym-training",
+            "bags",
+            "hydration",
+            "accessories-parent",
+          ],
         },
       },
-      images: { orderBy: { position: "asc" } },
-      variants: true,
-    },
-  });
+      include: {
+        children: {
+          orderBy: { name: "asc" },
+        },
+      },
+    }),
+    prisma.product.count({ where }),
+    prisma.brand.findMany({ orderBy: { name: "asc" } }),
+  ]);
 
-  const totalCount = await prisma.product.count({ where });
-  const brands = await prisma.brand.findMany({ orderBy: { name: "asc" } });
+  const parentOrder = [
+    "footwear",
+    "apparel-parent",
+    "jerseys-teamwear",
+    "gym-training",
+    "bags",
+    "hydration",
+    "accessories-parent",
+  ];
+
+  const categories = rawCategories
+    .sort((a, b) => parentOrder.indexOf(a.slug) - parentOrder.indexOf(b.slug))
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      children: c.children.map((ch) => ({
+        id: ch.id,
+        name: ch.name,
+        slug: ch.slug,
+      })),
+    }));
 
   const products = rawProducts.map((p) => ({
     ...p,
@@ -209,6 +241,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <aside className="lg:col-span-1">
             <Suspense fallback={<div className="h-96 bg-white dark:bg-slate-900 animate-pulse rounded-xl border border-gray-200 dark:border-slate-800" />}>
               <ShopFilters
+                categories={categories}
                 brands={brands}
                 selectedGender={genderSlug}
                 selectedCategory={categorySlug}

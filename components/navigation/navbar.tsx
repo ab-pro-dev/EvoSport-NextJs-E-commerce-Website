@@ -14,10 +14,11 @@ interface NavbarProps {
 
 const NAV_LINKS = [
   { href: "/shop", label: "Shop All" },
-  { href: "/shop?gender=men", label: "Men" },
-  { href: "/shop?gender=women", label: "Women" },
-  { href: "/shop?gender=kids", label: "Kids" },
-  { href: "/shop?category=accessories", label: "Accessories" },
+  { href: "/shop?gender=MEN", label: "Men" },
+  { href: "/shop?gender=WOMEN", label: "Women" },
+  { href: "/shop?category=footwear", label: "Footwear" },
+  { href: "/shop?category=apparel-parent", label: "Apparel" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export function Navbar({ cartItemCount = 0 }: NavbarProps) {

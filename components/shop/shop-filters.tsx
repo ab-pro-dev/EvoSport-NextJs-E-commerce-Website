@@ -2,11 +2,23 @@
 
 import { useCallback, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Search, RotateCcw, Filter, Check, Star } from "lucide-react";
+import { Search, RotateCcw, Filter, Check, Star, ChevronDown, ChevronRight, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+export interface CategoryTreeItem {
+  id: string;
+  name: string;
+  slug: string;
+  children: {
+    id: string;
+    name: string;
+    slug: string;
+  }[];
+}
+
 interface ShopFiltersProps {
+  categories?: CategoryTreeItem[];
   brands: { id: string; name: string; slug: string }[];
   selectedGender?: string;
   selectedCategory?: string;
@@ -17,23 +29,15 @@ interface ShopFiltersProps {
   search?: string;
 }
 
-const CATEGORY_OPTIONS = [
-  { label: "All", value: "" },
-  { label: "Footwear / Running Shoes", value: "running-shoes" },
-  { label: "Apparel", value: "apparel" },
-  { label: "Gym Gear", value: "gym-gear" },
-  { label: "Accessories", value: "accessories" },
-];
-
 const GENDER_OPTIONS = [
   { label: "All", value: "" },
-  { label: "Men", value: "men" },
-  { label: "Women", value: "women" },
-  { label: "Kids", value: "kids" },
-  { label: "Unisex", value: "unisex" },
+  { label: "Men", value: "MEN" },
+  { label: "Women", value: "WOMEN" },
+  { label: "Kids", value: "KIDS" },
+  { label: "Unisex", value: "UNISEX" },
 ];
 
-export function ShopFilters({ brands }: ShopFiltersProps) {
+export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -49,6 +53,27 @@ export function ShopFilters({ brands }: ShopFiltersProps) {
   const [maxPriceInput, setMaxPriceInput] = useState(currentMaxPrice);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+
+  // Expand parent categories if active child matches or initialize
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const parent of categories) {
+      const isParentActive = currentCategory === parent.slug;
+      const isChildActive = parent.children.some((child) => child.slug === currentCategory);
+      if (isParentActive || isChildActive) {
+        initial[parent.slug] = true;
+      }
+    }
+    return initial;
+  });
+
+  const toggleCategoryOpen = (slug: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpenCategories((prev) => ({
+      ...prev,
+      [slug]: !prev[slug],
+    }));
+  };
 
   const createQueryString = useCallback(
     (params: Record<string, string | null>) => {
@@ -131,28 +156,111 @@ export function ShopFilters({ brands }: ShopFiltersProps) {
         </div>
       </div>
 
-      {/* 1. Product Type / Category */}
+      {/* 1. Product Type / Category Tree */}
       <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400 mb-3">
-          Product Type
-        </h4>
-        <div className="space-y-1.5">
-          {CATEGORY_OPTIONS.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() =>
-                updateFilter("category", currentCategory === cat.value ? null : cat.value || null)
-              }
-              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-colors ${
-                currentCategory === cat.value
-                  ? "bg-[#B8FF00]/15 dark:bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00] font-bold"
-                  : "text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-[#F4F8FC] dark:hover:bg-slate-800/60 hover:text-[#0F1B2D] dark:hover:text-white"
-              }`}
-            >
-              <span>{cat.label}</span>
-              {currentCategory === cat.value && <Check className="h-3.5 w-3.5 text-[#0F1B2D] dark:text-[#B8FF00]" />}
-            </button>
-          ))}
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400">
+            Product Type
+          </h4>
+          <span className="text-[10px] text-[#0F1B2D]/40 dark:text-slate-500 font-semibold">
+            {categories.length} Categories
+          </span>
+        </div>
+
+        <div className="space-y-1">
+          {/* All Product Types option */}
+          <button
+            onClick={() => updateFilter("category", null)}
+            className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              !currentCategory
+                ? "bg-[#B8FF00]/15 dark:bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00] font-bold"
+                : "text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-[#F4F8FC] dark:hover:bg-slate-800/60 hover:text-[#0F1B2D] dark:hover:text-white"
+            }`}
+          >
+            <span>All Product Types</span>
+            {!currentCategory && <Check className="h-3.5 w-3.5 text-[#0F1B2D] dark:text-[#B8FF00]" />}
+          </button>
+
+          {/* 7 Parent Categories Tree */}
+          {categories.map((parent) => {
+            const isParentActive = currentCategory === parent.slug;
+            const isOpen = !!openCategories[parent.slug];
+            const hasChildren = parent.children && parent.children.length > 0;
+            const hasActiveChild = parent.children.some((ch) => ch.slug === currentCategory);
+
+            return (
+              <div key={parent.id} className="space-y-1 pt-1">
+                {/* Parent Row */}
+                <div
+                  className={`group flex items-center justify-between rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                    isParentActive
+                      ? "bg-[#B8FF00]/15 dark:bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00] font-bold"
+                      : hasActiveChild
+                      ? "text-[#0F1B2D] dark:text-white font-bold bg-gray-50 dark:bg-slate-800/40"
+                      : "text-[#0F1B2D]/80 dark:text-slate-300 hover:bg-[#F4F8FC] dark:hover:bg-slate-800/60"
+                  }`}
+                >
+                  <button
+                    onClick={() => {
+                      updateFilter("category", isParentActive ? null : parent.slug);
+                      // also open subcategories if not open
+                      if (!isOpen && hasChildren) {
+                        setOpenCategories((prev) => ({ ...prev, [parent.slug]: true }));
+                      }
+                    }}
+                    className="flex-1 text-left flex items-center gap-1.5 truncate"
+                  >
+                    <span>{parent.name}</span>
+                    {isParentActive && (
+                      <Check className="h-3 w-3 text-[#0F1B2D] dark:text-[#B8FF00] shrink-0" />
+                    )}
+                  </button>
+
+                  {hasChildren && (
+                    <button
+                      onClick={(e) => toggleCategoryOpen(parent.slug, e)}
+                      className="p-1 text-[#0F1B2D]/40 dark:text-slate-500 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"
+                      title={isOpen ? "Collapse subcategories" : "Expand subcategories"}
+                    >
+                      {isOpen ? (
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      ) : (
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Subcategories */}
+                {isOpen && hasChildren && (
+                  <div className="pl-3.5 pr-1 py-1 space-y-0.5 border-l-2 border-gray-100 dark:border-slate-800 ml-3">
+                    {parent.children.map((child) => {
+                      const isChildActive = currentCategory === child.slug;
+
+                      return (
+                        <button
+                          key={child.id}
+                          onClick={() =>
+                            updateFilter("category", isChildActive ? null : child.slug)
+                          }
+                          className={`flex w-full items-center justify-between rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                            isChildActive
+                              ? "bg-[#B8FF00]/20 dark:bg-[#B8FF00]/25 text-[#0F1B2D] dark:text-[#B8FF00] font-bold"
+                              : "text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-[#F4F8FC] dark:hover:bg-slate-800/40 hover:text-[#0F1B2D] dark:hover:text-white"
+                          }`}
+                        >
+                          <span className="truncate">{child.name}</span>
+                          {isChildActive && (
+                            <Check className="h-3 w-3 text-[#0F1B2D] dark:text-[#B8FF00] shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -162,20 +270,28 @@ export function ShopFilters({ brands }: ShopFiltersProps) {
           Gender
         </h4>
         <div className="space-y-1.5">
-          {GENDER_OPTIONS.map((g) => (
-            <button
-              key={g.value}
-              onClick={() => updateFilter("gender", currentGender === g.value ? null : g.value || null)}
-              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-colors ${
-                currentGender === g.value
-                  ? "bg-[#B8FF00]/15 dark:bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00] font-bold"
-                  : "text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-[#F4F8FC] dark:hover:bg-slate-800/60 hover:text-[#0F1B2D] dark:hover:text-white"
-              }`}
-            >
-              <span>{g.label}</span>
-              {currentGender === g.value && <Check className="h-3.5 w-3.5 text-[#0F1B2D] dark:text-[#B8FF00]" />}
-            </button>
-          ))}
+          {GENDER_OPTIONS.map((g) => {
+            const isSelected =
+              (!g.value && !currentGender) ||
+              (g.value && currentGender.toUpperCase() === g.value);
+
+            return (
+              <button
+                key={g.value}
+                onClick={() =>
+                  updateFilter("gender", isSelected && g.value ? null : g.value || null)
+                }
+                className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-colors ${
+                  isSelected
+                    ? "bg-[#B8FF00]/15 dark:bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00] font-bold"
+                    : "text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-[#F4F8FC] dark:hover:bg-slate-800/60 hover:text-[#0F1B2D] dark:hover:text-white"
+                }`}
+              >
+                <span>{g.label}</span>
+                {isSelected && <Check className="h-3.5 w-3.5 text-[#0F1B2D] dark:text-[#B8FF00]" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 

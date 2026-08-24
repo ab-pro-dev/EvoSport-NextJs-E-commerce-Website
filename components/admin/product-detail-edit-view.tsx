@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Save, Upload, Trash2, Plus, Package, Layers, Image as ImageIcon, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Save, Upload, Trash2, Plus, Package, Layers, Image as ImageIcon, AlertCircle, CheckCircle2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -195,6 +195,56 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
       alert("Image URL upload failed.");
     } finally {
       setIsUploadingImage(false);
+    }
+  };
+
+  // Delete Image Handler
+  const handleDeleteImage = async (imageId: string) => {
+    if (!confirm("Are you sure you want to delete this image?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/products/${product.id}/images/${imageId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to delete image.");
+        return;
+      }
+
+      if (data.images) {
+        setImages(data.images);
+      } else {
+        setImages(images.filter((img) => img.id !== imageId));
+      }
+    } catch (err) {
+      console.error("Error deleting image:", err);
+      alert("Failed to delete image.");
+    }
+  };
+
+  // Set as Main Image Handler
+  const handleSetMainImage = async (imageId: string) => {
+    try {
+      const res = await fetch(`/api/admin/products/${product.id}/images/${imageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isMain: true }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to set main image.");
+        return;
+      }
+
+      if (data.images) {
+        setImages(data.images);
+      }
+    } catch (err) {
+      console.error("Error setting main image:", err);
+      alert("Failed to set main image.");
     }
   };
 
@@ -592,11 +642,55 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
 
             {/* Cloudinary Images Grid */}
             <div className="grid grid-cols-2 gap-3">
-              {images.map((img) => (
-                <div key={img.id} className="relative group rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 aspect-square p-1">
-                  <Image src={img.url} alt={img.altText || "Product Image"} fill sizes="200px" className="object-contain" />
-                </div>
-              ))}
+              {images
+                .slice()
+                .sort((a, b) => a.position - b.position)
+                .map((img, idx) => {
+                  const isMain = img.position === 0 || idx === 0;
+
+                  return (
+                    <div
+                      key={img.id}
+                      className={`relative group rounded-xl overflow-hidden bg-white dark:bg-neutral-950 aspect-square p-1 transition-all ${
+                        isMain
+                          ? "border-2 border-rose-600 dark:border-rose-500 shadow-md ring-2 ring-rose-600/20"
+                          : "border border-gray-200 dark:border-neutral-800 hover:border-gray-400"
+                      }`}
+                    >
+                      <Image src={img.url} alt={img.altText || "Product Image"} fill sizes="200px" className="object-contain p-1" />
+
+                      {/* Main Badge or Set Main Button */}
+                      {isMain ? (
+                        <div className="absolute left-2 top-2 z-10">
+                          <span className="flex items-center gap-1 bg-rose-600 text-white font-extrabold text-[9px] uppercase px-1.5 py-0.5 rounded shadow-sm">
+                            <Star className="h-2.5 w-2.5 fill-current text-white" />
+                            MAIN
+                          </span>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSetMainImage(img.id)}
+                          className="absolute left-2 top-2 z-10 hidden group-hover:flex items-center gap-1 bg-neutral-900/90 hover:bg-rose-600 text-white text-[9px] font-bold uppercase px-1.5 py-0.5 rounded backdrop-blur-sm transition-colors shadow-sm"
+                          title="Set as Main Image (Position 0)"
+                        >
+                          <Star className="h-2.5 w-2.5" />
+                          Set Main
+                        </button>
+                      )}
+
+                      {/* Delete Overlay Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteImage(img.id)}
+                        className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900/80 hover:bg-rose-600 text-white transition-all shadow-sm opacity-80 group-hover:opacity-100"
+                        title="Delete Image"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  );
+                })}
             </div>
 
             {/* Upload File Control */}

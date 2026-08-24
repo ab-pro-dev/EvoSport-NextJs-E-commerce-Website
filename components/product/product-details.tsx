@@ -158,20 +158,20 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                       : "border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 opacity-60 hover:opacity-100"
                   }`}
                 >
-                  <Image src={img.url} alt={img.altText || product.name} fill className="object-contain" />
+                  <Image src={img.url} alt={img.altText || product.name} fill className="object-cover object-center" />
                 </button>
               ))}
             </div>
           )}
 
           {/* Main Product Image */}
-          <div className="relative aspect-square flex-1 overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-4 shadow-sm">
+          <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-100 dark:bg-[#0F172A] shadow-sm">
             <Image
               src={selectedImage}
               alt={product.name}
               fill
               priority
-              className="object-contain object-center transition-all duration-300"
+              className="object-cover object-center transition-all duration-300"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
 

@@ -90,12 +90,12 @@ export function ProductCard({ product, showDiscountBadge = false }: ProductCardP
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50 dark:hover:shadow-black/50">
       {/* Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden bg-white dark:bg-slate-900/60 p-4">
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100 dark:bg-slate-900">
         <Image
           src={mainImage}
           alt={product.name}
           fill
-          className="object-contain object-center transition-transform duration-500 group-hover:scale-105"
+          className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
         />
         

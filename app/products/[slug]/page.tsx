@@ -153,7 +153,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <ProductDetails product={serializedProduct} />
 
         {/* Product Details Tabs (Reviews, Specs, Shipping) */}
-        <ProductTabs product={serializedProduct} />
+        <ProductTabs
+          productId={product.id}
+          slug={product.slug}
+          description={product.description}
+          brandName={product.brand?.name || null}
+          categoryName={product.category.name}
+          reviewCount={serializedProduct.reviewCount}
+          avgRating={serializedProduct.avgRating}
+        />
 
         {/* Related Products Grid */}
         {serializedRelated.length > 0 && (

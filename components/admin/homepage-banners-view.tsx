@@ -773,7 +773,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                 {/* Preview of Background Image or Default Gradient */}
                 {backgroundImageUrl ? (
                   <div className="flex items-center gap-3 pt-2 border-t border-gray-200 dark:border-neutral-800">
-                    <div className="relative h-16 w-28 rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900">
+                    <div className="relative h-28 w-44 rounded-xl overflow-hidden border border-gray-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 shadow-md">
                       <Image src={backgroundImageUrl} alt="Banner Preview" fill className="object-cover" />
                     </div>
                     <div className="flex-1 text-[11px] truncate">

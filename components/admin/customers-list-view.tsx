@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Users, CheckCircle2, ArrowRight, Search, ShieldAlert } from "lucide-react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface CustomerItem {
   id: string;
@@ -32,12 +34,42 @@ export function CustomersListView({ initialCustomers }: CustomersListViewProps) 
       c.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleToggleBan = async (id: string, currentStatus: boolean, name: string) => {
-    const actionText = currentStatus ? "un-suspend" : "suspend";
-    if (!confirm(`Are you sure you want to ${actionText} customer "${name}"?`)) return;
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+    variant?: "danger" | "warning";
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+    variant: "warning",
+  });
 
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
+  const handleToggleBanPrompt = (id: string, currentStatus: boolean, name: string) => {
+    const actionText = currentStatus ? "un-suspend" : "suspend";
+    setConfirmModal({
+      isOpen: true,
+      title: `${currentStatus ? "Un-suspend" : "Suspend"} Account?`,
+      description: `Are you sure you want to ${actionText} customer account "${name}"?`,
+      onConfirm: () => executeToggleBan(id, currentStatus, name),
+      isLoading: false,
+      variant: currentStatus ? "warning" : "danger",
+    });
+  };
+
+  const executeToggleBan = async (id: string, currentStatus: boolean, name: string) => {
     try {
       setTogglingId(id);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/customers/${id}/ban`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -46,19 +78,24 @@ export function CustomersListView({ initialCustomers }: CustomersListViewProps) 
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to update ban status.");
+        toast.error(data.error || "Failed to update ban status.");
         setTogglingId(null);
+        closeConfirmModal();
         return;
       }
 
       setCustomers(
         customers.map((c) => (c.id === id ? { ...c, isBanned: data.user.isBanned } : c))
       );
+      toast.success(
+        `Customer "${name}" ${data.user.isBanned ? "suspended" : "reactivated"}.`
+      );
     } catch (err) {
       console.error("Error toggling customer ban:", err);
-      alert("Failed to update ban status.");
+      toast.error("Failed to update ban status.");
     } finally {
       setTogglingId(null);
+      closeConfirmModal();
     }
   };
 
@@ -156,7 +193,7 @@ export function CustomersListView({ initialCustomers }: CustomersListViewProps) 
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-3">
                           <button
-                            onClick={() => handleToggleBan(c.id, c.isBanned, c.name)}
+                            onClick={() => handleToggleBanPrompt(c.id, c.isBanned, c.name)}
                             disabled={togglingId === c.id}
                             className={`text-xs font-bold transition-colors ${
                               c.isBanned ? "text-emerald-600 dark:text-emerald-400 hover:underline" : "text-rose-600 dark:text-rose-400 hover:underline"
@@ -181,6 +218,18 @@ export function CustomersListView({ initialCustomers }: CustomersListViewProps) 
           </table>
         </div>
       </div>
+
+      {/* Reusable Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        isLoading={confirmModal.isLoading}
+        variant={confirmModal.variant}
+        confirmText={confirmModal.variant === "danger" ? "Suspend" : "Un-suspend"}
+      />
     </div>
   );
 }

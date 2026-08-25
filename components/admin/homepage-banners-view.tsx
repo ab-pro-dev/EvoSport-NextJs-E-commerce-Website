@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export interface BannerItem {
   id: string;
@@ -221,28 +222,58 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     }
   };
 
-  // Delete Banner
-  const handleDelete = async (id: string, bannerHeadline: string) => {
-    if (!confirm(`Are you sure you want to delete banner "${bannerHeadline}"?`)) return;
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+  });
 
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
+  // Delete Banner
+  const handleDeletePrompt = (id: string, bannerHeadline: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Banner?",
+      description: `Are you sure you want to delete banner "${bannerHeadline}"?`,
+      onConfirm: () => executeDeleteBanner(id, bannerHeadline),
+      isLoading: false,
+    });
+  };
+
+  const executeDeleteBanner = async (id: string, bannerHeadline: string) => {
     try {
       setDeletingId(id);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/homepage-banners/${id}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
-        alert("Failed to delete banner.");
+        toast.error("Failed to delete banner.");
         setDeletingId(null);
+        closeConfirmModal();
         return;
       }
 
       setBanners(banners.filter((b) => b.id !== id));
+      toast.success(`Banner "${bannerHeadline}" deleted successfully.`);
     } catch (err) {
       console.error("Delete banner error:", err);
-      alert("Error deleting banner.");
+      toast.error("Error deleting banner.");
     } finally {
       setDeletingId(null);
+      closeConfirmModal();
     }
   };
 
@@ -547,7 +578,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                           <Edit2 className="h-3.5 w-3.5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(banner.id, banner.headline)}
+                          onClick={() => handleDeletePrompt(banner.id, banner.headline)}
                           disabled={deletingId === banner.id}
                           className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 transition-colors disabled:opacity-50"
                           title="Delete Banner"
@@ -858,6 +889,15 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
           </div>
         </div>
       )}
+      {/* Reusable Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        isLoading={confirmModal.isLoading}
+      />
     </div>
   );
 }

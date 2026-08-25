@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Ticket, Plus, Trash2, CheckCircle2, XCircle, AlertCircle, Percent, DollarSign, Truck } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface CouponItem {
   id: string;
@@ -78,27 +80,59 @@ export function CouponsManagementView({ initialCoupons }: CouponsManagementViewP
     }
   };
 
-  const handleDeleteCoupon = async (id: string, couponCode: string) => {
-    if (!confirm(`Are you sure you want to delete coupon "${couponCode}"?`)) return;
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+  });
 
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
+  const handleDeleteCouponPrompt = (id: string, couponCode: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Coupon?",
+      description: `Are you sure you want to delete coupon "${couponCode}"? Customers will no longer be able to apply it.`,
+      onConfirm: () => executeDeleteCoupon(id, couponCode),
+      isLoading: false,
+    });
+  };
+
+  const executeDeleteCoupon = async (id: string, couponCode: string) => {
     try {
       setDeletingId(id);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/coupons/${id}`, {
         method: "DELETE",
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        alert("Failed to delete coupon.");
+        toast.error(data.error || "Failed to delete coupon.");
         setDeletingId(null);
+        closeConfirmModal();
         return;
       }
 
+      toast.success(`Coupon "${couponCode}" deleted successfully!`);
       setCoupons(coupons.filter((c) => c.id !== id));
     } catch (err) {
       console.error("Error deleting coupon:", err);
-      alert("Failed to delete coupon.");
+      toast.error("Network error deleting coupon.");
     } finally {
       setDeletingId(null);
+      closeConfirmModal();
     }
   };
 
@@ -195,7 +229,7 @@ export function CouponsManagementView({ initialCoupons }: CouponsManagementViewP
 
                       <td className="py-3.5 px-4 text-right">
                         <button
-                          onClick={() => handleDeleteCoupon(c.id, c.code)}
+                          onClick={() => handleDeleteCouponPrompt(c.id, c.code)}
                           disabled={deletingId === c.id}
                           className="text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors p-1"
                           title="Delete Coupon"
@@ -308,6 +342,15 @@ export function CouponsManagementView({ initialCoupons }: CouponsManagementViewP
           </div>
         </div>
       )}
+      {/* Reusable Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        isLoading={confirmModal.isLoading}
+      />
     </div>
   );
 }

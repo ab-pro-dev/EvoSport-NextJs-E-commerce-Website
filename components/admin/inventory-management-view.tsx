@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Boxes, Search, AlertTriangle, CheckCircle2, XCircle, Edit2, Save, Filter } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -67,7 +68,7 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
       setIsSaving(true);
       const stockInt = editStockValue.trim() === "" ? null : parseInt(editStockValue.trim(), 10);
       if (stockInt !== null && (isNaN(stockInt) || stockInt < 0)) {
-        alert("Please enter a valid non-negative integer for stock or leave blank for unlimited.");
+        toast.error("Please enter a valid non-negative integer for stock or leave blank for unlimited.");
         setIsSaving(false);
         return;
       }
@@ -80,7 +81,7 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to update stock.");
+        toast.error(data.error || "Failed to update stock.");
         setIsSaving(false);
         return;
       }
@@ -88,6 +89,7 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
       const newVariants = variants.map((v) => (v.id === variantId ? { ...v, stock: data.variant.stock } : v));
       setVariants(newVariants);
       setEditingId(null);
+      toast.success("Stock level updated successfully!");
 
       // Recalculate stats
       const inStock = newVariants.filter((v) => v.stock === null || v.stock > 10).length;
@@ -102,7 +104,7 @@ export function InventoryManagementView({ initialVariants, initialStats }: Inven
       });
     } catch (err) {
       console.error("Error updating stock:", err);
-      alert("Failed to update stock.");
+      toast.error("Failed to update stock.");
     } finally {
       setIsSaving(false);
     }

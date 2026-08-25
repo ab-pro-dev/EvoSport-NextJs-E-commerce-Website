@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FileText, Plus, Trash2, Edit2, Eye, Globe, Lock, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface BlogPostItem {
   id: string;
@@ -126,6 +128,24 @@ export function BlogManagementView({ initialPosts }: BlogManagementViewProps) {
     }
   };
 
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+  });
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
   const handleToggleStatus = async (id: string, currentStatus: string) => {
     try {
       const nextStatus = currentStatus === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
@@ -137,35 +157,58 @@ export function BlogManagementView({ initialPosts }: BlogManagementViewProps) {
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to toggle status.");
+        toast.error(data.error || "Failed to toggle status.");
         return;
       }
 
       setPosts(posts.map((p) => (p.id === id ? { ...p, status: data.post.status, publishedAt: data.post.publishedAt } : p)));
+      toast.success(`Blog post status set to ${data.post.status}.`);
     } catch (err) {
       console.error("Error toggling post status:", err);
-      alert("Failed to toggle status.");
+      toast.error("Failed to toggle status.");
     }
   };
 
-  const handleDeletePost = async (id: string, postTitle: string) => {
-    if (!confirm(`Are you sure you want to delete post "${postTitle}"?`)) return;
+  const handleDeletePostPrompt = (id: string, postTitle: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Blog Post?",
+      description: `Are you sure you want to delete blog post "${postTitle}"? This cannot be undone.`,
+      onConfirm: () => executeDeletePost(id, postTitle),
+      isLoading: false,
+    });
+  };
 
+  const executeDeletePost = async (id: string, postTitle: string) => {
     try {
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/blog/${id}`, { method: "DELETE" });
       if (!res.ok) {
-        alert("Failed to delete post.");
+        toast.error("Failed to delete post.");
+        closeConfirmModal();
         return;
       }
       setPosts(posts.filter((p) => p.id !== id));
+      toast.success(`Post "${postTitle}" deleted successfully!`);
     } catch (err) {
-      console.error("Error deleting blog post:", err);
-      alert("Failed to delete post.");
+      console.error("Error deleting post:", err);
+      toast.error("Failed to delete post.");
+    } finally {
+      closeConfirmModal();
     }
   };
 
   return (
     <div className="space-y-6">
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        onConfirm={confirmModal.onConfirm}
+        isLoading={confirmModal.isLoading}
+      />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-neutral-800 pb-5">
         <div>
@@ -258,7 +301,7 @@ export function BlogManagementView({ initialPosts }: BlogManagementViewProps) {
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDeletePost(p.id, p.title)}
+                            onClick={() => handleDeletePostPrompt(p.id, p.title)}
                             className="text-neutral-400 hover:text-rose-600 dark:hover:text-rose-500 p-1"
                             title="Delete Article"
                           >

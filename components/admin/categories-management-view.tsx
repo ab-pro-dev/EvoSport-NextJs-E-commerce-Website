@@ -5,6 +5,7 @@ import { FolderTree, Plus, Trash2, Pencil, AlertCircle, CornerDownRight, PlusCir
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface CategoryItem {
   id: string;
@@ -174,11 +175,38 @@ export function CategoriesManagementView({ initialCategories }: CategoriesManage
     }
   };
 
-  const handleDeleteCategory = async (id: string, catName: string) => {
-    if (!confirm(`Are you sure you want to delete category "${catName}"?`)) return;
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+  });
 
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
+  const handleDeleteCategoryPrompt = (id: string, catName: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Category?",
+      description: `Are you sure you want to delete category "${catName}"? This action cannot be undone if products are attached.`,
+      onConfirm: () => executeDeleteCategory(id, catName),
+      isLoading: false,
+    });
+  };
+
+  const executeDeleteCategory = async (id: string, catName: string) => {
     try {
       setDeletingId(id);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       setErrorMsg(null);
 
       const res = await fetch(`/api/admin/categories/${id}`, {
@@ -191,6 +219,7 @@ export function CategoriesManagementView({ initialCategories }: CategoriesManage
         setErrorMsg(msg);
         toast.error(msg);
         setDeletingId(null);
+        closeConfirmModal();
         return;
       }
 
@@ -203,6 +232,7 @@ export function CategoriesManagementView({ initialCategories }: CategoriesManage
       toast.error(msg);
     } finally {
       setDeletingId(null);
+      closeConfirmModal();
     }
   };
 
@@ -299,7 +329,7 @@ export function CategoriesManagementView({ initialCategories }: CategoriesManage
                             </button>
                             {/* Delete Button */}
                             <button
-                              onClick={() => handleDeleteCategory(parent.id, parent.name)}
+                              onClick={() => handleDeleteCategoryPrompt(parent.id, parent.name)}
                               disabled={deletingId === parent.id}
                               className="text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors p-1 disabled:opacity-50"
                               title="Delete Category"
@@ -332,7 +362,7 @@ export function CategoriesManagementView({ initialCategories }: CategoriesManage
                               </button>
                               {/* Delete Button */}
                               <button
-                                onClick={() => handleDeleteCategory(child.id, child.name)}
+                                onClick={() => handleDeleteCategoryPrompt(child.id, child.name)}
                                 disabled={deletingId === child.id}
                                 className="text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors p-1 disabled:opacity-50"
                                 title="Delete Subcategory"
@@ -550,6 +580,15 @@ export function CategoriesManagementView({ initialCategories }: CategoriesManage
           </div>
         </div>
       )}
+      {/* Reusable Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        isLoading={confirmModal.isLoading}
+      />
     </div>
   );
 }

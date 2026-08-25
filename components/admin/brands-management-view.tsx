@@ -6,6 +6,7 @@ import { Tag, Plus, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface BrandItem {
   id: string;
@@ -80,11 +81,38 @@ export function BrandsManagementView({ initialBrands }: BrandsManagementViewProp
     }
   };
 
-  const handleDeleteBrand = async (id: string, brandName: string) => {
-    if (!confirm(`Are you sure you want to delete brand "${brandName}"?`)) return;
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+  });
 
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
+  const handleDeleteBrandPrompt = (id: string, brandName: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Brand?",
+      description: `Are you sure you want to delete brand "${brandName}"? Products assigned to this brand will remain.`,
+      onConfirm: () => executeDeleteBrand(id, brandName),
+      isLoading: false,
+    });
+  };
+
+  const executeDeleteBrand = async (id: string, brandName: string) => {
     try {
       setDeletingId(id);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       setErrorMsg(null);
 
       const res = await fetch(`/api/admin/brands/${id}`, {
@@ -97,6 +125,7 @@ export function BrandsManagementView({ initialBrands }: BrandsManagementViewProp
         setErrorMsg(msg);
         toast.error(msg);
         setDeletingId(null);
+        closeConfirmModal();
         return;
       }
 
@@ -109,6 +138,7 @@ export function BrandsManagementView({ initialBrands }: BrandsManagementViewProp
       toast.error(msg);
     } finally {
       setDeletingId(null);
+      closeConfirmModal();
     }
   };
 
@@ -165,7 +195,7 @@ export function BrandsManagementView({ initialBrands }: BrandsManagementViewProp
             </div>
 
             <button
-              onClick={() => handleDeleteBrand(b.id, b.name)}
+              onClick={() => handleDeleteBrandPrompt(b.id, b.name)}
               disabled={deletingId === b.id}
               className="text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors p-2"
               title="Delete Brand"
@@ -244,6 +274,15 @@ export function BrandsManagementView({ initialBrands }: BrandsManagementViewProp
           </div>
         </div>
       )}
+      {/* Reusable Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        isLoading={confirmModal.isLoading}
+      />
     </div>
   );
 }

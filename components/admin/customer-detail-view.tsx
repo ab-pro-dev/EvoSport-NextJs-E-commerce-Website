@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, MapPin, ShoppingBag, Star } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface CustomerDetailProps {
   customer: {
@@ -45,12 +47,42 @@ export function CustomerDetailView({ customer: initialCustomer }: CustomerDetail
   const [customer, setCustomer] = useState(initialCustomer);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleToggleBan = async () => {
-    const actionText = customer.isBanned ? "un-suspend" : "suspend";
-    if (!confirm(`Are you sure you want to ${actionText} customer "${customer.name || customer.email}"?`)) return;
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+    variant?: "danger" | "warning";
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+    variant: "warning",
+  });
 
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
+  const handleToggleBanPrompt = () => {
+    const actionText = customer.isBanned ? "un-suspend" : "suspend";
+    setConfirmModal({
+      isOpen: true,
+      title: `${customer.isBanned ? "Un-suspend" : "Suspend"} Account?`,
+      description: `Are you sure you want to ${actionText} customer "${customer.name || customer.email}"?`,
+      onConfirm: executeToggleBan,
+      isLoading: false,
+      variant: customer.isBanned ? "warning" : "danger",
+    });
+  };
+
+  const executeToggleBan = async () => {
     try {
       setIsUpdating(true);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/customers/${customer.id}/ban`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -59,17 +91,22 @@ export function CustomerDetailView({ customer: initialCustomer }: CustomerDetail
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to update suspension state.");
+        toast.error(data.error || "Failed to update suspension state.");
         setIsUpdating(false);
+        closeConfirmModal();
         return;
       }
 
       setCustomer({ ...customer, isBanned: data.user.isBanned });
+      toast.success(
+        `Account ${data.user.isBanned ? "suspended" : "reactivated"} successfully.`
+      );
     } catch (err) {
       console.error("Error toggling customer ban:", err);
-      alert("Failed to update suspension state.");
+      toast.error("Failed to update suspension state.");
     } finally {
       setIsUpdating(false);
+      closeConfirmModal();
     }
   };
 
@@ -108,7 +145,7 @@ export function CustomerDetailView({ customer: initialCustomer }: CustomerDetail
         </div>
 
         <Button
-          onClick={handleToggleBan}
+          onClick={handleToggleBanPrompt}
           disabled={isUpdating}
           className={`font-black uppercase text-xs rounded-lg h-10 px-5 shadow-sm ${
             customer.isBanned
@@ -223,6 +260,17 @@ export function CustomerDetailView({ customer: initialCustomer }: CustomerDetail
           </div>
         </div>
       </div>
+      {/* Reusable Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        isLoading={confirmModal.isLoading}
+        variant={confirmModal.variant}
+        confirmText={confirmModal.variant === "danger" ? "Suspend" : "Un-suspend"}
+      />
     </div>
   );
 }

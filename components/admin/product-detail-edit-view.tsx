@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Save, Upload, Trash2, Plus, Package, Layers, Image as ImageIcon, AlertCircle, CheckCircle2, Star } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface Variant {
   id: string;
@@ -137,6 +139,25 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
     }
   };
 
+  // Confirm Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+  });
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
   // 2. Handle Cloudinary File / URL Upload
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -154,15 +175,16 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Image upload failed.");
+        toast.error(data.error || "Image upload failed.");
         setIsUploadingImage(false);
         return;
       }
 
       setImages([...images, data.image]);
+      toast.success("Image uploaded successfully!");
     } catch (err) {
       console.error("Error uploading image to Cloudinary:", err);
-      alert("Image upload failed.");
+      toast.error("Image upload failed.");
     } finally {
       setIsUploadingImage(false);
     }
@@ -183,33 +205,44 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Image URL upload failed.");
+        toast.error(data.error || "Image URL upload failed.");
         setIsUploadingImage(false);
         return;
       }
 
       setImages([...images, data.image]);
       setImageUrlInput("");
+      toast.success("Image URL added successfully!");
     } catch (err) {
       console.error("Error uploading image URL to Cloudinary:", err);
-      alert("Image URL upload failed.");
+      toast.error("Image URL upload failed.");
     } finally {
       setIsUploadingImage(false);
     }
   };
 
   // Delete Image Handler
-  const handleDeleteImage = async (imageId: string) => {
-    if (!confirm("Are you sure you want to delete this image?")) return;
+  const handleDeleteImagePrompt = (imageId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Image?",
+      description: "Are you sure you want to delete this image? This action cannot be undone.",
+      onConfirm: () => executeDeleteImage(imageId),
+      isLoading: false,
+    });
+  };
 
+  const executeDeleteImage = async (imageId: string) => {
     try {
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/products/${product.id}/images/${imageId}`, {
         method: "DELETE",
       });
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to delete image.");
+        toast.error(data.error || "Failed to delete image.");
+        closeConfirmModal();
         return;
       }
 
@@ -218,9 +251,12 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
       } else {
         setImages(images.filter((img) => img.id !== imageId));
       }
+      toast.success("Image deleted successfully.");
     } catch (err) {
       console.error("Error deleting image:", err);
-      alert("Failed to delete image.");
+      toast.error("Failed to delete image.");
+    } finally {
+      closeConfirmModal();
     }
   };
 
@@ -235,16 +271,17 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to set main image.");
+        toast.error(data.error || "Failed to set main image.");
         return;
       }
 
       if (data.images) {
         setImages(data.images);
       }
+      toast.success("Main image updated.");
     } catch (err) {
       console.error("Error setting main image:", err);
-      alert("Failed to set main image.");
+      toast.error("Failed to set main image.");
     }
   };
 
@@ -268,7 +305,7 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to add variant.");
+        toast.error(data.error || "Failed to add variant.");
         setIsAddingVariant(false);
         return;
       }
@@ -278,37 +315,60 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
       setNewColor("");
       setNewSize("");
       setNewStock("");
+      toast.success("Variant added successfully!");
     } catch (err) {
       console.error("Error adding variant:", err);
-      alert("Failed to add variant.");
+      toast.error("Failed to add variant.");
     } finally {
       setIsAddingVariant(false);
     }
   };
 
   // 4. Handle Variant Deletion
-  const handleDeleteVariant = async (variantId: string) => {
-    if (!confirm("Are you sure you want to delete this variant?")) return;
+  const handleDeleteVariantPrompt = (variantId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Variant?",
+      description: "Are you sure you want to delete this variant?",
+      onConfirm: () => executeDeleteVariant(variantId),
+      isLoading: false,
+    });
+  };
 
+  const executeDeleteVariant = async (variantId: string) => {
     try {
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/products/${product.id}/variants/${variantId}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
-        alert("Failed to delete variant.");
+        toast.error("Failed to delete variant.");
+        closeConfirmModal();
         return;
       }
 
       setVariants(variants.filter((v) => v.id !== variantId));
+      toast.success("Variant deleted successfully.");
     } catch (err) {
       console.error("Error deleting variant:", err);
-      alert("Failed to delete variant.");
+      toast.error("Failed to delete variant.");
+    } finally {
+      closeConfirmModal();
     }
   };
 
   return (
     <div className="space-y-8 max-w-5xl">
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        onConfirm={confirmModal.onConfirm}
+        isLoading={confirmModal.isLoading}
+      />
+
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-neutral-800 pb-5">
         <div className="flex items-center gap-3">
@@ -560,7 +620,7 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
                         <td className="py-2.5 px-3 font-bold text-neutral-900 dark:text-white">${Number(v.price).toFixed(2)}</td>
                         <td className="py-2.5 px-3 text-right">
                           <button
-                            onClick={() => handleDeleteVariant(v.id)}
+                            onClick={() => handleDeleteVariantPrompt(v.id)}
                             className="text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
                             title="Delete Variant"
                           >
@@ -682,7 +742,7 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
                       {/* Delete Overlay Button */}
                       <button
                         type="button"
-                        onClick={() => handleDeleteImage(img.id)}
+                        onClick={() => handleDeleteImagePrompt(img.id)}
                         className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900/80 hover:bg-rose-600 text-white transition-all shadow-sm opacity-80 group-hover:opacity-100"
                         title="Delete Image"
                       >

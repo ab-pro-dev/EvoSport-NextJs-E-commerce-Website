@@ -7,6 +7,7 @@ import { Plus, Edit2, Trash2, Package, Search, Filter, AlertCircle, Upload, X, I
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface ProductItem {
   id: string;
@@ -48,9 +49,26 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Bulk Selection State
+  // Bulk Selection & Modal State
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+  });
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
 
   // 1. Parent Categories (Main Categories)
   const mainCategories = useMemo(() => {
@@ -275,20 +293,23 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
     );
   };
 
-  const handleBulkDelete = async () => {
+  const handleBulkDeletePrompt = () => {
     const count = selectedProductIds.length;
     if (count === 0) return;
 
-    if (
-      !confirm(
-        `Delete ${count} selected product(s)? This cannot be undone.`
-      )
-    ) {
-      return;
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Products?",
+      description: `Delete ${count} selected product(s)? This action cannot be undone.`,
+      onConfirm: executeBulkDelete,
+      isLoading: false,
+    });
+  };
 
+  const executeBulkDelete = async () => {
     try {
       setIsBulkDeleting(true);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
 
       const res = await fetch("/api/admin/products/bulk-delete", {
         method: "POST",
@@ -300,6 +321,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
       if (!res.ok) {
         toast.error(data.error || "Bulk delete failed.");
         setIsBulkDeleting(false);
+        closeConfirmModal();
         return;
       }
 
@@ -331,16 +353,24 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
       toast.error("Network error executing bulk delete.");
     } finally {
       setIsBulkDeleting(false);
+      closeConfirmModal();
     }
   };
 
-  const handleDeleteProduct = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"? This will remove all its images and variants.`)) {
-      return;
-    }
+  const handleDeleteProductPrompt = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Product?",
+      description: `Are you sure you want to delete "${name}"? This will remove all its images and variants.`,
+      onConfirm: () => executeDeleteProduct(id),
+      isLoading: false,
+    });
+  };
 
+  const executeDeleteProduct = async (id: string) => {
     try {
       setDeletingId(id);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
       });
@@ -348,6 +378,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.error || "Failed to delete product.");
+        closeConfirmModal();
         return;
       }
 
@@ -358,6 +389,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
       toast.error("Network error deleting product.");
     } finally {
       setDeletingId(null);
+      closeConfirmModal();
     }
   };
 
@@ -532,7 +564,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                           <Edit2 className="h-3.5 w-3.5" />
                         </Link>
                         <button
-                          onClick={() => handleDeleteProduct(p.id, p.name)}
+                          onClick={() => handleDeleteProductPrompt(p.id, p.name)}
                           disabled={isDeleting === p.id}
                           className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400 hover:border-rose-300 dark:hover:border-rose-800 hover:text-rose-600 dark:hover:text-rose-400 transition-colors shadow-sm"
                           title="Delete Product"
@@ -566,7 +598,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
 
           <Button
             type="button"
-            onClick={handleBulkDelete}
+            onClick={handleBulkDeletePrompt}
             disabled={isBulkDeleting}
             className="bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs uppercase px-4 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5"
           >
@@ -917,6 +949,15 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
           </div>
         </div>
       )}
+      {/* Reusable Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        isLoading={confirmModal.isLoading}
+      />
     </div>
   );
 }

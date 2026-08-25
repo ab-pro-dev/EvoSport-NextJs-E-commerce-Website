@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Star, CheckCircle, XCircle, Trash2, ShieldCheck, Filter } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 interface ReviewItem {
   id: string;
@@ -27,6 +29,24 @@ export function ReviewsManagementView({ initialReviews }: ReviewsManagementViewP
 
   const filteredReviews = reviews.filter((r) => statusFilter === "ALL" || r.status === statusFilter);
 
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    onConfirm: () => {},
+    isLoading: false,
+  });
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+  };
+
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
       setUpdatingId(id);
@@ -38,41 +58,54 @@ export function ReviewsManagementView({ initialReviews }: ReviewsManagementViewP
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to update review status.");
+        toast.error(data.error || "Failed to update review status.");
         setUpdatingId(null);
         return;
       }
 
       setReviews(reviews.map((r) => (r.id === id ? { ...r, status: data.review.status } : r)));
+      toast.success(`Review status updated to ${newStatus}.`);
     } catch (err) {
       console.error("Error updating review status:", err);
-      alert("Failed to update review status.");
+      toast.error("Failed to update review status.");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const handleDeleteReview = async (id: string) => {
-    if (!confirm("Are you sure you want to permanently delete this review?")) return;
+  const handleDeleteReviewPrompt = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Review?",
+      description: "Are you sure you want to permanently delete this customer review? This action cannot be undone.",
+      onConfirm: () => executeDeleteReview(id),
+      isLoading: false,
+    });
+  };
 
+  const executeDeleteReview = async (id: string) => {
     try {
       setUpdatingId(id);
+      setConfirmModal((prev) => ({ ...prev, isLoading: true }));
       const res = await fetch(`/api/admin/reviews/${id}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
-        alert("Failed to delete review.");
+        toast.error("Failed to delete review.");
         setUpdatingId(null);
+        closeConfirmModal();
         return;
       }
 
       setReviews(reviews.filter((r) => r.id !== id));
+      toast.success("Review deleted successfully.");
     } catch (err) {
       console.error("Error deleting review:", err);
-      alert("Failed to delete review.");
+      toast.error("Failed to delete review.");
     } finally {
       setUpdatingId(null);
+      closeConfirmModal();
     }
   };
 
@@ -214,7 +247,7 @@ export function ReviewsManagementView({ initialReviews }: ReviewsManagementViewP
                   )}
 
                   <Button
-                    onClick={() => handleDeleteReview(r.id)}
+                    onClick={() => handleDeleteReviewPrompt(r.id)}
                     disabled={updatingId === r.id}
                     variant="outline"
                     className="border-gray-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900 text-xs font-bold h-8 px-3"
@@ -228,6 +261,16 @@ export function ReviewsManagementView({ initialReviews }: ReviewsManagementViewP
           })
         )}
       </div>
+
+      {/* Reusable Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        description={confirmModal.description}
+        isLoading={confirmModal.isLoading}
+      />
     </div>
   );
 }

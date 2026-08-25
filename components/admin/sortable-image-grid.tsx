@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import {
   DndContext,
@@ -75,7 +75,7 @@ function SortableImageCard({ item, index, onDelete, onSetMain }: SortableImageCa
       ) : (
         <>
           <Image
-            src={item.url}
+            src={item.url || "/placeholder.png"}
             alt={item.altText || "Product Image"}
             fill
             sizes="200px"
@@ -145,6 +145,18 @@ export function SortableImageGrid({
   onDelete,
   onSetMain,
 }: SortableImageGridProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const validImages = useMemo(() => {
+    return (images || []).filter(
+      (img): img is SortableImageItem => Boolean(img && typeof img === "object" && img.id)
+    );
+  }, [images]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -160,17 +172,19 @@ export function SortableImageGrid({
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = images.findIndex((img) => img.id === active.id);
-      const newIndex = images.findIndex((img) => img.id === over.id);
+      const oldIndex = validImages.findIndex((img) => img.id === active.id);
+      const newIndex = validImages.findIndex((img) => img.id === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const reordered = arrayMove(images, oldIndex, newIndex);
+        const reordered = arrayMove(validImages, oldIndex, newIndex);
         onReorder(reordered);
       }
     }
   };
 
-  if (images.length === 0) return null;
+  if (!isMounted || validImages.length === 0) return null;
+
+  const itemIds = validImages.map((img) => img.id);
 
   return (
     <DndContext
@@ -178,9 +192,9 @@ export function SortableImageGrid({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={images.map((img) => img.id)} strategy={rectSortingStrategy}>
+      <SortableContext items={itemIds} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {images.map((item, index) => (
+          {validImages.map((item, index) => (
             <SortableImageCard
               key={item.id}
               item={item}

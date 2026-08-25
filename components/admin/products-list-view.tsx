@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { SortableImageGrid, SortableImageItem } from "@/components/admin/sortable-image-grid";
 
 interface ProductItem {
   id: string;
@@ -96,8 +97,8 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
   const [newStatus, setNewStatus] = useState("ACTIVE");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Image Upload State (unlimited images support)
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  // Image Upload State (unlimited multi-image drag-to-reorder support)
+  const [imageItems, setImageItems] = useState<SortableImageItem[]>([]);
   const [imageUrlInput, setImageUrlInput] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
@@ -146,39 +147,79 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
     setNewBasePrice("");
     setNewComparePrice("");
     setNewStock("");
-    setImageUrls([]);
+    setImageItems([]);
     setImageUrlInput("");
     setErrorMsg(null);
   };
 
-  // Image Upload via File
+  // Multi-file Upload via File Input
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     try {
       setIsUploadingImage(true);
-      const formData = new FormData();
-      formData.append("file", file);
 
-      const res = await fetch("/api/admin/media/upload", {
-        method: "POST",
-        body: formData,
+      // Create placeholder skeleton items for all selected files
+      const tempPlaceholders: SortableImageItem[] = files.map((file, idx) => ({
+        id: `uploading-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 5)}`,
+        url: "",
+        fileName: file.name,
+        isUploading: true,
+      }));
+
+      // Append placeholders so skeleton spinners show up in parallel
+      setImageItems((prev) => [...prev, ...tempPlaceholders]);
+
+      // Upload all files in parallel
+      const uploadPromises = files.map(async (file, idx) => {
+        const tempId = tempPlaceholders[idx].id;
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const res = await fetch("/api/admin/media/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            toast.error(`Upload failed for ${file.name}: ${data.error || "Error"}`);
+            // Remove skeleton placeholder on error
+            setImageItems((prev) => prev.filter((item) => item.id !== tempId));
+            return null;
+          }
+
+          if (data.secure_url) {
+            const newItem: SortableImageItem = {
+              id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              url: data.secure_url,
+              altText: file.name,
+              isUploading: false,
+            };
+            // Replace placeholder with uploaded image
+            setImageItems((prev) =>
+              prev.map((item) => (item.id === tempId ? newItem : item))
+            );
+            return data.secure_url;
+          }
+        } catch (err) {
+          console.error(`Error uploading file ${file.name}:`, err);
+          toast.error(`Network error uploading ${file.name}`);
+          setImageItems((prev) => prev.filter((item) => item.id !== tempId));
+          return null;
+        }
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.error || "File upload failed.");
-        return;
-      }
-
-      if (data.secure_url) {
-        setImageUrls((prev) => [...prev, data.secure_url]);
-        toast.success("Image uploaded successfully!");
+      const results = await Promise.all(uploadPromises);
+      const successful = results.filter((url): url is string => Boolean(url));
+      if (successful.length > 0) {
+        toast.success(`Successfully uploaded ${successful.length} image(s)!`);
       }
     } catch (err) {
-      console.error("Image upload error:", err);
-      toast.error("Network error uploading image.");
+      console.error("Multi-image upload error:", err);
+      toast.error("Network error uploading images.");
     } finally {
       setIsUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -187,13 +228,32 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
 
   const handleAddImageUrl = () => {
     if (!imageUrlInput.trim()) return;
-    setImageUrls((prev) => [...prev, imageUrlInput.trim()]);
+    const newItem: SortableImageItem = {
+      id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      url: imageUrlInput.trim(),
+      isUploading: false,
+    };
+    setImageItems((prev) => [...prev, newItem]);
     setImageUrlInput("");
     toast.success("Image URL added!");
   };
 
-  const handleRemoveImage = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+  const handleReorderImageItems = (newItems: SortableImageItem[]) => {
+    setImageItems(newItems);
+  };
+
+  const handleSetMainImageItem = (id: string) => {
+    setImageItems((prev) => {
+      const idx = prev.findIndex((img) => img.id === id);
+      if (idx <= 0) return prev;
+      const target = prev[idx];
+      const rest = prev.filter((img) => img.id !== id);
+      return [target, ...rest];
+    });
+  };
+
+  const handleDeleteImageItem = (id: string) => {
+    setImageItems((prev) => prev.filter((img) => img.id !== id));
   };
 
   const handleAddProduct = async (e: React.FormEvent) => {
@@ -209,6 +269,10 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
         return;
       }
 
+      const validImages = imageItems
+        .filter((img) => !img.isUploading && img.url)
+        .map((img, idx) => ({ url: img.url, position: idx }));
+
       const payload = {
         name: newProductName.trim(),
         slug: newProductSlug.trim(),
@@ -217,10 +281,10 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
         categoryId: targetCategoryId,
         gender: newGender,
         basePrice: parseFloat(newBasePrice),
-        compareAtPrice: newComparePrice ? parseFloat(newComparePrice) : null,
-        status: newStatus,
+        compareAtPrice: newComparePrice ? parseFloat(newComparePrice) : undefined,
         stock: newStock.trim() ? parseInt(newStock, 10) : null,
-        images: imageUrls.map((url, idx) => ({ url, position: idx })),
+        status: newStatus,
+        images: validImages,
       };
 
       const res = await fetch("/api/admin/products", {
@@ -792,6 +856,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                     <input
                       ref={fileInputRef}
                       type="file"
+                      multiple
                       accept="image/*"
                       onChange={handleFileUpload}
                       className="hidden"
@@ -803,9 +868,9 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                     >
                       <Upload className="h-5 w-5 text-neutral-400 mb-1" />
                       <span className="text-xs font-bold text-neutral-900 dark:text-white">
-                        {isUploadingImage ? "Uploading to Cloudinary..." : "Click to browse and upload image"}
+                        {isUploadingImage ? "Uploading to Cloudinary..." : "Click to select and upload multiple images"}
                       </span>
-                      <span className="text-[10px] text-neutral-500 mt-0.5">PNG, JPG, WEBP up to 10MB (Unlimited uploads)</span>
+                      <span className="text-[10px] text-neutral-500 mt-0.5">Select 1 or multiple PNG, JPG, WEBP files (Drag to reorder thumbnails after uploading)</span>
                     </label>
                   </div>
                 ) : (
@@ -826,33 +891,18 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                   </div>
                 )}
 
-                {/* Thumbnails of Added Images (Unlimited images) */}
-                {imageUrls.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-neutral-800/80 max-h-48 overflow-y-auto p-1">
-                    {imageUrls.map((url, idx) => (
-                      <div
-                        key={idx}
-                        className="relative h-16 w-16 rounded-lg overflow-hidden border border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 group shrink-0"
-                      >
-                        <Image src={url} alt={`Preview ${idx + 1}`} fill className="object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(idx)}
-                          className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-rose-400 hover:text-rose-300 transition-opacity"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                        {idx === 0 ? (
-                          <span className="absolute bottom-0 inset-x-0 bg-rose-600 text-white text-[7px] font-black uppercase text-center py-0.5">
-                            Card Primary
-                          </span>
-                        ) : (
-                          <span className="absolute bottom-0 inset-x-0 bg-neutral-900/80 text-neutral-300 text-[7px] font-bold text-center py-0.5">
-                            Gallery #{idx + 1}
-                          </span>
-                        )}
-                      </div>
-                    ))}
+                {/* Sortable & Draggable Thumbnails Grid */}
+                {imageItems.length > 0 && (
+                  <div className="pt-2 border-t border-gray-200 dark:border-neutral-800/80 space-y-2">
+                    <p className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase">
+                      Drag thumbnails to reorder • Position #1 is Card Primary Image
+                    </p>
+                    <SortableImageGrid
+                      images={imageItems}
+                      onReorder={handleReorderImageItems}
+                      onSetMain={handleSetMainImageItem}
+                      onDelete={handleDeleteImageItem}
+                    />
                   </div>
                 )}
               </div>

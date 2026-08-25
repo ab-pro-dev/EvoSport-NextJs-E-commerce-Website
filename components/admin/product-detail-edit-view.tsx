@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { SortableImageGrid, SortableImageItem } from "@/components/admin/sortable-image-grid";
 
 interface Variant {
   id: string;
@@ -158,35 +159,94 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
     setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
   };
 
-  // 2. Handle Cloudinary File / URL Upload
+  // 2. Handle Cloudinary File / URL Upload (Multi-file parallel upload support)
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     try {
       setIsUploadingImage(true);
-      const formData = new FormData();
-      formData.append("file", file);
 
+      const tempPlaceholders = files.map((file, idx) => ({
+        id: `uploading-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 5)}`,
+        url: "",
+        position: images.length + idx,
+        isUploading: true,
+        fileName: file.name,
+      }));
+
+      // Append skeleton placeholders
+      setImages((prev: any) => [...prev, ...tempPlaceholders]);
+
+      const uploadPromises = files.map(async (file, idx) => {
+        const tempId = tempPlaceholders[idx].id;
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const res = await fetch(`/api/admin/products/${product.id}/images`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            toast.error(`Upload failed for ${file.name}: ${data.error || "Error"}`);
+            setImages((prev: any) => prev.filter((img: any) => img.id !== tempId));
+            return null;
+          }
+
+          if (data.image) {
+            setImages((prev: any) =>
+              prev.map((img: any) => (img.id === tempId ? data.image : img))
+            );
+            return data.image;
+          }
+        } catch (err) {
+          console.error(`Error uploading ${file.name}:`, err);
+          toast.error(`Failed to upload ${file.name}`);
+          setImages((prev: any) => prev.filter((img: any) => img.id !== tempId));
+          return null;
+        }
+      });
+
+      const results = await Promise.all(uploadPromises);
+      const successful = results.filter((img): img is any => Boolean(img));
+      if (successful.length > 0) {
+        toast.success(`Successfully uploaded ${successful.length} image(s)!`);
+      }
+    } catch (err) {
+      console.error("Error uploading images to Cloudinary:", err);
+      toast.error("Image upload failed.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Drag-to-reorder handler
+  const handleReorderImages = async (newImages: SortableImageItem[]) => {
+    setImages(newImages as any);
+    try {
+      const imageIds = newImages.map((img) => img.id);
       const res = await fetch(`/api/admin/products/${product.id}/images`, {
-        method: "POST",
-        body: formData,
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageIds }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error || "Image upload failed.");
-        setIsUploadingImage(false);
+        toast.error("Failed to sync image order to database.");
         return;
       }
 
-      setImages([...images, data.image]);
-      toast.success("Image uploaded successfully!");
+      if (data.images) {
+        setImages(data.images);
+      }
+      toast.success("Image order updated!");
     } catch (err) {
-      console.error("Error uploading image to Cloudinary:", err);
-      toast.error("Image upload failed.");
-    } finally {
-      setIsUploadingImage(false);
+      console.error("Error reordering images:", err);
+      toast.error("Failed to reorder images.");
     }
   };
 
@@ -700,66 +760,33 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
               <h2 className="text-sm font-black uppercase tracking-tight text-neutral-900 dark:text-white">CLOUDINARY MEDIA ASSETS</h2>
             </div>
 
-            {/* Cloudinary Images Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              {images
-                .slice()
-                .sort((a, b) => a.position - b.position)
-                .map((img, idx) => {
-                  const isMain = img.position === 0 || idx === 0;
+            {/* Cloudinary Images Grid with Drag-to-Reorder */}
+            {images.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase">
+                  Drag thumbnails to reorder • Position #1 is Card Primary Image
+                </p>
+                <SortableImageGrid
+                  images={images.slice().sort((a, b) => a.position - b.position)}
+                  onReorder={handleReorderImages}
+                  onSetMain={handleSetMainImage}
+                  onDelete={handleDeleteImagePrompt}
+                />
+              </div>
+            ) : (
+              <p className="text-xs text-neutral-400 dark:text-neutral-500 italic text-center py-4">
+                No media assets uploaded for this product yet.
+              </p>
+            )}
 
-                  return (
-                    <div
-                      key={img.id}
-                      className={`relative group rounded-xl overflow-hidden bg-white dark:bg-neutral-950 aspect-square p-1 transition-all ${
-                        isMain
-                          ? "border-2 border-rose-600 dark:border-rose-500 shadow-md ring-2 ring-rose-600/20"
-                          : "border border-gray-200 dark:border-neutral-800 hover:border-gray-400"
-                      }`}
-                    >
-                      <Image src={img.url} alt={img.altText || "Product Image"} fill sizes="200px" className="object-contain p-1" />
-
-                      {/* Main Badge or Set Main Button */}
-                      {isMain ? (
-                        <div className="absolute left-2 top-2 z-10">
-                          <span className="flex items-center gap-1 bg-rose-600 text-white font-extrabold text-[9px] uppercase px-1.5 py-0.5 rounded shadow-sm">
-                            <Star className="h-2.5 w-2.5 fill-current text-white" />
-                            MAIN
-                          </span>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleSetMainImage(img.id)}
-                          className="absolute left-2 top-2 z-10 hidden group-hover:flex items-center gap-1 bg-neutral-900/90 hover:bg-rose-600 text-white text-[9px] font-bold uppercase px-1.5 py-0.5 rounded backdrop-blur-sm transition-colors shadow-sm"
-                          title="Set as Main Image (Position 0)"
-                        >
-                          <Star className="h-2.5 w-2.5" />
-                          Set Main
-                        </button>
-                      )}
-
-                      {/* Delete Overlay Button */}
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteImagePrompt(img.id)}
-                        className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-neutral-900/80 hover:bg-rose-600 text-white transition-all shadow-sm opacity-80 group-hover:opacity-100"
-                        title="Delete Image"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  );
-                })}
-            </div>
-
-            {/* Upload File Control */}
+            {/* Upload File Control (Multi-file Support) */}
             <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-neutral-800">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
-                Upload Local Image File to Cloudinary
+                Upload Local Image File(s) to Cloudinary
               </label>
               <input
                 type="file"
+                multiple
                 accept="image/*"
                 onChange={handleImageFileUpload}
                 disabled={isUploadingImage}

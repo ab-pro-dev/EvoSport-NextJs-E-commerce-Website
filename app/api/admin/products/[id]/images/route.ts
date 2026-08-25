@@ -95,3 +95,43 @@ export async function POST(
     return NextResponse.json({ error: "Cloudinary upload failed: " + String(error) }, { status: 500 });
   }
 }
+
+// PATCH /api/admin/products/[id]/images — Reorder images array
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const authResult = await verifyAdmin();
+    if ("error" in authResult) {
+      return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+    }
+
+    const { id: productId } = await params;
+    const body = await req.json().catch(() => ({}));
+    const imageIds: string[] = body.imageIds;
+
+    if (!Array.isArray(imageIds)) {
+      return NextResponse.json({ error: "Invalid imageIds payload" }, { status: 400 });
+    }
+
+    await prisma.$transaction(
+      imageIds.map((imageId, index) =>
+        prisma.productImage.update({
+          where: { id: imageId, productId },
+          data: { position: index },
+        })
+      )
+    );
+
+    const updatedImages = await prisma.productImage.findMany({
+      where: { productId },
+      orderBy: { position: "asc" },
+    });
+
+    return NextResponse.json({ success: true, images: updatedImages });
+  } catch (error) {
+    console.error("PATCH /api/admin/products/[id]/images error:", error);
+    return NextResponse.json({ error: "Failed to reorder images" }, { status: 500 });
+  }
+}

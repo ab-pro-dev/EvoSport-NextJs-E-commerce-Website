@@ -823,7 +823,7 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
                     <ImageIcon className="h-3.5 w-3.5" />
-                    Product Images ({imageUrls.length} added)
+                    Product Images ({imageItems.length} added)
                   </span>
                   <div className="flex rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-0.5 text-[10px] font-bold">
                     <button

@@ -48,6 +48,10 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Bulk Selection State
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
   // 1. Parent Categories (Main Categories)
   const mainCategories = useMemo(() => {
     return categories.filter((c) => !c.parentId);
@@ -247,6 +251,89 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
     }
   };
 
+  const isAllSelected =
+    filteredProducts.length > 0 &&
+    filteredProducts.every((p) => selectedProductIds.includes(p.id));
+
+  const isSomeSelected =
+    filteredProducts.some((p) => selectedProductIds.includes(p.id)) &&
+    !isAllSelected;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      const filteredSet = new Set(filteredProducts.map((p) => p.id));
+      setSelectedProductIds((prev) => prev.filter((id) => !filteredSet.has(id)));
+    } else {
+      const visibleIds = filteredProducts.map((p) => p.id);
+      setSelectedProductIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
+
+  const toggleSelectProduct = (id: string) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    const count = selectedProductIds.length;
+    if (count === 0) return;
+
+    if (
+      !confirm(
+        `Delete ${count} selected product(s)? This cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsBulkDeleting(true);
+
+      const res = await fetch("/api/admin/products/bulk-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productIds: selectedProductIds }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Bulk delete failed.");
+        setIsBulkDeleting(false);
+        return;
+      }
+
+      const deletedIds = new Set((data.deleted || []).map((d: any) => d.id));
+      const deletedCount = data.deleted?.length || 0;
+      const failedCount = data.failed?.length || 0;
+
+      // Update products state
+      setProducts((prev) => prev.filter((p) => !deletedIds.has(p.id)));
+      setSelectedProductIds((prev) => prev.filter((id) => !deletedIds.has(id)));
+
+      if (deletedCount > 0 && failedCount === 0) {
+        toast.success(`${deletedCount} product(s) deleted successfully.`);
+      } else if (deletedCount > 0 && failedCount > 0) {
+        const failedSummary = data.failed
+          .map((f: any) => `${f.name} (${f.reason})`)
+          .join("; ");
+        toast.warning(
+          `${deletedCount} deleted, ${failedCount} failed: ${failedSummary}`
+        );
+      } else if (failedCount > 0) {
+        const failedSummary = data.failed
+          .map((f: any) => `${f.name}: ${f.reason}`)
+          .join("; ");
+        toast.error(`Failed to delete product(s): ${failedSummary}`);
+      }
+    } catch (err) {
+      console.error("Error bulk deleting products:", err);
+      toast.error("Network error executing bulk delete.");
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   const handleDeleteProduct = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete "${name}"? This will remove all its images and variants.`)) {
       return;
@@ -330,6 +417,18 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
           <table className="w-full text-left text-xs">
             <thead className="border-b border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950/60 text-[10px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
               <tr>
+                <th className="py-3 px-4 w-10">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = isSomeSelected;
+                    }}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 rounded border-gray-300 dark:border-neutral-700 text-rose-600 focus:ring-rose-500 cursor-pointer accent-rose-600"
+                    title="Select All Filtered Products"
+                  />
+                </th>
                 <th className="py-3 px-4">Product</th>
                 <th className="py-3 px-4">Category & Gender</th>
                 <th className="py-3 px-4">Price</th>
@@ -341,14 +440,31 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
             <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/60 text-neutral-700 dark:text-neutral-300">
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-xs text-neutral-400 dark:text-neutral-500 italic">
+                  <td colSpan={7} className="py-8 text-center text-xs text-neutral-400 dark:text-neutral-500 italic">
                     No products found matching filters.
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-neutral-900/90 transition-colors">
-                    <td className="py-3.5 px-4">
+                filteredProducts.map((p) => {
+                  const isSelected = selectedProductIds.includes(p.id);
+                  return (
+                    <tr
+                      key={p.id}
+                      className={`transition-colors ${
+                        isSelected
+                          ? "bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                          : "hover:bg-gray-50 dark:hover:bg-neutral-900/90"
+                      }`}
+                    >
+                      <td className="py-3.5 px-4 w-10">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectProduct(p.id)}
+                          className="h-4 w-4 rounded border-gray-300 dark:border-neutral-700 text-rose-600 focus:ring-rose-500 cursor-pointer accent-rose-600"
+                        />
+                      </td>
+                      <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 relative rounded bg-white dark:bg-neutral-950 overflow-hidden border border-gray-200 dark:border-neutral-800 shrink-0 p-0.5">
                           {p.image ? (
@@ -425,13 +541,48 @@ export function ProductsListView({ initialProducts, brands, categories }: Produc
                         </button>
                       </div>
                     </td>
-                  </tr>
-                ))
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Floating Action Bar for Bulk Actions */}
+      {selectedProductIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-neutral-900 dark:bg-neutral-800 text-white px-5 py-3 rounded-2xl shadow-2xl border border-neutral-700/80 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <div className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-white font-black text-[10px]">
+              {selectedProductIds.length}
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider">
+              {selectedProductIds.length === 1 ? "Product Selected" : "Products Selected"}
+            </span>
+          </div>
+
+          <div className="h-4 w-[1px] bg-neutral-700" />
+
+          <Button
+            type="button"
+            onClick={handleBulkDelete}
+            disabled={isBulkDeleting}
+            className="bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs uppercase px-4 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            {isBulkDeleting ? "Deleting..." : "Delete Selected"}
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedProductIds([])}
+            className="text-neutral-400 hover:text-white text-xs font-bold transition-colors"
+          >
+            Clear Selection
+          </button>
+        </div>
+      )}
 
       {/* Add Product Modal */}
       {isAddModalOpen && (

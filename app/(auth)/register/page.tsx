@@ -78,7 +78,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden bg-black selection:bg-[#B8FF00] selection:text-black">
-      {/* 1. Full-bleed background photo flatlay with vignette */}
+      {/* 1. Full-bleed background photo flatlay with light vignette */}
       <Image
         src="/images/Login_background.png"
         alt="EvoSport Product Background"
@@ -86,7 +86,7 @@ export default function RegisterPage() {
         className="object-cover object-center pointer-events-none select-none"
         priority
       />
-      <div className="absolute inset-0 bg-black/65 backdrop-blur-[3px] pointer-events-none" />
+      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
 
       {/* 2. Centered Glassmorphic Card */}
       <div className="w-full max-w-[440px] bg-[#121418]/85 backdrop-blur-2xl rounded-[32px] p-7 sm:p-9 shadow-2xl border border-white/10 relative z-20 space-y-5 text-white my-6">

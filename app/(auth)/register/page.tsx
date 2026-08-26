@@ -83,13 +83,15 @@ export default function RegisterPage() {
         src="/images/Login_background.png"
         alt="EvoSport Product Background"
         fill
+        quality={100}
+        sizes="100vw"
         className="object-cover object-center pointer-events-none select-none"
         priority
       />
-      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/25 pointer-events-none" />
 
       {/* 2. Centered Glassmorphic Card */}
-      <div className="w-full max-w-[440px] bg-[#121418]/85 backdrop-blur-2xl rounded-[32px] p-7 sm:p-9 shadow-2xl border border-white/10 relative z-20 space-y-5 text-white my-6">
+      <div className="w-full max-w-[440px] bg-[#121418]/85 backdrop-blur-2xl rounded-[32px] p-7 sm:p-9 shadow-2xl border border-white/10 relative z-20 space-y-5 text-white my-6 overflow-hidden">
         {/* 3. Real Transparent Dark Logo */}
         <div className="flex justify-center pt-1">
           <Link href="/" className="inline-block transition-transform hover:scale-105">

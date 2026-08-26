@@ -34,6 +34,7 @@ export interface BannerItem {
   ctaText: string;
   ctaLink: string;
   backgroundImageUrl: string | null;
+  backgroundBlur: number;
   order: number;
   active: boolean;
   startsAt: string | null;
@@ -62,6 +63,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
   const [ctaText, setCtaText] = useState("EXPLORE ALL GEAR");
   const [ctaLink, setCtaLink] = useState("/shop");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
+  const [backgroundBlur, setBackgroundBlur] = useState<number>(0);
   const [order, setOrder] = useState<number>(0);
   const [active, setActive] = useState(true);
   const [startsAt, setStartsAt] = useState("");
@@ -86,6 +88,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     setCtaText("EXPLORE ALL GEAR");
     setCtaLink("/shop");
     setBackgroundImageUrl("");
+    setBackgroundBlur(0);
     setImageUrlInput("");
     setOrder(banners.length > 0 ? Math.max(...banners.map((b) => b.order)) + 1 : 1);
     setActive(true);
@@ -103,6 +106,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     setCtaText(banner.ctaText);
     setCtaLink(banner.ctaLink);
     setBackgroundImageUrl(banner.backgroundImageUrl || "");
+    setBackgroundBlur(banner.backgroundBlur ?? 0);
     setImageUrlInput(banner.backgroundImageUrl || "");
     setOrder(banner.order);
     setActive(banner.active);
@@ -169,6 +173,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
         ctaText: ctaText.trim(),
         ctaLink: ctaLink.trim(),
         backgroundImageUrl: backgroundImageUrl.trim() || null,
+        backgroundBlur: Number(backgroundBlur) || 0,
         order: Number(order) || 0,
         active,
         startsAt: startsAt ? new Date(startsAt).toISOString() : null,
@@ -772,25 +777,62 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
 
                 {/* Preview of Background Image or Default Gradient */}
                 {backgroundImageUrl ? (
-                  <div className="flex items-center gap-3 pt-2 border-t border-gray-200 dark:border-neutral-800">
-                    <div className="relative h-28 w-44 rounded-xl overflow-hidden border border-gray-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 shadow-md">
-                      <Image src={backgroundImageUrl} alt="Banner Preview" fill className="object-cover" />
+                  <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-neutral-800">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-28 w-44 rounded-xl overflow-hidden border border-gray-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 shadow-md">
+                        <Image
+                          src={backgroundImageUrl}
+                          alt="Banner Preview"
+                          fill
+                          className="object-cover transition-all duration-200"
+                          style={{
+                            filter: backgroundBlur > 0 ? `blur(${backgroundBlur}px)` : "none",
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 text-[11px] truncate space-y-1">
+                        <span className="font-bold text-neutral-800 dark:text-neutral-200">Active Background Image:</span>
+                        <p className="text-neutral-500 font-mono truncate">{backgroundImageUrl}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBackgroundImageUrl("");
+                          setImageUrlInput("");
+                          setBackgroundBlur(0);
+                        }}
+                        className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                        title="Remove Image"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
-                    <div className="flex-1 text-[11px] truncate">
-                      <span className="font-bold text-neutral-800 dark:text-neutral-200">Active Background Image:</span>
-                      <p className="text-neutral-500 font-mono truncate">{backgroundImageUrl}</p>
+
+                    {/* Background Blur Slider Control */}
+                    <div className="space-y-1.5 pt-2 border-t border-gray-200/80 dark:border-neutral-800/80">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                          Background Blur Intensity
+                        </label>
+                        <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900">
+                          {backgroundBlur}px
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min="0"
+                          max="20"
+                          step="1"
+                          value={backgroundBlur}
+                          onChange={(e) => setBackgroundBlur(parseInt(e.target.value, 10) || 0)}
+                          className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-rose-600 dark:accent-rose-500"
+                        />
+                      </div>
+                      <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
+                        Live preview enabled above. Range: 0px (sharp photo) to 20px (maximum soft blur).
+                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setBackgroundImageUrl("");
-                        setImageUrlInput("");
-                      }}
-                      className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                      title="Remove Image"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
                   </div>
                 ) : (
                   <p className="text-[11px] text-neutral-500 dark:text-neutral-400 italic">

@@ -48,6 +48,7 @@ export async function PATCH(
       ctaText,
       ctaLink,
       backgroundImageUrl,
+      backgroundBlur,
       order,
       active,
       startsAt,
@@ -62,6 +63,7 @@ export async function PATCH(
     if (ctaText !== undefined) dataToUpdate.ctaText = String(ctaText).trim();
     if (ctaLink !== undefined) dataToUpdate.ctaLink = String(ctaLink).trim();
     if (backgroundImageUrl !== undefined) dataToUpdate.backgroundImageUrl = backgroundImageUrl ? String(backgroundImageUrl).trim() : null;
+    if (backgroundBlur !== undefined) dataToUpdate.backgroundBlur = typeof backgroundBlur === "number" ? Math.max(0, Math.min(20, backgroundBlur)) : parseInt(backgroundBlur, 10) || 0;
     if (order !== undefined) dataToUpdate.order = typeof order === "number" ? order : parseInt(order, 10) || 0;
     if (active !== undefined) dataToUpdate.active = Boolean(active);
     if (startsAt !== undefined) dataToUpdate.startsAt = startsAt ? new Date(startsAt) : null;

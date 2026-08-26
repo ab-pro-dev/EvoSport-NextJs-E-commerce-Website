@@ -13,6 +13,7 @@ export interface HomepageBannerData {
   ctaText: string;
   ctaLink: string;
   backgroundImageUrl: string | null;
+  backgroundBlur?: number;
   order: number;
 }
 
@@ -28,6 +29,7 @@ const DEFAULT_BANNER: HomepageBannerData = {
   ctaText: "EXPLORE ALL GEAR",
   ctaLink: "/shop",
   backgroundImageUrl: null,
+  backgroundBlur: 0,
   order: 0,
 };
 
@@ -67,13 +69,21 @@ export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
     >
       {/* Background Image Layer if present */}
       {currentBanner.backgroundImageUrl && (
-        <div className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-700">
+        <div className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-700 overflow-hidden">
           <Image
             src={currentBanner.backgroundImageUrl}
             alt={currentBanner.headline}
             fill
             priority
-            className="object-cover object-center select-none"
+            quality={100}
+            sizes="100vw"
+            className="object-cover object-center select-none transition-all duration-300"
+            style={{
+              filter:
+                currentBanner.backgroundBlur && currentBanner.backgroundBlur > 0
+                  ? `blur(${currentBanner.backgroundBlur}px)`
+                  : "none",
+            }}
           />
           {/* Subtle gradient overlay for typography readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/40 dark:from-[#090E17]/95 dark:via-[#090E17]/85 dark:to-[#090E17]/50" />

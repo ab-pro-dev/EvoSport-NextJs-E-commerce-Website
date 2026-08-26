@@ -38,6 +38,7 @@ export default async function AdminHomepageBannersPage() {
     ctaText: b.ctaText,
     ctaLink: b.ctaLink,
     backgroundImageUrl: b.backgroundImageUrl,
+    backgroundBlur: b.backgroundBlur ?? 0,
     order: b.order,
     active: b.active,
     startsAt: b.startsAt ? b.startsAt.toISOString() : null,

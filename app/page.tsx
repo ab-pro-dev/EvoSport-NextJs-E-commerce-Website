@@ -44,6 +44,7 @@ export default async function HomePage() {
     ctaLink: b.ctaLink,
     backgroundImageUrl: b.backgroundImageUrl,
     backgroundBlur: b.backgroundBlur ?? 0,
+    lightModeOverlayOpacity: b.lightModeOverlayOpacity ?? 80,
     order: b.order,
   }));
 

@@ -14,6 +14,7 @@ export interface HomepageBannerData {
   ctaLink: string;
   backgroundImageUrl: string | null;
   backgroundBlur?: number;
+  lightModeOverlayOpacity?: number;
   order: number;
 }
 
@@ -30,6 +31,7 @@ const DEFAULT_BANNER: HomepageBannerData = {
   ctaLink: "/shop",
   backgroundImageUrl: null,
   backgroundBlur: 0,
+  lightModeOverlayOpacity: 80,
   order: 0,
 };
 
@@ -85,8 +87,15 @@ export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
                   : "none",
             }}
           />
-          {/* Subtle gradient overlay for typography readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/40 dark:from-[#090E17]/95 dark:via-[#090E17]/85 dark:to-[#090E17]/50" />
+          {/* Light Mode Gradient Overlay driven by lightModeOverlayOpacity (0-100) */}
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/40 dark:hidden transition-opacity duration-300"
+            style={{
+              opacity: (currentBanner.lightModeOverlayOpacity ?? 80) / 100,
+            }}
+          />
+          {/* Dark Mode Gradient Overlay (Unchanged) */}
+          <div className="absolute inset-0 hidden dark:block bg-gradient-to-r from-[#090E17]/95 via-[#090E17]/85 to-[#090E17]/50" />
         </div>
       )}
 

@@ -49,6 +49,7 @@ export async function PATCH(
       ctaLink,
       backgroundImageUrl,
       backgroundBlur,
+      lightModeOverlayOpacity,
       order,
       active,
       startsAt,
@@ -64,6 +65,7 @@ export async function PATCH(
     if (ctaLink !== undefined) dataToUpdate.ctaLink = String(ctaLink).trim();
     if (backgroundImageUrl !== undefined) dataToUpdate.backgroundImageUrl = backgroundImageUrl ? String(backgroundImageUrl).trim() : null;
     if (backgroundBlur !== undefined) dataToUpdate.backgroundBlur = typeof backgroundBlur === "number" ? Math.max(0, Math.min(20, backgroundBlur)) : parseInt(backgroundBlur, 10) || 0;
+    if (lightModeOverlayOpacity !== undefined) dataToUpdate.lightModeOverlayOpacity = typeof lightModeOverlayOpacity === "number" ? Math.max(0, Math.min(100, lightModeOverlayOpacity)) : parseInt(lightModeOverlayOpacity, 10) ?? 80;
     if (order !== undefined) dataToUpdate.order = typeof order === "number" ? order : parseInt(order, 10) || 0;
     if (active !== undefined) dataToUpdate.active = Boolean(active);
     if (startsAt !== undefined) dataToUpdate.startsAt = startsAt ? new Date(startsAt) : null;

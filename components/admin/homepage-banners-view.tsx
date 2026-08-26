@@ -35,6 +35,7 @@ export interface BannerItem {
   ctaLink: string;
   backgroundImageUrl: string | null;
   backgroundBlur: number;
+  lightModeOverlayOpacity: number;
   order: number;
   active: boolean;
   startsAt: string | null;
@@ -64,6 +65,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
   const [ctaLink, setCtaLink] = useState("/shop");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
   const [backgroundBlur, setBackgroundBlur] = useState<number>(0);
+  const [lightModeOverlayOpacity, setLightModeOverlayOpacity] = useState<number>(80);
   const [order, setOrder] = useState<number>(0);
   const [active, setActive] = useState(true);
   const [startsAt, setStartsAt] = useState("");
@@ -89,6 +91,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     setCtaLink("/shop");
     setBackgroundImageUrl("");
     setBackgroundBlur(0);
+    setLightModeOverlayOpacity(80);
     setImageUrlInput("");
     setOrder(banners.length > 0 ? Math.max(...banners.map((b) => b.order)) + 1 : 1);
     setActive(true);
@@ -107,6 +110,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     setCtaLink(banner.ctaLink);
     setBackgroundImageUrl(banner.backgroundImageUrl || "");
     setBackgroundBlur(banner.backgroundBlur ?? 0);
+    setLightModeOverlayOpacity(banner.lightModeOverlayOpacity ?? 80);
     setImageUrlInput(banner.backgroundImageUrl || "");
     setOrder(banner.order);
     setActive(banner.active);
@@ -174,6 +178,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
         ctaLink: ctaLink.trim(),
         backgroundImageUrl: backgroundImageUrl.trim() || null,
         backgroundBlur: Number(backgroundBlur) || 0,
+        lightModeOverlayOpacity: Number(lightModeOverlayOpacity) ?? 80,
         order: Number(order) || 0,
         active,
         startsAt: startsAt ? new Date(startsAt).toISOString() : null,
@@ -809,16 +814,16 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                     </div>
 
                     {/* Background Blur Slider Control */}
-                    <div className="space-y-1.5 pt-2 border-t border-gray-200/80 dark:border-neutral-800/80">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
-                          Background Blur Intensity
-                        </label>
-                        <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900">
-                          {backgroundBlur}px
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-200/80 dark:border-neutral-800/80">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                            Background Blur
+                          </label>
+                          <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900">
+                            {backgroundBlur}px
+                          </span>
+                        </div>
                         <input
                           type="range"
                           min="0"
@@ -828,10 +833,33 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                           onChange={(e) => setBackgroundBlur(parseInt(e.target.value, 10) || 0)}
                           className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-rose-600 dark:accent-rose-500"
                         />
+                        <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
+                          0px (sharp) to 20px (soft blur).
+                        </p>
                       </div>
-                      <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
-                        Live preview enabled above. Range: 0px (sharp photo) to 20px (maximum soft blur).
-                      </p>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                            Light Mode Overlay Opacity
+                          </label>
+                          <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-900">
+                            {lightModeOverlayOpacity}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="1"
+                          value={lightModeOverlayOpacity}
+                          onChange={(e) => setLightModeOverlayOpacity(parseInt(e.target.value, 10) ?? 80)}
+                          className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-500"
+                        />
+                        <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
+                          0% (transparent) to 100% (solid). Dark mode unaffected.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : (

@@ -404,9 +404,10 @@ model HomepageBanner {
   badgeText          String?
   ctaText            String
   ctaLink            String
-  backgroundImageUrl String?
-  backgroundBlur     Int       @default(0)
-  order              Int       @default(0)
+  backgroundImageUrl      String?
+  backgroundBlur          Int       @default(0)
+  lightModeOverlayOpacity Int       @default(80)
+  order                   Int       @default(0)
   active             Boolean   @default(true)
   startsAt           DateTime?
   endsAt             DateTime?

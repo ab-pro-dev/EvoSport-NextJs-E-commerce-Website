@@ -7,6 +7,7 @@ import { Lock, Mail, ShieldAlert, ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import Image from "next/image";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -62,10 +63,28 @@ export default function AdminLoginPage() {
 
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
+          <div className="flex justify-center mb-1">
+            <Image
+              src="/images/evosport_logo_light.png"
+              alt="EvoSport Logo"
+              width={220}
+              height={36}
+              priority
+              className="h-9 w-auto object-contain dark:hidden"
+            />
+            <Image
+              src="/images/evosport_logo_dark.png"
+              alt="EvoSport Logo"
+              width={220}
+              height={36}
+              priority
+              className="h-9 w-auto object-contain hidden dark:block"
+            />
+          </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 px-3.5 py-1 text-xs font-bold text-rose-600 dark:text-rose-400">
             <ShieldAlert className="h-3.5 w-3.5" />
-            <span>EVOSPORT ADMIN CONTROL PORTAL</span>
+            <span>ADMIN CONTROL PORTAL</span>
           </div>
           <h1 className="text-2xl font-black uppercase tracking-tight text-neutral-900 dark:text-white mt-2">
             RESTRICTED ACCESS

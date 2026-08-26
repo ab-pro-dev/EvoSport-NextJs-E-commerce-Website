@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, ArrowLeft, Send, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,8 +23,15 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md space-y-6">
         {/* Brand Logo */}
         <div className="text-center space-y-2">
-          <Link href="/" className="inline-block text-3xl font-black italic tracking-tighter text-white">
-            EVO<span className="text-[#CCFF00]">SPORT</span>
+          <Link href="/" className="inline-block">
+            <Image
+              src="/images/evosport_logo_dark.png"
+              alt="EvoSport Logo"
+              width={180}
+              height={32}
+              priority
+              className="h-8 w-auto object-contain mx-auto"
+            />
           </Link>
           <p className="text-xs text-neutral-400 font-medium">
             Reset your password to regain access to your account.

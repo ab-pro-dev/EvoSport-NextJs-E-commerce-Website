@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { ShoppingBag, Heart, User, LogOut, Menu, X } from "lucide-react";
 import { NotificationsDropdown } from "@/components/navigation/notifications-dropdown";
@@ -67,9 +68,22 @@ export function Navbar({ cartItemCount = 0 }: NavbarProps) {
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-6">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <span className="text-2xl font-black italic tracking-tighter text-[#0F1B2D] dark:text-white">
-            EVO<span className="text-[#B8FF00]">SPORT</span>
-          </span>
+          <Image
+            src="/images/evosport_logo_light.png"
+            alt="EvoSport Logo"
+            width={150}
+            height={26}
+            priority
+            className="h-6 w-auto object-contain dark:hidden"
+          />
+          <Image
+            src="/images/evosport_logo_dark.png"
+            alt="EvoSport Logo"
+            width={150}
+            height={26}
+            priority
+            className="h-6 w-auto object-contain hidden dark:block"
+          />
         </Link>
 
         {/* Center Nav Links - Desktop */}

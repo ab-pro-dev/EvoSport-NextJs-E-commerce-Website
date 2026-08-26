@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Bell } from "lucide-react";
+import Image from "next/image";
 
 export default async function AdminLayout({
   children,
@@ -31,13 +32,23 @@ export default async function AdminLayout({
       {/* Top Navbar */}
       <header className="sticky top-0 z-50 h-16 border-b border-gray-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md px-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-600 font-black text-sm text-white shadow-sm">
-            A
-          </div>
-          <div>
-            <span className="text-base font-black italic tracking-tighter text-neutral-900 dark:text-white">
-              EVO<span className="text-rose-500">SPORT</span>
-            </span>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/images/evosport_logo_light.png"
+              alt="EvoSport Admin"
+              width={140}
+              height={24}
+              priority
+              className="h-5 w-auto object-contain dark:hidden"
+            />
+            <Image
+              src="/images/evosport_logo_dark.png"
+              alt="EvoSport Admin"
+              width={140}
+              height={24}
+              priority
+              className="h-5 w-auto object-contain hidden dark:block"
+            />
             <span className="ml-2 rounded border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
               ADMIN CONTROL PANEL
             </span>

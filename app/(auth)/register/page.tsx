@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { User, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -10,33 +11,15 @@ import { Input } from "@/components/ui/input";
 
 function EvoSportLogo() {
   return (
-    <Link href="/" className="inline-flex items-center gap-2 group">
-      <div className="relative w-8 h-8 flex items-center justify-center">
-        <svg viewBox="0 0 32 32" fill="none" className="w-8 h-8">
-          <path
-            d="M8 5h16a1 1 0 0 1 .9 1.45l-4.5 9A1 1 0 0 1 19.5 16H5a1 1 0 0 1-.9-1.45l4-9A1 1 0 0 1 9 5z"
-            fill="url(#e-grad-1)"
-          />
-          <path
-            d="M5 16h15a1 1 0 0 1 .9 1.45l-4.5 9A1 1 0 0 1 15.5 27H1a1 1 0 0 1-.9-1.45l4-9A1 1 0 0 1 5 16z"
-            fill="url(#e-grad-2)"
-            opacity="0.9"
-          />
-          <defs>
-            <linearGradient id="e-grad-1" x1="5" y1="5" x2="24" y2="16" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#4F46E5" />
-              <stop offset="1" stopColor="#7C3AED" />
-            </linearGradient>
-            <linearGradient id="e-grad-2" x1="1" y1="16" x2="20" y2="27" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#6366F1" />
-              <stop offset="1" stopColor="#8B5CF6" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-      <span className="text-2xl font-black italic tracking-tighter text-slate-900">
-        EVO<span className="text-indigo-600">SPORT</span>
-      </span>
+    <Link href="/" className="inline-flex items-center group">
+      <Image
+        src="/images/evosport_logo_light.png"
+        alt="EvoSport Logo"
+        width={170}
+        height={30}
+        priority
+        className="h-7 w-auto object-contain"
+      />
     </Link>
   );
 }

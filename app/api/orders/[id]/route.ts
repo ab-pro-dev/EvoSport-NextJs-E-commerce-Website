@@ -73,7 +73,7 @@ export async function GET(
         priceAtPurchase: Number(item.priceAtPurchase),
         productName: item.variant.product.name,
         slug: item.variant.product.slug,
-        brandName: item.variant.product.brand.name,
+        brandName: item.variant.product.brand?.name || "EvoSport",
         color: item.variant.color,
         size: item.variant.size,
         sku: item.variant.sku,

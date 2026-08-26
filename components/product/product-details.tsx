@@ -372,32 +372,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </div>
           </div>
 
-          {/* Static Trust Badges Bar */}
-          <div className="grid grid-cols-3 gap-3 pt-6 border-t border-gray-200 dark:border-slate-800 text-left">
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 shadow-sm">
-              <Truck className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
-              <div>
-                <div className="text-[11px] font-bold text-[#0F1B2D] dark:text-white uppercase">Free Shipping</div>
-                <div className="text-[10px] text-[#0F1B2D]/60 dark:text-slate-400">On orders over $100</div>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 shadow-sm">
-              <RefreshCw className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
-              <div>
-                <div className="text-[11px] font-bold text-[#0F1B2D] dark:text-white uppercase">Easy Returns</div>
-                <div className="text-[10px] text-[#0F1B2D]/60 dark:text-slate-400">30 days return policy</div>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2.5 p-3 rounded-lg bg-white dark:bg-[#0F172A] border border-gray-100 dark:border-slate-800 shadow-sm">
-              <ShieldCheck className="h-5 w-5 text-[#B8FF00] flex-shrink-0 mt-0.5" />
-              <div>
-                <div className="text-[11px] font-bold text-[#0F1B2D] dark:text-white uppercase">Secure Payment</div>
-                <div className="text-[10px] text-[#0F1B2D]/60 dark:text-slate-400">100% secure payment</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

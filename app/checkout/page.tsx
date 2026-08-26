@@ -83,7 +83,7 @@ async function getCartData(userId: string) {
           id: item.variant.product.id,
           name: item.variant.product.name,
           slug: item.variant.product.slug,
-          brand: item.variant.product.brand.name,
+          brand: item.variant.product.brand?.name || "EvoSport",
           image: item.variant.product.images[0]?.url || null,
         },
       },

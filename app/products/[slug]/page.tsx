@@ -54,7 +54,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     },
   });
 
-  if (!product || product.status !== "ACTIVE") {
+  if (!product || product.status !== "PUBLISHED") {
     notFound();
   }
 
@@ -68,13 +68,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const avgRating = reviewStats._avg.rating ? Number(reviewStats._avg.rating.toFixed(1)) : 0;
   const reviewCount = reviewStats._count.rating || 0;
 
-  // Real Related Products from Database (excluding current product) and settings
-  const [rawRelated, discountBadgeSetting] = await Promise.all([
+  // Real Related Products from Database: same category first, matching gender/similar price as fallback
+  const [sameCategory, discountBadgeSetting] = await Promise.all([
     prisma.product.findMany({
       where: {
         categoryId: product.categoryId,
         id: { not: product.id },
-        status: "ACTIVE",
+        status: "PUBLISHED",
       },
       take: 4,
       include: {
@@ -87,6 +87,33 @@ export default async function ProductPage({ params }: ProductPageProps) {
     }),
     prisma.setting.findUnique({ where: { key: "showDiscountBadge" } }),
   ]);
+
+  let relatedList = [...sameCategory];
+
+  if (relatedList.length < 4) {
+    const existingIds = [product.id, ...relatedList.map((p) => p.id)];
+    const fallbackRelated = await prisma.product.findMany({
+      where: {
+        id: { notIn: existingIds },
+        status: "PUBLISHED",
+        OR: [
+          { gender: product.gender },
+          { categoryId: product.categoryId },
+        ],
+      },
+      take: 4 - relatedList.length,
+      include: {
+        brand: true,
+        category: true,
+        images: { orderBy: { position: "asc" } },
+        variants: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    relatedList = [...relatedList, ...fallbackRelated];
+  }
+
+  const rawRelated = relatedList;
 
   const showDiscountBadge = discountBadgeSetting?.value === "true";
 

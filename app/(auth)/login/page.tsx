@@ -31,21 +31,6 @@ function GoogleIcon() {
   );
 }
 
-function EvoSportLogo() {
-  return (
-    <Link href="/" className="inline-flex items-center group">
-      <Image
-        src="/images/evosport_logo_light.png"
-        alt="EvoSport Logo"
-        width={170}
-        height={30}
-        priority
-        className="h-7 w-auto object-contain"
-      />
-    </Link>
-  );
-}
-
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -72,7 +57,7 @@ export default function LoginPage() {
       if (!verifyRes.ok) {
         setErrorMessage(verifyData.error || "Invalid email or password.");
         setIsLoading(false);
-        return; // Only display inline error banner — NO toast popup for login form errors!
+        return;
       }
 
       // 2. Credentials valid -> sign in via NextAuth
@@ -99,172 +84,143 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#eef2ff] via-[#f8fafc] to-[#e0e7ff] flex items-center justify-center p-4 sm:p-6 lg:p-10 relative overflow-hidden">
-      {/* Decorative Dot Matrix - Top Left */}
-      <div className="absolute top-10 left-10 grid grid-cols-4 gap-2 opacity-30 pointer-events-none">
-        {[...Array(16)].map((_, i) => (
-          <div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-        ))}
-      </div>
+    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden bg-black selection:bg-[#B8FF00] selection:text-black">
+      {/* 1. Full-bleed background photo flatlay with vignette */}
+      <Image
+        src="/images/Login_background.png"
+        alt="EvoSport Product Background"
+        fill
+        className="object-cover object-center pointer-events-none select-none"
+        priority
+      />
+      <div className="absolute inset-0 bg-black/65 backdrop-blur-[3px] pointer-events-none" />
 
-      {/* Decorative Diagonal Vector Lines */}
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-t from-indigo-200/40 to-transparent rounded-full blur-3xl pointer-events-none" />
-
-      {/* Main Container - Split View */}
-      <div className="w-full max-w-5xl bg-white/40 backdrop-blur-xl rounded-3xl p-3 sm:p-4 shadow-2xl border border-white/60 flex flex-col md:flex-row items-center gap-6 relative z-10">
-        
-        {/* Left Side: Runner Photo Background */}
-        <div className="hidden md:block w-1/2 relative h-[620px] rounded-2xl overflow-hidden shadow-lg group">
-          <Image
-            src="/images/login_runner_bg.jpg"
-            alt="EvoSport Athlete Runner"
-            fill
-            className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent flex flex-col justify-end p-8 text-white">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-300 mb-1">
-              ENGINEERED FOR SPEED
-            </span>
-            <h2 className="text-2xl font-black tracking-tight leading-snug text-white">
-              Unleash Your Ultimate Athletic Potential.
-            </h2>
-          </div>
+      {/* 2. Centered Glassmorphic Card */}
+      <div className="w-full max-w-[440px] bg-[#121418]/85 backdrop-blur-2xl rounded-[32px] p-7 sm:p-9 shadow-2xl border border-white/10 relative z-20 space-y-6 text-white">
+        {/* 3. Real Transparent Dark Logo */}
+        <div className="flex justify-center pt-1">
+          <Link href="/" className="inline-block transition-transform hover:scale-105">
+            <Image
+              src="/images/evosport_logo_dark.png"
+              alt="EvoSport Logo"
+              width={200}
+              height={36}
+              priority
+              className="h-8 sm:h-9 w-auto object-contain"
+            />
+          </Link>
         </div>
 
-        {/* Right Side: White Login Form Card */}
-        <div className="w-full md:w-1/2 bg-white rounded-2xl p-6 sm:p-10 shadow-xl border border-slate-100 space-y-6">
-          {/* Logo */}
-          <div className="text-center">
-            <EvoSportLogo />
+        {/* 4. Heading & Subtext */}
+        <div className="text-center space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+            Welcome <span className="text-[#B8FF00]">Back!</span>
+          </h1>
+          <p className="text-xs text-neutral-400">
+            Sign in to your account and continue shopping
+          </p>
+        </div>
+
+        {/* Inline Error Message Banner */}
+        {errorMessage && (
+          <div className="rounded-xl border border-rose-500/40 bg-rose-950/60 p-3 text-xs text-rose-200 font-medium flex items-center gap-2.5 shadow-sm">
+            <AlertCircle className="h-4 w-4 flex-shrink-0 text-rose-400" />
+            <span>{errorMessage}</span>
           </div>
+        )}
 
-          {/* Heading & Subtitle */}
-          <div className="text-center space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-              Welcome <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Back</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 max-w-xs mx-auto">
-              Sign in to access your athlete dashboard and performance gear.
-            </p>
-          </div>
-
-          {/* Inline Error Message */}
-          {errorMessage && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-700 font-medium flex items-center gap-2.5">
-              <AlertCircle className="h-4 w-4 flex-shrink-0 text-rose-600" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1.5">
-                Email Address
-              </label>
-              <div className="relative">
-                <Input
-                  required
-                  type="email"
-                  placeholder="abera.dev.one@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#f8fafc] border border-slate-200 text-slate-900 text-sm rounded-xl pl-10 pr-4 py-3 h-11 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:border-indigo-500 transition-all"
-                />
-                <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-slate-700">
-                  Password
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:underline"
-                >
-                  Forgot Password?
-                </Link>
-              </div>
-              <div className="relative">
-                <Input
-                  required
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#f8fafc] border border-slate-200 text-slate-900 text-sm rounded-xl pl-10 pr-10 py-3 h-11 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:border-indigo-500 transition-all"
-                />
-                <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
-              />
-              <label
-                htmlFor="remember"
-                className="text-xs text-slate-600 cursor-pointer select-none font-medium"
-              >
-                Remember me on this device
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white font-semibold text-sm py-3 px-6 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/35 transition-all h-11 cursor-pointer disabled:opacity-70"
-            >
-              {isLoading ? "Signing In..." : "Sign In"}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </form>
-
-          {/* Social Divider */}
-          <div className="relative my-4 flex items-center justify-center">
-            <div className="w-full border-t border-slate-200" />
-            <span className="absolute bg-white px-3 text-xs text-slate-400 font-medium">
-              or continue with
-            </span>
-          </div>
-
-          {/* Disabled Google Button (Apple Button Removed) */}
+        {/* 5. Form Fields */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <button
-              type="button"
-              disabled
-              title="Google Sign-In is coming soon"
-              className="w-full bg-white border border-slate-200 py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 shadow-sm opacity-60 cursor-not-allowed select-none"
-            >
-              <GoogleIcon />
-              <span>Google</span>
-            </button>
+            <label className="text-xs font-semibold text-neutral-300 block mb-1.5">
+              Email Address
+            </label>
+            <div className="relative">
+              <Input
+                required
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-[#1A1D21] border border-white/10 text-white text-sm rounded-xl pl-10 pr-4 py-3 h-12 placeholder:text-neutral-500 focus-visible:ring-2 focus-visible:ring-[#B8FF00]/40 focus-visible:border-[#B8FF00] transition-all"
+              />
+              <Mail className="absolute left-3.5 top-4 h-4 w-4 text-neutral-400 pointer-events-none" />
+            </div>
           </div>
 
-          {/* Footer Link */}
-          <div className="pt-2 text-center text-xs text-slate-500 font-medium">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline">
-              Create an Account
-            </Link>
+          <div>
+            <label className="text-xs font-semibold text-neutral-300 block mb-1.5">
+              Password
+            </label>
+            <div className="relative">
+              <Input
+                required
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-[#1A1D21] border border-white/10 text-white text-sm rounded-xl pl-10 pr-10 py-3 h-12 placeholder:text-neutral-500 focus-visible:ring-2 focus-visible:ring-[#B8FF00]/40 focus-visible:border-[#B8FF00] transition-all"
+              />
+              <Lock className="absolute left-3.5 top-4 h-4 w-4 text-neutral-400 pointer-events-none" />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-4 text-neutral-400 hover:text-white transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+
+            {/* 6. Forgot Password Link */}
+            <div className="flex justify-end mt-2">
+              <Link
+                href="/forgot-password"
+                className="text-xs font-semibold text-[#B8FF00] hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </div>
+
+          {/* 7. Lime Green Gradient SIGN IN Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full mt-2 bg-[#B8FF00] hover:bg-[#a6e600] text-black font-extrabold text-sm uppercase tracking-wider py-3.5 px-6 rounded-full flex items-center justify-center gap-2 shadow-lg shadow-[#B8FF00]/20 hover:shadow-[#B8FF00]/30 transition-all h-12 cursor-pointer disabled:opacity-60"
+          >
+            <span>{isLoading ? "SIGNING IN..." : "SIGN IN"}</span>
+            <ArrowRight className="h-4 w-4 stroke-[2.5]" />
+          </button>
+        </form>
+
+        {/* 8. OR CONTINUE WITH Divider & Google Button */}
+        <div className="relative my-4 flex items-center justify-center">
+          <div className="w-full border-t border-white/10" />
+          <span className="absolute bg-[#121418] px-3 text-[10px] uppercase font-bold text-neutral-400 tracking-wider">
+            OR CONTINUE WITH
+          </span>
+        </div>
+
+        {/* Disabled Google Button */}
+        <div className="flex justify-center">
+          <button
+            type="button"
+            disabled
+            title="Google Sign-In coming soon"
+            className="w-full bg-[#1A1D21] border border-white/10 py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold text-neutral-400 opacity-50 cursor-not-allowed select-none"
+          >
+            <GoogleIcon />
+          </button>
+        </div>
+
+        {/* 9. Create Account Footer Link */}
+        <div className="pt-2 text-center text-xs text-neutral-400">
+          Don&apos;t have an account?{" "}
+          <Link href="/register" className="font-semibold text-[#B8FF00] hover:underline">
+            Create Account
+          </Link>
         </div>
       </div>
     </div>
   );
 }
-

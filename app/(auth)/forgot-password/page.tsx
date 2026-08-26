@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, ArrowLeft, Send, Info } from "lucide-react";
+import { Mail, ArrowLeft, Send, Info, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -19,83 +19,99 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Brand Logo */}
-        <div className="text-center space-y-2">
-          <Link href="/" className="inline-block">
+    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden bg-black selection:bg-[#B8FF00] selection:text-black">
+      {/* 1. Full-bleed background photo flatlay with vignette */}
+      <Image
+        src="/images/Login_background.png"
+        alt="EvoSport Product Background"
+        fill
+        className="object-cover object-center pointer-events-none select-none"
+        priority
+      />
+      <div className="absolute inset-0 bg-black/65 backdrop-blur-[3px] pointer-events-none" />
+
+      {/* 2. Centered Glassmorphic Card */}
+      <div className="w-full max-w-[440px] bg-[#121418]/85 backdrop-blur-2xl rounded-[32px] p-7 sm:p-9 shadow-2xl border border-white/10 relative z-20 space-y-6 text-white">
+        {/* 3. Real Transparent Dark Logo */}
+        <div className="flex justify-center pt-1">
+          <Link href="/" className="inline-block transition-transform hover:scale-105">
             <Image
               src="/images/evosport_logo_dark.png"
               alt="EvoSport Logo"
-              width={180}
-              height={32}
+              width={200}
+              height={36}
               priority
-              className="h-8 w-auto object-contain mx-auto"
+              className="h-8 sm:h-9 w-auto object-contain"
             />
           </Link>
-          <p className="text-xs text-neutral-400 font-medium">
-            Reset your password to regain access to your account.
+        </div>
+
+        {/* 4. Heading & Subtext */}
+        <div className="text-center space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+            Reset <span className="text-[#B8FF00]">Password</span>
+          </h1>
+          <p className="text-xs text-neutral-400">
+            Enter your email address to receive reset instructions
           </p>
         </div>
 
-        {/* Card */}
-        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/80 p-8 backdrop-blur-md shadow-2xl space-y-6">
-          <div className="border-b border-neutral-800 pb-4">
-            <h1 className="text-xl font-black uppercase tracking-tight text-white">RESET PASSWORD</h1>
-            <p className="text-xs text-neutral-400 mt-1">Enter your account email to receive instructions</p>
+        {isSubmitted ? (
+          <div className="rounded-2xl border border-white/10 bg-[#1A1D21] p-6 text-center space-y-4">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#B8FF00]/10 text-[#B8FF00]">
+              <Info className="h-6 w-6" />
+            </div>
+            <h3 className="text-sm font-bold text-white">Reset Link Sent</h3>
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              If email reset is enabled, instructions will be sent to <span className="text-[#B8FF00] font-bold">{email}</span>.
+            </p>
+            <div className="pt-2">
+              <Link href="/login">
+                <button
+                  type="button"
+                  className="w-full bg-[#B8FF00] hover:bg-[#a6e600] text-black font-extrabold text-xs uppercase tracking-wider py-3 px-4 rounded-full transition-all"
+                >
+                  Return to Sign In
+                </button>
+              </Link>
+            </div>
           </div>
-
-          {isSubmitted ? (
-            <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-6 text-center space-y-3">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#CCFF00]/10 text-[#CCFF00]">
-                <Info className="h-6 w-6" />
-              </div>
-              <h3 className="text-sm font-bold uppercase text-white">Password Reset Info</h3>
-              {/* Static placeholder message per requirements - no fake emails */}
-              <p className="text-xs text-neutral-400">
-                If email reset is enabled later, a reset link will be sent to <span className="text-white font-bold">{email}</span>.
-              </p>
-              <div className="pt-2">
-                <Link href="/login">
-                  <Button variant="outline" className="border-neutral-700 text-xs text-white font-bold uppercase hover:border-[#CCFF00]">
-                    Return to Login
-                  </Button>
-                </Link>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-neutral-300 block mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <Input
+                  required
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-[#1A1D21] border border-white/10 text-white text-sm rounded-xl pl-10 pr-4 py-3 h-12 placeholder:text-neutral-500 focus-visible:ring-2 focus-visible:ring-[#B8FF00]/40 focus-visible:border-[#B8FF00] transition-all"
+                />
+                <Mail className="absolute left-3.5 top-4 h-4 w-4 text-neutral-400 pointer-events-none" />
               </div>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Email Address *</label>
-                <div className="relative mt-1.5">
-                  <Input
-                    required
-                    type="email"
-                    placeholder="alex@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-neutral-950 border-neutral-800 text-xs text-white pl-9 placeholder:text-neutral-600 focus-visible:ring-[#CCFF00]"
-                  />
-                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
-                </div>
-              </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-[#CCFF00] text-black font-black uppercase text-xs tracking-wider hover:bg-[#b8e600] rounded-lg h-12 mt-2"
-              >
-                <Send className="mr-2 h-4 w-4" />
-                Send Reset Link
-              </Button>
-            </form>
-          )}
+            {/* Lime Green Gradient Button */}
+            <button
+              type="submit"
+              className="w-full mt-2 bg-[#B8FF00] hover:bg-[#a6e600] text-black font-extrabold text-sm uppercase tracking-wider py-3.5 px-6 rounded-full flex items-center justify-center gap-2 shadow-lg shadow-[#B8FF00]/20 hover:shadow-[#B8FF00]/30 transition-all h-12 cursor-pointer"
+            >
+              <span>SEND RESET LINK</span>
+              <ArrowRight className="h-4 w-4 stroke-[2.5]" />
+            </button>
+          </form>
+        )}
 
-          <div className="pt-4 border-t border-neutral-800 text-center text-xs">
-            <Link href="/login" className="inline-flex items-center gap-1.5 font-bold text-neutral-400 hover:text-[#CCFF00] transition-colors">
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Back to Sign In
-            </Link>
-          </div>
+        {/* Footer Link */}
+        <div className="pt-2 text-center text-xs text-neutral-400">
+          <Link href="/login" className="inline-flex items-center gap-1.5 font-bold text-[#B8FF00] hover:underline">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to Sign In
+          </Link>
         </div>
       </div>
     </div>

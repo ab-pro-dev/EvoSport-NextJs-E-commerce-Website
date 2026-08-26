@@ -84,7 +84,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden bg-black selection:bg-[#B8FF00] selection:text-black">
+    <div className="min-h-[calc(100vh-4rem)] relative flex items-center justify-center p-4 sm:p-6 overflow-hidden bg-black selection:bg-[#B8FF00] selection:text-black">
       {/* 1. Full-bleed background photo flatlay with light vignette */}
       <Image
         src="/images/Login_background.png"

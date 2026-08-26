@@ -9,10 +9,7 @@ export function SiteHeader() {
   if (
     pathname.startsWith("/admin") ||
     pathname === "/admin-login" ||
-    pathname === "/maintenance" ||
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname === "/forgot-password"
+    pathname === "/maintenance"
   ) {
     return null;
   }

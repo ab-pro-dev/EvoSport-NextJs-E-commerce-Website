@@ -40,6 +40,7 @@ export default async function AdminHomepageBannersPage() {
     backgroundImageUrl: b.backgroundImageUrl,
     backgroundBlur: b.backgroundBlur ?? 0,
     lightModeOverlayOpacity: b.lightModeOverlayOpacity ?? 80,
+    darkModeOverlayOpacity: b.darkModeOverlayOpacity ?? 85,
     order: b.order,
     active: b.active,
     startsAt: b.startsAt ? b.startsAt.toISOString() : null,

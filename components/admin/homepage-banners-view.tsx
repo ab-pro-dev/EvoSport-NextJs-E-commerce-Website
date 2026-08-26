@@ -36,6 +36,7 @@ export interface BannerItem {
   backgroundImageUrl: string | null;
   backgroundBlur: number;
   lightModeOverlayOpacity: number;
+  darkModeOverlayOpacity: number;
   order: number;
   active: boolean;
   startsAt: string | null;
@@ -66,6 +67,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
   const [backgroundImageUrl, setBackgroundImageUrl] = useState("");
   const [backgroundBlur, setBackgroundBlur] = useState<number>(0);
   const [lightModeOverlayOpacity, setLightModeOverlayOpacity] = useState<number>(80);
+  const [darkModeOverlayOpacity, setDarkModeOverlayOpacity] = useState<number>(85);
   const [order, setOrder] = useState<number>(0);
   const [active, setActive] = useState(true);
   const [startsAt, setStartsAt] = useState("");
@@ -92,6 +94,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     setBackgroundImageUrl("");
     setBackgroundBlur(0);
     setLightModeOverlayOpacity(80);
+    setDarkModeOverlayOpacity(85);
     setImageUrlInput("");
     setOrder(banners.length > 0 ? Math.max(...banners.map((b) => b.order)) + 1 : 1);
     setActive(true);
@@ -111,6 +114,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     setBackgroundImageUrl(banner.backgroundImageUrl || "");
     setBackgroundBlur(banner.backgroundBlur ?? 0);
     setLightModeOverlayOpacity(banner.lightModeOverlayOpacity ?? 80);
+    setDarkModeOverlayOpacity(banner.darkModeOverlayOpacity ?? 85);
     setImageUrlInput(banner.backgroundImageUrl || "");
     setOrder(banner.order);
     setActive(banner.active);
@@ -179,6 +183,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
         backgroundImageUrl: backgroundImageUrl.trim() || null,
         backgroundBlur: Number(backgroundBlur) || 0,
         lightModeOverlayOpacity: Number(lightModeOverlayOpacity) ?? 80,
+        darkModeOverlayOpacity: Number(darkModeOverlayOpacity) ?? 85,
         order: Number(order) || 0,
         active,
         startsAt: startsAt ? new Date(startsAt).toISOString() : null,
@@ -813,14 +818,14 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                       </button>
                     </div>
 
-                    {/* Background Blur Slider Control */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-200/80 dark:border-neutral-800/80">
+                    {/* Image Effect Sliders Control (Blur, Light Overlay, Dark Overlay) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 border-t border-gray-200/80 dark:border-neutral-800/80">
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
                             Background Blur
                           </label>
-                          <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-900">
+                          <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-900">
                             {backgroundBlur}px
                           </span>
                         </div>
@@ -834,16 +839,16 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                           className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-rose-600 dark:accent-rose-500"
                         />
                         <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
-                          0px (sharp) to 20px (soft blur).
+                          0px (sharp) to 20px (blur).
                         </p>
                       </div>
 
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
-                            Light Mode Overlay Opacity
+                            Light Overlay
                           </label>
-                          <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-900">
+                          <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-900">
                             {lightModeOverlayOpacity}%
                           </span>
                         </div>
@@ -857,7 +862,30 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                           className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-500"
                         />
                         <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
-                          0% (transparent) to 100% (solid). Dark mode unaffected.
+                          0% to 100% (light theme).
+                        </p>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                            Dark Overlay
+                          </label>
+                          <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-900">
+                            {darkModeOverlayOpacity}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="1"
+                          value={darkModeOverlayOpacity}
+                          onChange={(e) => setDarkModeOverlayOpacity(parseInt(e.target.value, 10) ?? 85)}
+                          className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-emerald-600 dark:accent-emerald-500"
+                        />
+                        <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
+                          0% to 100% (dark theme).
                         </p>
                       </div>
                     </div>

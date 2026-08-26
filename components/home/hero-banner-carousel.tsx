@@ -15,6 +15,7 @@ export interface HomepageBannerData {
   backgroundImageUrl: string | null;
   backgroundBlur?: number;
   lightModeOverlayOpacity?: number;
+  darkModeOverlayOpacity?: number;
   order: number;
 }
 
@@ -32,6 +33,7 @@ const DEFAULT_BANNER: HomepageBannerData = {
   backgroundImageUrl: null,
   backgroundBlur: 0,
   lightModeOverlayOpacity: 80,
+  darkModeOverlayOpacity: 85,
   order: 0,
 };
 
@@ -94,8 +96,13 @@ export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
               opacity: (currentBanner.lightModeOverlayOpacity ?? 80) / 100,
             }}
           />
-          {/* Dark Mode Gradient Overlay (Unchanged) */}
-          <div className="absolute inset-0 hidden dark:block bg-gradient-to-r from-[#090E17]/95 via-[#090E17]/85 to-[#090E17]/50" />
+          {/* Dark Mode Gradient Overlay driven by darkModeOverlayOpacity (0-100) */}
+          <div
+            className="absolute inset-0 hidden dark:block bg-gradient-to-r from-[#090E17]/95 via-[#090E17]/85 to-[#090E17]/50 transition-opacity duration-300"
+            style={{
+              opacity: (currentBanner.darkModeOverlayOpacity ?? 85) / 100,
+            }}
+          />
         </div>
       )}
 

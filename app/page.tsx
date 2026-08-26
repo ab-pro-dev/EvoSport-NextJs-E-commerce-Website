@@ -45,6 +45,7 @@ export default async function HomePage() {
     backgroundImageUrl: b.backgroundImageUrl,
     backgroundBlur: b.backgroundBlur ?? 0,
     lightModeOverlayOpacity: b.lightModeOverlayOpacity ?? 80,
+    darkModeOverlayOpacity: b.darkModeOverlayOpacity ?? 85,
     order: b.order,
   }));
 

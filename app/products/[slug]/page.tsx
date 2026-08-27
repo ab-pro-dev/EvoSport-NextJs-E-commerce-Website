@@ -54,7 +54,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     },
   });
 
-  if (!product || product.status !== "PUBLISHED") {
+  if (!product || product.status !== "ACTIVE") {
     notFound();
   }
 
@@ -74,7 +74,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       where: {
         categoryId: product.categoryId,
         id: { not: product.id },
-        status: "PUBLISHED",
+        status: "ACTIVE",
       },
       take: 4,
       include: {
@@ -95,7 +95,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     const fallbackRelated = await prisma.product.findMany({
       where: {
         id: { notIn: existingIds },
-        status: "PUBLISHED",
+        status: "ACTIVE",
         OR: [
           { gender: product.gender },
           { categoryId: product.categoryId },

@@ -24,7 +24,7 @@ export async function GET(
       where: {
         categoryId: currentProduct.categoryId,
         id: { not: currentProduct.id },
-        status: "PUBLISHED",
+        status: "ACTIVE",
       },
       take: 4,
       include: {
@@ -41,7 +41,7 @@ export async function GET(
       const fallback = await prisma.product.findMany({
         where: {
           id: { notIn: existingIds },
-          status: "PUBLISHED",
+          status: "ACTIVE",
           OR: [
             { gender: currentProduct.gender },
             { categoryId: currentProduct.categoryId },

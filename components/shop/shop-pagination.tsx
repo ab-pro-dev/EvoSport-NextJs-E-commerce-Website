@@ -23,7 +23,7 @@ export function ShopPagination({ currentPage, totalPages }: ShopPaginationProps)
   };
 
   return (
-    <div className="mt-10 flex items-center justify-center gap-2">
+    <div className="mt-6 flex items-center justify-center gap-2">
       <Button
         variant="outline"
         size="icon"

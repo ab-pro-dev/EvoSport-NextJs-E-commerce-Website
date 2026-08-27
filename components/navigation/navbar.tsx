@@ -15,10 +15,10 @@ interface NavbarProps {
 }
 
 const NAV_LINKS = [
+  { href: "/", label: "Home" },
   { href: "/shop", label: "Shop All" },
   { href: "/shop?gender=MEN", label: "Men" },
   { href: "/shop?gender=WOMEN", label: "Women" },
-  { href: "/shop?category=footwear", label: "Footwear" },
   { href: "/shop?category=apparel-parent", label: "Apparel" },
   { href: "/blog", label: "Blog" },
 ];

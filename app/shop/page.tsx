@@ -64,7 +64,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const sort = resolvedParams.sort || "newest";
   const search = resolvedParams.search || "";
   const currentPage = Math.max(1, parseInt(resolvedParams.page || "1", 10));
-  const limit = 8;
+  const limit = 12;
   const skip = (currentPage - 1) * limit;
 
   const where: Prisma.ProductWhereInput = {
@@ -267,13 +267,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               </div>
               <div className="flex items-center gap-4">
                 <span className="font-medium text-[#0F1B2D]/60 dark:text-slate-400">Sort by: <strong className="text-[#0F1B2D] dark:text-white">Featured</strong></span>
-                <span className="font-medium text-[#0F1B2D]/60 dark:text-slate-400">Show: <strong className="text-[#0F1B2D] dark:text-white">8</strong></span>
+                <span className="font-medium text-[#0F1B2D]/60 dark:text-slate-400">Show: <strong className="text-[#0F1B2D] dark:text-white">12</strong></span>
               </div>
             </div>
 
-            {/* Product Grid - 4 Column Layout */}
+            {/* Product Grid - 3 Column Layout */}
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} showDiscountBadge={showDiscountBadge} />
                 ))}

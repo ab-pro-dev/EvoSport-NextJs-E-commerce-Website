@@ -10,7 +10,7 @@ export async function GET(
 
     const currentProduct = await prisma.product.findUnique({
       where: { slug },
-      select: { id: true, categoryId: true, gender: true },
+      include: { category: true },
     });
 
     if (!currentProduct) {
@@ -20,11 +20,14 @@ export async function GET(
       );
     }
 
+    const mainCategoryId = currentProduct.category.parentId || currentProduct.categoryId;
+
     let relatedProducts = await prisma.product.findMany({
       where: {
-        categoryId: currentProduct.categoryId,
         id: { not: currentProduct.id },
         status: "ACTIVE",
+        categoryId: currentProduct.categoryId,
+        gender: currentProduct.gender,
       },
       take: 4,
       include: {
@@ -36,16 +39,14 @@ export async function GET(
       orderBy: { createdAt: "desc" },
     });
 
-    if (relatedProducts.length < 4) {
+    if (relatedProducts.length < 4 && currentProduct.gender !== "UNISEX") {
       const existingIds = [currentProduct.id, ...relatedProducts.map((p) => p.id)];
-      const fallback = await prisma.product.findMany({
+      const stepB = await prisma.product.findMany({
         where: {
           id: { notIn: existingIds },
           status: "ACTIVE",
-          OR: [
-            { gender: currentProduct.gender },
-            { categoryId: currentProduct.categoryId },
-          ],
+          categoryId: currentProduct.categoryId,
+          gender: "UNISEX",
         },
         take: 4 - relatedProducts.length,
         include: {
@@ -56,7 +57,58 @@ export async function GET(
         },
         orderBy: { createdAt: "desc" },
       });
-      relatedProducts = [...relatedProducts, ...fallback];
+      relatedProducts = [...relatedProducts, ...stepB];
+    }
+
+    if (relatedProducts.length < 4) {
+      const existingIds = [currentProduct.id, ...relatedProducts.map((p) => p.id)];
+      const stepC = await prisma.product.findMany({
+        where: {
+          id: { notIn: existingIds },
+          status: "ACTIVE",
+          gender: currentProduct.gender,
+          category: {
+            OR: [
+              { id: mainCategoryId },
+              { parentId: mainCategoryId },
+            ],
+          },
+        },
+        take: 4 - relatedProducts.length,
+        include: {
+          brand: true,
+          category: true,
+          images: { orderBy: { position: "asc" } },
+          variants: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      relatedProducts = [...relatedProducts, ...stepC];
+    }
+
+    if (relatedProducts.length < 4) {
+      const existingIds = [currentProduct.id, ...relatedProducts.map((p) => p.id)];
+      const stepD = await prisma.product.findMany({
+        where: {
+          id: { notIn: existingIds },
+          status: "ACTIVE",
+          category: {
+            OR: [
+              { id: mainCategoryId },
+              { parentId: mainCategoryId },
+            ],
+          },
+        },
+        take: 4 - relatedProducts.length,
+        include: {
+          brand: true,
+          category: true,
+          images: { orderBy: { position: "asc" } },
+          variants: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      relatedProducts = [...relatedProducts, ...stepD];
     }
 
     const productsWithReviews = await Promise.all(

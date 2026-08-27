@@ -68,13 +68,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const avgRating = reviewStats._avg.rating ? Number(reviewStats._avg.rating.toFixed(1)) : 0;
   const reviewCount = reviewStats._count.rating || 0;
 
-  // Real Related Products from Database: same category first, matching gender/similar price as fallback
-  const [sameCategory, discountBadgeSetting] = await Promise.all([
+  // Real Related Products from Database using 4-tier relevance algorithm:
+  // a. Same subcategory + same gender
+  // b. Same subcategory + Unisex gender
+  // c. Same main category + same gender
+  // d. Same main category regardless of gender
+  const mainCategoryId = product.category.parentId || product.categoryId;
+
+  const [sameSubcatGender, discountBadgeSetting] = await Promise.all([
     prisma.product.findMany({
       where: {
-        categoryId: product.categoryId,
         id: { not: product.id },
         status: "ACTIVE",
+        categoryId: product.categoryId,
+        gender: product.gender,
       },
       take: 4,
       include: {
@@ -88,18 +95,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
     prisma.setting.findUnique({ where: { key: "showDiscountBadge" } }),
   ]);
 
-  let relatedList = [...sameCategory];
+  let relatedList = [...sameSubcatGender];
 
-  if (relatedList.length < 4) {
+  if (relatedList.length < 4 && product.gender !== "UNISEX") {
     const existingIds = [product.id, ...relatedList.map((p) => p.id)];
-    const fallbackRelated = await prisma.product.findMany({
+    const stepB = await prisma.product.findMany({
       where: {
         id: { notIn: existingIds },
         status: "ACTIVE",
-        OR: [
-          { gender: product.gender },
-          { categoryId: product.categoryId },
-        ],
+        categoryId: product.categoryId,
+        gender: "UNISEX",
       },
       take: 4 - relatedList.length,
       include: {
@@ -110,7 +115,58 @@ export default async function ProductPage({ params }: ProductPageProps) {
       },
       orderBy: { createdAt: "desc" },
     });
-    relatedList = [...relatedList, ...fallbackRelated];
+    relatedList = [...relatedList, ...stepB];
+  }
+
+  if (relatedList.length < 4) {
+    const existingIds = [product.id, ...relatedList.map((p) => p.id)];
+    const stepC = await prisma.product.findMany({
+      where: {
+        id: { notIn: existingIds },
+        status: "ACTIVE",
+        gender: product.gender,
+        category: {
+          OR: [
+            { id: mainCategoryId },
+            { parentId: mainCategoryId },
+          ],
+        },
+      },
+      take: 4 - relatedList.length,
+      include: {
+        brand: true,
+        category: true,
+        images: { orderBy: { position: "asc" } },
+        variants: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    relatedList = [...relatedList, ...stepC];
+  }
+
+  if (relatedList.length < 4) {
+    const existingIds = [product.id, ...relatedList.map((p) => p.id)];
+    const stepD = await prisma.product.findMany({
+      where: {
+        id: { notIn: existingIds },
+        status: "ACTIVE",
+        category: {
+          OR: [
+            { id: mainCategoryId },
+            { parentId: mainCategoryId },
+          ],
+        },
+      },
+      take: 4 - relatedList.length,
+      include: {
+        brand: true,
+        category: true,
+        images: { orderBy: { position: "asc" } },
+        variants: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    relatedList = [...relatedList, ...stepD];
   }
 
   const rawRelated = relatedList;
@@ -197,7 +253,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div className="mb-6 flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">
-                    Related <span className="text-[#5B8DEF] dark:text-[#B8FF00]">Equipment</span>
+                    Related <span className="text-[#5B8DEF] dark:text-[#B8FF00]">Products</span>
                   </h2>
                   <p className="text-xs text-[#0F1B2D]/50 dark:text-slate-400 mt-1">
                     Hand-picked gear from the {product.category.name} collection

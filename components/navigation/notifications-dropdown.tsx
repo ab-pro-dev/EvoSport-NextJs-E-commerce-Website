@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Bell, Check, Package, Info, ShoppingBag } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Bell, Check, Package, Info, Volume2, VolumeX } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  playNotificationSound,
+  isSoundMuted,
+  setSoundMuted,
+} from "@/lib/audio-notification";
 
 interface NotificationItem {
   id: string;
@@ -20,14 +25,41 @@ export function NotificationsDropdown() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const prevUnreadCountRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setIsMuted(isSoundMuted());
+    const handleToggle = (e: Event) => {
+      const customEvent = e as CustomEvent<{ muted: boolean }>;
+      setIsMuted(customEvent.detail?.muted ?? isSoundMuted());
+    };
+    window.addEventListener("evosport_sound_toggle", handleToggle);
+    return () => window.removeEventListener("evosport_sound_toggle", handleToggle);
+  }, []);
+
+  const toggleMute = () => {
+    const nextState = !isMuted;
+    setIsMuted(nextState);
+    setSoundMuted(nextState);
+  };
 
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch("/api/notifications");
       if (res.ok) {
         const data = await res.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
+        const newNotifications = data.notifications || [];
+        const newUnread = data.unreadCount || 0;
+
+        // Play chime only if unread count strictly increased from previous poll
+        if (prevUnreadCountRef.current !== null && newUnread > prevUnreadCountRef.current) {
+          playNotificationSound();
+        }
+        prevUnreadCountRef.current = newUnread;
+
+        setNotifications(newNotifications);
+        setUnreadCount(newUnread);
       }
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -46,6 +78,7 @@ export function NotificationsDropdown() {
       if (res.ok) {
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnreadCount(0);
+        prevUnreadCountRef.current = 0;
       }
     } catch (err) {
       console.error("Error marking all notifications as read:", err);
@@ -59,7 +92,11 @@ export function NotificationsDropdown() {
         setNotifications((prev) =>
           prev.map((n) => (n.id === id ? { ...n, read: true } : n))
         );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
+        setUnreadCount((prev) => {
+          const nextVal = Math.max(0, prev - 1);
+          prevUnreadCountRef.current = nextVal;
+          return nextVal;
+        });
       }
     } catch (err) {
       console.error("Error marking notification as read:", err);
@@ -103,14 +140,29 @@ export function NotificationsDropdown() {
             )}
           </div>
 
-          {unreadCount > 0 && (
+          <div className="flex items-center gap-3">
             <button
-              onClick={handleMarkAllRead}
-              className="text-[10px] font-bold text-[#5B8DEF] hover:underline"
+              onClick={toggleMute}
+              className="flex items-center gap-1 text-[11px] font-medium text-[#0F1B2D]/60 dark:text-slate-400 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"
+              title={isMuted ? "Unmute notification sounds" : "Mute notification sounds"}
             >
-              Mark all as read
+              {isMuted ? (
+                <VolumeX className="h-3.5 w-3.5 text-rose-500" />
+              ) : (
+                <Volume2 className="h-3.5 w-3.5 text-emerald-500" />
+              )}
+              <span className="text-[10px]">{isMuted ? "Muted" : "Sound"}</span>
             </button>
-          )}
+
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllRead}
+                className="text-[10px] font-bold text-[#5B8DEF] hover:underline"
+              >
+                Mark all
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Notification List */}

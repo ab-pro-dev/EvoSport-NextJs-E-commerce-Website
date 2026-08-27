@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminNotificationsDropdown } from "@/components/admin/admin-notifications-dropdown";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Bell } from "lucide-react";
 import Image from "next/image";
 
 export default async function AdminLayout({
@@ -58,9 +58,7 @@ export default async function AdminLayout({
         <div className="flex items-center gap-3 sm:gap-4">
           <ThemeToggle variant="admin" />
 
-          <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors shadow-sm">
-            <Bell className="h-4 w-4" />
-          </button>
+          <AdminNotificationsDropdown />
 
           <div className="flex items-center gap-2.5 rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/80 px-3 py-1.5 shadow-sm">
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-[10px] font-black text-white">

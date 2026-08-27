@@ -41,9 +41,9 @@ export default async function AdminMediaPage() {
     ...productImages.map((img) => ({
       id: img.id,
       url: img.url,
-      altText: img.altText || img.product.name,
+      altText: img.altText || img.product?.name || "Product Image",
       source: "PRODUCT",
-      referenceName: `Product: ${img.product.name}`,
+      referenceName: img.product ? `Product: ${img.product.name}` : "Product Image",
       referenceLink: `/admin/products`,
     })),
     ...blogPosts.map((post) => ({

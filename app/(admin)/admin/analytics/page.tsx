@@ -70,7 +70,7 @@ export default async function AdminAnalyticsPage() {
   const categoryMap: Record<string, { categoryName: string; revenue: number; itemsSold: number }> = {};
   for (const o of orders) {
     for (const item of o.items) {
-      const categoryName = item.variant.product.category?.name || "Uncategorized";
+      const categoryName = item.variant?.product?.category?.name || "Uncategorized";
       if (!categoryMap[categoryName]) {
         categoryMap[categoryName] = { categoryName, revenue: 0, itemsSold: 0 };
       }

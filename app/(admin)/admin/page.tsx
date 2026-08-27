@@ -91,10 +91,10 @@ export default async function AdminOverviewPage() {
     const v = variantMap.get(item.variantId);
     return {
       id: item.variantId,
-      name: v?.product.name || "Unknown Product",
+      name: v?.product?.name || "Unknown Product",
       color: v?.color || "N/A",
       size: v?.size || "N/A",
-      image: v?.product.images[0]?.url || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200",
+      image: v?.product?.images?.[0]?.url || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200",
       unitsSold: item._sum.quantity || 0,
     };
   });

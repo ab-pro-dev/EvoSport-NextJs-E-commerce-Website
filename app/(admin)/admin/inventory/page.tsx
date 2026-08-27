@@ -44,9 +44,9 @@ export default async function AdminInventoryPage() {
     stock: v.stock,
     price: v.price ? Number(v.price) : null,
     productId: v.productId,
-    productName: v.product.name,
-    productSlug: v.product.slug,
-    productStatus: v.product.status,
+    productName: v.product?.name || "Unknown Product",
+    productSlug: v.product?.slug || "",
+    productStatus: v.product?.status || "INACTIVE",
     createdAt: v.createdAt.toISOString(),
   }));
 

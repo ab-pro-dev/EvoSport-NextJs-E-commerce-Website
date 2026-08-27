@@ -104,17 +104,41 @@ export default async function CheckoutPage() {
     redirect("/login?callbackUrl=/checkout");
   }
 
-  const cart = await getCartData(session.user.id);
+  const [cart, savedAddresses] = await Promise.all([
+    getCartData(session.user.id),
+    prisma.address.findMany({
+      where: { userId: session.user.id },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+    }),
+  ]);
 
   // If cart is empty, redirect back to /cart
   if (cart.items.length === 0) {
     redirect("/cart");
   }
 
+  const serializedAddresses = savedAddresses.map((addr) => ({
+    id: addr.id,
+    fullName: addr.fullName,
+    phone: addr.phone,
+    line1: addr.line1,
+    line2: addr.line2 || "",
+    city: addr.city,
+    state: addr.state,
+    zip: addr.zip,
+    country: addr.country,
+    isDefault: addr.isDefault,
+  }));
+
   return (
     <div className="min-h-screen bg-[#F4F8FC] dark:bg-[#090E17] text-[#0F1B2D] dark:text-[#F1F5F9] transition-colors duration-200">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <CheckoutView cart={cart} />
+        <CheckoutView
+          cart={cart}
+          savedAddresses={serializedAddresses}
+          userEmail={session.user.email || ""}
+          userName={session.user.name || ""}
+        />
       </main>
     </div>
   );

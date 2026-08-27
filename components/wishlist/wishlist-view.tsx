@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Heart, ShoppingBag, ArrowRight, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { AddToCartTooltip } from "@/components/ui/add-to-cart-tooltip";
 
 interface WishlistItem {
   id: string;
@@ -82,9 +83,8 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
       }
 
       if (res.ok) {
-        toast.success(`${item.product.name} added to cart!`);
         setCartMessage({ id: item.productId, text: "Added to Cart!" });
-        setTimeout(() => setCartMessage(null), 3000);
+        setTimeout(() => setCartMessage(null), 1800);
         window.dispatchEvent(new Event("cart-updated"));
       } else {
         const data = await res.json();
@@ -214,14 +214,15 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
                 </div>
 
                 {/* Add to Cart Button */}
-                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
+                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800 relative">
+                  <AddToCartTooltip show={cartMessage?.id === item.productId} />
                   <Button
                     onClick={() => handleAddToCart(item)}
                     size="sm"
                     className="w-full bg-[#B8FF00] font-extrabold text-[#0F1B2D] hover:bg-[#a3e600] text-xs uppercase tracking-wider rounded-xl transition-colors shadow-sm"
                   >
                     <ShoppingBag className="mr-1.5 h-3.5 w-3.5" />
-                    {cartMessage?.id === product.id ? cartMessage.text : "ADD TO CART"}
+                    {cartMessage?.id === item.productId ? cartMessage.text : "ADD TO CART"}
                   </Button>
                 </div>
               </div>

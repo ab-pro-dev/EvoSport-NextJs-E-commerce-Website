@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Heart, Star, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
+import { AddToCartTooltip } from "@/components/ui/add-to-cart-tooltip";
 
 interface ProductCardProps {
   product: {
@@ -56,9 +57,8 @@ export function ProductCard({ product, showDiscountBadge = false }: ProductCardP
       });
 
       if (cartRes.ok) {
-        toast.success(`${product.name} added to cart!`);
         setAdded(true);
-        setTimeout(() => setAdded(false), 2000);
+        setTimeout(() => setAdded(false), 1800);
         window.dispatchEvent(new Event("cart-updated"));
       } else {
         const data = await cartRes.json();
@@ -119,7 +119,8 @@ export function ProductCard({ product, showDiscountBadge = false }: ProductCardP
           </Link>
         </div>
 
-        <div className="absolute inset-x-3 bottom-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10">
+        <div className="absolute inset-x-3 bottom-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10 relative">
+          <AddToCartTooltip show={added} />
           <button
             onClick={handleQuickAdd}
             disabled={isAdding}

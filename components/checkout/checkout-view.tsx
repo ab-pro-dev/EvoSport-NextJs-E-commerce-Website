@@ -4,10 +4,23 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, ShieldCheck, CreditCard, Truck, ArrowRight, ArrowLeft, ShoppingBag } from "lucide-react";
+import { Check, ShieldCheck, CreditCard, Truck, ArrowRight, ArrowLeft, ShoppingBag, MapPin, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+export interface SavedAddress {
+  id: string;
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  isDefault: boolean;
+}
 
 interface CartItem {
   id: string;
@@ -36,22 +49,31 @@ interface CartData {
 
 interface CheckoutViewProps {
   cart: CartData;
+  savedAddresses?: SavedAddress[];
+  userEmail?: string;
+  userName?: string;
 }
 
-export function CheckoutView({ cart }: CheckoutViewProps) {
+export function CheckoutView({ cart, savedAddresses = [], userEmail = "", userName = "" }: CheckoutViewProps) {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
-  // Address form state
+  const defaultAddr = savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
+
+  const [selectedAddressId, setSelectedAddressId] = useState<string>(
+    defaultAddr?.id || "custom"
+  );
+
+  // Address form state initialized with default address if available
   const [address, setAddress] = useState({
-    fullName: "",
-    email: "",
-    line1: "",
-    line2: "",
-    city: "",
+    fullName: defaultAddr?.fullName || userName || "",
+    email: userEmail || "",
+    line1: defaultAddr?.line1 || "",
+    line2: defaultAddr?.line2 || "",
+    city: defaultAddr?.city || "",
   });
 
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(defaultAddr?.phone || "");
 
   // Payment form state
   const [payment, setPayment] = useState({
@@ -75,6 +97,32 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
 
   const tax = Number((subtotal * 0.08).toFixed(2));
   const total = Number((subtotal + shippingCost + tax).toFixed(2));
+
+  const handleSelectSavedAddress = (id: string) => {
+    setSelectedAddressId(id);
+    if (id === "custom") {
+      setAddress({
+        fullName: userName || "",
+        email: userEmail || "",
+        line1: "",
+        line2: "",
+        city: "",
+      });
+      setPhoneNumber("");
+    } else {
+      const selected = savedAddresses.find((a) => a.id === id);
+      if (selected) {
+        setAddress({
+          fullName: selected.fullName,
+          email: userEmail || "",
+          line1: selected.line1,
+          line2: selected.line2 || "",
+          city: selected.city,
+        });
+        setPhoneNumber(selected.phone);
+      }
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setAddress((prev) => ({ ...prev, [field]: value }));
@@ -238,6 +286,65 @@ export function CheckoutView({ cart }: CheckoutViewProps) {
                 <Truck className="h-5 w-5 text-[#B8FF00]" />
                 <h2 className="text-lg font-black uppercase text-[#0F1B2D] dark:text-white">1. SHIPPING ADDRESS</h2>
               </div>
+
+              {/* Saved Address Selector */}
+              {savedAddresses.length > 0 && (
+                <div className="rounded-xl border border-[#B8FF00]/40 bg-[#B8FF00]/10 dark:bg-[#B8FF00]/10 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-black uppercase tracking-wider text-[#0F1B2D] dark:text-white flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-[#B8FF00]" />
+                      Use a Saved Address
+                    </label>
+                    <span className="text-[10px] font-bold text-[#0F1B2D]/50 dark:text-slate-400">
+                      {savedAddresses.length} saved
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    {savedAddresses.map((addr) => {
+                      const isSelected = selectedAddressId === addr.id;
+                      return (
+                        <button
+                          key={addr.id}
+                          type="button"
+                          onClick={() => handleSelectSavedAddress(addr.id)}
+                          className={`flex flex-col text-left p-3 rounded-xl border transition-all ${
+                            isSelected
+                              ? "border-[#B8FF00] bg-white dark:bg-slate-900 ring-2 ring-[#B8FF00]/40 shadow-sm"
+                              : "border-gray-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 hover:border-gray-300 dark:hover:border-slate-700"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between w-full mb-1">
+                            <span className="text-xs font-bold text-[#0F1B2D] dark:text-white truncate">
+                              {addr.fullName}
+                            </span>
+                            {addr.isDefault && (
+                              <span className="text-[9px] font-black uppercase bg-[#B8FF00] text-[#0F1B2D] px-1.5 py-0.5 rounded">
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-[#0F1B2D]/70 dark:text-slate-300 line-clamp-1">{addr.line1}</span>
+                          <span className="text-[10px] text-[#0F1B2D]/50 dark:text-slate-400">{addr.city}, {addr.state} {addr.zip}</span>
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSavedAddress("custom")}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed transition-all ${
+                        selectedAddressId === "custom"
+                          ? "border-[#B8FF00] bg-white dark:bg-slate-900 text-[#0F1B2D] dark:text-white font-bold"
+                          : "border-gray-300 dark:border-slate-700 text-[#0F1B2D]/60 dark:text-slate-400 hover:border-gray-400"
+                      }`}
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span className="text-xs font-bold">+ Enter New Address</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">

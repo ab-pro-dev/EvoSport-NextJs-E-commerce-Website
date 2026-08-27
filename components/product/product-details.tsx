@@ -9,6 +9,7 @@ import { Star, Heart, RefreshCw, Minus, Plus, ShoppingBag, Zap, ChevronRight, Sh
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AddToCartTooltip } from "@/components/ui/add-to-cart-tooltip";
 
 interface ProductDetailsProps {
   product: {
@@ -78,9 +79,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         throw new Error(msg);
       }
 
-      toast.success(`${product.name} added to cart!`);
       setAddSuccess(true);
-      setTimeout(() => setAddSuccess(false), 3000);
+      setTimeout(() => setAddSuccess(false), 1800);
       window.dispatchEvent(new Event("cart-updated"));
     } catch (err: any) {
       setAddError(err.message || "Failed to add to cart");
@@ -330,15 +330,18 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 </button>
               </div>
 
-              <Button
-                size="lg"
-                disabled={!inStock || isAdding}
-                onClick={handleAddToCart}
-                className="flex-1 bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-11 text-xs uppercase tracking-wider rounded-lg shadow-sm"
-              >
-                <ShoppingBag className="mr-2 h-4 w-4" />
-                {isAdding ? "ADDING..." : addSuccess ? "ADDED TO CART!" : "ADD TO CART"}
-              </Button>
+              <div className="relative flex-1">
+                <AddToCartTooltip show={addSuccess} />
+                <Button
+                  size="lg"
+                  disabled={!inStock || isAdding}
+                  onClick={handleAddToCart}
+                  className="w-full bg-[#B8FF00] font-black text-[#0F1B2D] hover:bg-[#a3e600] h-11 text-xs uppercase tracking-wider rounded-lg shadow-sm"
+                >
+                  <ShoppingBag className="mr-2 h-4 w-4" />
+                  {isAdding ? "ADDING..." : addSuccess ? "ADDED TO CART!" : "ADD TO CART"}
+                </Button>
+              </div>
 
               <Button
                 size="lg"

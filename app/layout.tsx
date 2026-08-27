@@ -4,6 +4,7 @@ import { SessionProvider } from "@/components/providers/session-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SiteHeader } from "@/components/navigation/site-header";
+import { SiteFooter } from "@/components/navigation/site-footer";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -50,6 +51,7 @@ export default function RootLayout({
             <SmoothScrollProvider>
               <SiteHeader />
               {children}
+              <SiteFooter />
               <Toaster
                 position="top-right"
                 toastOptions={{

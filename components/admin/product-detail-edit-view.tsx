@@ -44,6 +44,7 @@ interface ProductDetailProps {
     basePrice: number;
     compareAtPrice: number | null;
     status: string;
+    isFeatured?: boolean;
     brandId: string | null;
     categoryId: string;
     images: ProductImageItem[];
@@ -72,6 +73,7 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
   const [basePrice, setBasePrice] = useState(product.basePrice.toString());
   const [compareAtPrice, setCompareAtPrice] = useState(product.compareAtPrice ? product.compareAtPrice.toString() : "");
   const [status, setStatus] = useState(product.status);
+  const [isFeatured, setIsFeatured] = useState(product.isFeatured ?? false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [productSuccessMsg, setProductSuccessMsg] = useState<string | null>(null);
   const [productErrorMsg, setProductErrorMsg] = useState<string | null>(null);
@@ -121,6 +123,7 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
           basePrice: parseFloat(basePrice),
           compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
           status,
+          isFeatured,
         }),
       });
 
@@ -614,6 +617,19 @@ export function ProductDetailEditView({ product, brands, categories }: ProductDe
                     <option value="DRAFT">DRAFT</option>
                     <option value="ARCHIVED">ARCHIVED</option>
                   </select>
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950 p-2.5">
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-900 dark:text-white block">Featured Gear</label>
+                    <span className="text-[10px] text-neutral-500">Show on homepage Featured section</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isFeatured}
+                    onChange={(e) => setIsFeatured(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-[#B8FF00] focus:ring-[#B8FF00] cursor-pointer"
+                  />
                 </div>
               </div>
 

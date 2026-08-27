@@ -218,6 +218,7 @@ model Product {
   basePrice      Decimal       @db.Decimal(10, 2)
   compareAtPrice Decimal?      @db.Decimal(10, 2)
   status         ProductStatus @default(DRAFT)
+  isFeatured     Boolean       @default(false)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 

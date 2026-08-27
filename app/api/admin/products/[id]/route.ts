@@ -72,7 +72,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const { name, slug, description, brandId, categoryId, gender, basePrice, compareAtPrice, status } = body;
+    const { name, slug, description, brandId, categoryId, gender, basePrice, compareAtPrice, status, isFeatured } = body;
 
     const updateData: any = {};
     if (name !== undefined) updateData.name = name.trim();
@@ -88,6 +88,7 @@ export async function PATCH(
     if (basePrice !== undefined) updateData.basePrice = Number(basePrice);
     if (compareAtPrice !== undefined) updateData.compareAtPrice = compareAtPrice ? Number(compareAtPrice) : null;
     if (status !== undefined) updateData.status = status;
+    if (isFeatured !== undefined) updateData.isFeatured = Boolean(isFeatured);
 
     if (slug && slug.trim().toLowerCase() !== existingProduct.slug) {
       const normalizedSlug = slug.trim().toLowerCase();

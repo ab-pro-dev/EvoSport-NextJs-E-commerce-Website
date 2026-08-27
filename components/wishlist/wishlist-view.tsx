@@ -47,6 +47,8 @@ export function WishlistView({ initialItems, isAuthenticated }: WishlistViewProp
 
       if (res.ok) {
         setItems((prev) => prev.filter((item) => item.productId !== productId));
+        window.dispatchEvent(new Event("wishlist-updated"));
+        toast.success("Removed from wishlist");
         router.refresh();
       }
     } catch (err) {

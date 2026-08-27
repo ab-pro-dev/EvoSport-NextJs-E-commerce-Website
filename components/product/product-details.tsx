@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AddToCartTooltip } from "@/components/ui/add-to-cart-tooltip";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 interface ProductDetailsProps {
   product: {
@@ -50,6 +51,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [addSuccess, setAddSuccess] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+
+  const { isWishlisted, toggleWishlist } = useWishlist();
 
   // Find selected variant from real API data
   const currentVariant = product.variants.find(
@@ -357,16 +360,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
             <div className="flex items-center gap-6 pt-2 text-xs font-semibold text-[#0F1B2D]/60 dark:text-slate-400">
               <button
-                onClick={() => {
-                  if (status !== "authenticated") {
-                    toast.error("Please log in to save items to your wishlist.");
-                    router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
-                  }
-                }}
+                onClick={(e) => toggleWishlist(product.id, e)}
                 className="flex items-center gap-1.5 hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors"
               >
-                <Heart className="h-3.5 w-3.5" />
-                <span>Add to Wishlist</span>
+                <Heart className={`h-4 w-4 transition-colors ${isWishlisted(product.id) ? "fill-rose-500 text-rose-500" : ""}`} />
+                <span className={isWishlisted(product.id) ? "text-rose-500 font-bold" : ""}>
+                  {isWishlisted(product.id) ? "Saved to Wishlist" : "Add to Wishlist"}
+                </span>
               </button>
               <button className="flex items-center gap-1.5 hover:text-[#5B8DEF] dark:hover:text-[#B8FF00] transition-colors">
                 <RefreshCw className="h-3.5 w-3.5" />

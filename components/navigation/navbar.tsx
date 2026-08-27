@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { ShoppingBag, Heart, User, LogOut, Menu, X } from "lucide-react";
 import { NotificationsDropdown } from "@/components/navigation/notifications-dropdown";
+import { useWishlist } from "@/hooks/use-wishlist";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { toast } from "sonner";
 
@@ -24,6 +25,7 @@ const NAV_LINKS = [
 
 export function Navbar({ cartItemCount = 0 }: NavbarProps) {
   const { data: session } = useSession();
+  const { wishlistCount } = useWishlist();
   const [itemCount, setItemCount] = useState(cartItemCount);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -104,13 +106,18 @@ export function Navbar({ cartItemCount = 0 }: NavbarProps) {
           {/* Theme Mode Toggle Button */}
           <ThemeToggle variant="customer" />
 
-          {/* Wishlist Icon */}
+          {/* Wishlist Icon with Badge */}
           <Link
             href="/wishlist"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"
             title="Wishlist"
           >
             <Heart className="h-[18px] w-[18px]" />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 font-black text-[9px] text-white">
+                {wishlistCount}
+              </span>
+            )}
           </Link>
 
           {/* Notifications Dropdown */}

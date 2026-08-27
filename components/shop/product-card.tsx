@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { Heart, Star, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { AddToCartTooltip } from "@/components/ui/add-to-cart-tooltip";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 interface ProductCardProps {
   product: {
@@ -32,6 +33,7 @@ export function ProductCard({ product, showDiscountBadge = false }: ProductCardP
   const { status } = useSession();
   const [isAdding, setIsAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist();
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -108,15 +110,16 @@ export function ProductCard({ product, showDiscountBadge = false }: ProductCardP
           </div>
         )}
 
-        {/* Action Buttons: Wishlist & Quick Add */}
+        {/* Action Buttons: Wishlist */}
         <div className="absolute right-3 top-3 flex flex-col gap-2 z-10">
-          <Link
-            href={`/products/${product.slug}`}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-[#0F1B2D] dark:text-white shadow-sm transition-all hover:bg-white dark:hover:bg-slate-800 hover:text-rose-500"
-            title="View Details"
+          <button
+            type="button"
+            onClick={(e) => toggleWishlist(product.id, e)}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-[#0F1B2D] dark:text-white shadow-sm transition-all hover:bg-white dark:hover:bg-slate-800 hover:scale-110"
+            title={isWishlisted(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
           >
-            <Heart className="h-4 w-4" />
-          </Link>
+            <Heart className={`h-4 w-4 transition-colors ${isWishlisted(product.id) ? "fill-rose-500 text-rose-500" : "hover:text-rose-500"}`} />
+          </button>
         </div>
 
         <div className="absolute inset-x-3 bottom-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10 relative">

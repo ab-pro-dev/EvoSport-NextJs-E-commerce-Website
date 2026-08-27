@@ -146,7 +146,7 @@ export function Navbar({ cartItemCount = 0 }: NavbarProps) {
               <button
                 onClick={() => {
                   toast.success("You've been logged out");
-                  signOut({ callbackUrl: "/login" });
+                  signOut({ callbackUrl: "/" });
                 }}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-[#0F1B2D]/40 dark:text-slate-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-500 transition-colors"
                 title="Logout"

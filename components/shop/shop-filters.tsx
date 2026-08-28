@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Search, RotateCcw, Filter, Check, Star, ChevronDown, ChevronRight, Layers } from "lucide-react";
+import { Search, RotateCcw, Filter, Check, ChevronDown, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -19,10 +19,9 @@ export interface CategoryTreeItem {
 
 interface ShopFiltersProps {
   categories?: CategoryTreeItem[];
-  brands: { id: string; name: string; slug: string }[];
+  brands?: { id: string; name: string; slug: string }[];
   selectedGender?: string;
   selectedCategory?: string;
-  selectedBrand?: string;
   minPrice?: number;
   maxPrice?: number;
   sort?: string;
@@ -37,14 +36,13 @@ const GENDER_OPTIONS = [
   { label: "Unisex", value: "UNISEX" },
 ];
 
-export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
+export function ShopFilters({ categories = [] }: ShopFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const currentGender = searchParams.get("gender") || "";
   const currentCategory = searchParams.get("category") || "";
-  const currentBrand = searchParams.get("brand") || "";
   const currentMinPrice = searchParams.get("minPrice") || "";
   const currentMaxPrice = searchParams.get("maxPrice") || "";
   const currentSearch = searchParams.get("search") || "";
@@ -52,8 +50,6 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
   const [searchInput, setSearchInput] = useState(currentSearch);
   const [minPriceInput, setMinPriceInput] = useState(currentMinPrice);
   const [maxPriceInput, setMaxPriceInput] = useState(currentMaxPrice);
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
 
   // Sync search input if URL changes externally
   useEffect(() => {
@@ -130,19 +126,8 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
     setSearchInput("");
     setMinPriceInput("");
     setMaxPriceInput("");
-    setSelectedSize("");
-    setSelectedColor("");
     router.push(pathname);
   };
-
-  const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-  const colors = [
-    { name: "Black", bg: "bg-black border-slate-700" },
-    { name: "White", bg: "bg-white border-gray-300 dark:border-slate-700" },
-    { name: "Cyan", bg: "bg-cyan-500" },
-    { name: "Red", bg: "bg-red-500" },
-    { name: "Neon Green", bg: "bg-[#B8FF00]" },
-  ];
 
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-5 shadow-sm text-[#0F1B2D] dark:text-slate-100 space-y-6">
@@ -208,7 +193,7 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
             {!currentCategory && <Check className="h-3.5 w-3.5 text-[#0F1B2D] dark:text-[#B8FF00]" />}
           </button>
 
-          {/* 7 Parent Categories Tree */}
+          {/* Parent Categories Tree */}
           {categories.map((parent) => {
             const isParentActive = currentCategory === parent.slug;
             const isOpen = !!openCategories[parent.slug];
@@ -230,7 +215,6 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
                   <button
                     onClick={() => {
                       updateFilter("category", isParentActive ? null : parent.slug);
-                      // also open subcategories if not open
                       if (!isOpen && hasChildren) {
                         setOpenCategories((prev) => ({ ...prev, [parent.slug]: true }));
                       }
@@ -322,7 +306,7 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
         </div>
       </div>
 
-      {/* Price Range */}
+      {/* 3. Price Range */}
       <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
         <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400 mb-3">
           Price Range ($)
@@ -351,99 +335,6 @@ export function ShopFilters({ categories = [], brands }: ShopFiltersProps) {
         >
           Apply Price
         </Button>
-      </div>
-
-      {/* Brands */}
-      <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400 mb-3">
-          Brand
-        </h4>
-        <div className="space-y-1.5">
-          {brands.map((b) => (
-            <button
-              key={b.id}
-              onClick={() =>
-                updateFilter("brand", currentBrand === b.slug ? null : b.slug)
-              }
-              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-colors ${
-                currentBrand === b.slug
-                  ? "bg-[#B8FF00]/15 dark:bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00] font-bold"
-                  : "text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-[#F4F8FC] dark:hover:bg-slate-800/60 hover:text-[#0F1B2D] dark:hover:text-white"
-              }`}
-            >
-              <span>{b.name}</span>
-              {currentBrand === b.slug && <Check className="h-3.5 w-3.5 text-[#0F1B2D] dark:text-[#B8FF00]" />}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Sizes */}
-      <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400 mb-3">
-          Size
-        </h4>
-        <div className="grid grid-cols-4 gap-1.5">
-          {sizes.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSelectedSize(selectedSize === s ? "" : s)}
-              className={`rounded-md border py-1.5 text-xs font-bold transition-colors ${
-                selectedSize === s
-                  ? "border-[#B8FF00] bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]"
-                  : "border-gray-200 dark:border-slate-800 bg-[#F4F8FC] dark:bg-slate-900 text-[#0F1B2D]/50 dark:text-slate-400 hover:border-gray-300 dark:hover:border-slate-700 hover:text-[#0F1B2D] dark:hover:text-white"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Color Swatches */}
-      <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400 mb-3">
-          Color
-        </h4>
-        <div className="flex items-center gap-2.5">
-          {colors.map((c) => (
-            <button
-              key={c.name}
-              title={c.name}
-              onClick={() => setSelectedColor(selectedColor === c.name ? "" : c.name)}
-              className={`h-6 w-6 rounded-full border ${c.bg} flex items-center justify-center transition-transform ${
-                selectedColor === c.name ? "ring-2 ring-[#B8FF00] ring-offset-2 ring-offset-white dark:ring-offset-slate-900 scale-110" : "hover:scale-105"
-              }`}
-            >
-              {selectedColor === c.name && <Check className="h-3 w-3 text-black" />}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Rating */}
-      <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#0F1B2D]/60 dark:text-slate-400 mb-3">
-          Rating
-        </h4>
-        <div className="space-y-1.5">
-          {[4, 3, 2].map((r) => (
-            <button
-              key={r}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-xs text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/60 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"
-            >
-              <div className="flex text-amber-400">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-3 w-3 ${i < r ? "fill-amber-400" : "fill-gray-200 dark:fill-slate-700 text-gray-200 dark:text-slate-700"}`}
-                  />
-                ))}
-              </div>
-              <span>& up</span>
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );

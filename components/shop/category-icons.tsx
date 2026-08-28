@@ -59,29 +59,68 @@ export function BottleIcon({ className = "h-4 w-4" }: { className?: string }) {
 }
 
 export function getCategoryIcon(slug: string, className = "h-4 w-4") {
-  switch (slug) {
-    case "all":
-    case "":
-      return <LayoutGrid className={className} />;
-    case "footwear":
-      return <ShoeIcon className={className} />;
-    case "apparel-parent":
-    case "apparel":
-      return <Shirt className={className} />;
-    case "jerseys-teamwear":
-      return <JerseyIcon className={className} />;
-    case "gym-training":
-      return <Dumbbell className={className} />;
-    case "bags":
-      return <ShoppingBag className={className} />;
-    case "hydration":
-      return <BottleIcon className={className} />;
-    case "accessories-parent":
-    case "accessories":
-      return <Watch className={className} />;
-    case "gender":
-      return <Users className={className} />;
-    default:
-      return <Layers className={className} />;
+  const normalized = (slug || "").toLowerCase();
+  if (!normalized || normalized === "all" || normalized === "all products") {
+    return <LayoutGrid className={className} />;
   }
+  if (
+    normalized.includes("footwear") ||
+    normalized.includes("shoe") ||
+    normalized.includes("running-shoes") ||
+    normalized.includes("sneaker")
+  ) {
+    return <ShoeIcon className={className} />;
+  }
+  if (normalized.includes("jersey") || normalized.includes("teamwear")) {
+    return <JerseyIcon className={className} />;
+  }
+  if (
+    normalized.includes("apparel") ||
+    normalized.includes("cloth") ||
+    normalized.includes("hoodie") ||
+    normalized.includes("tee") ||
+    normalized.includes("shirt")
+  ) {
+    return <Shirt className={className} />;
+  }
+  if (
+    normalized.includes("gym") ||
+    normalized.includes("train") ||
+    normalized.includes("gear") ||
+    normalized.includes("fitness") ||
+    normalized.includes("workout")
+  ) {
+    return <Dumbbell className={className} />;
+  }
+  if (normalized.includes("bag") || normalized.includes("pack") || normalized.includes("duffle")) {
+    return <ShoppingBag className={className} />;
+  }
+  if (
+    normalized.includes("hydrat") ||
+    normalized.includes("bottle") ||
+    normalized.includes("water") ||
+    normalized.includes("flask")
+  ) {
+    return <BottleIcon className={className} />;
+  }
+  if (
+    normalized.includes("accessor") ||
+    normalized.includes("watch") ||
+    normalized.includes("belt") ||
+    normalized.includes("band") ||
+    normalized.includes("socks") ||
+    normalized.includes("glove")
+  ) {
+    return <Watch className={className} />;
+  }
+  if (
+    normalized.includes("gender") ||
+    normalized.includes("men") ||
+    normalized.includes("women") ||
+    normalized.includes("kids") ||
+    normalized.includes("unisex")
+  ) {
+    return <Users className={className} />;
+  }
+  return <Layers className={className} />;
 }

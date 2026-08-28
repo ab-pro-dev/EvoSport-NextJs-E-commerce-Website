@@ -55,6 +55,7 @@ export function ShopLayoutView({
   const activeFilterCount = [
     genderSlug,
     categorySlug,
+    brandSlug,
     minPrice !== undefined,
     maxPrice !== undefined,
     search,
@@ -80,7 +81,10 @@ export function ShopLayoutView({
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[85vw] max-w-sm p-0 overflow-y-auto bg-white dark:bg-[#0F172A] border-r border-gray-200 dark:border-slate-800">
+          <SheetContent
+            side="left"
+            className="w-[85vw] max-w-sm p-0 overflow-y-auto bg-white dark:bg-[#0F172A] border-r border-gray-200 dark:border-slate-800"
+          >
             <SheetHeader className="p-4 pb-0 text-left border-b border-gray-100 dark:border-slate-800">
               <SheetTitle className="text-sm font-black uppercase tracking-wider text-[#0F1B2D] dark:text-white flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4 text-[#B8FF00]" />
@@ -112,8 +116,8 @@ export function ShopLayoutView({
       <div className="flex flex-col lg:flex-row items-start gap-6 transition-all duration-300">
         {/* Desktop-Only Collapsible / Expandable Sidebar Container */}
         <aside
-          className={`hidden lg:block transition-all duration-300 ease-in-out flex-shrink-0 sticky top-24 ${
-            isCollapsed ? "w-[68px]" : "w-[320px]"
+          className={`hidden lg:block transition-all duration-300 ease-in-out flex-shrink-0 sticky top-24 self-start ${
+            isCollapsed ? "w-16" : "w-[300px] xl:w-[320px]"
           }`}
         >
           <ShopFilters
@@ -132,7 +136,7 @@ export function ShopLayoutView({
         </aside>
 
         {/* Main Product Grid & Content Area (Smoothly expands when sidebar is collapsed) */}
-        <section className="flex-1 w-full min-w-0 transition-all duration-300">
+        <section className="flex-1 w-full min-w-0 transition-all duration-300 ease-in-out">
           {/* Top Bar */}
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-3.5 shadow-sm text-xs text-[#0F1B2D]/60 dark:text-slate-400">
             <div>
@@ -152,13 +156,13 @@ export function ShopLayoutView({
             </div>
           </div>
 
-          {/* Product Grid - Dynamically transitions between 3 columns (expanded) and 4 columns (collapsed) */}
+          {/* Product Grid - Dynamically transitions columns between expanded and collapsed states */}
           {products.length > 0 ? (
             <div
               className={`grid grid-cols-1 gap-6 sm:grid-cols-2 transition-all duration-300 ${
                 isCollapsed
-                  ? "lg:grid-cols-3 xl:grid-cols-4"
-                  : "lg:grid-cols-3 xl:grid-cols-3"
+                  ? "lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4"
+                  : "lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
               }`}
             >
               {products.map((product) => (

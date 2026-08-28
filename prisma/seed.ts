@@ -1,16 +1,153 @@
-import { PrismaClient, ProductStatus } from "@prisma/client";
+import { PrismaClient, ProductStatus, Role } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting seeding...");
+  console.log("🌱 Starting complete seeding of all 11 EvoSport products and store data...");
 
+  // 1. Users
+  const adminPasswordHash = await bcrypt.hash("admin123", 10);
+  await prisma.user.upsert({
+    where: { email: "admin@evosport.com" },
+    update: {
+      passwordHash: adminPasswordHash,
+      role: Role.ADMIN,
+      soundEnabled: true,
+      notificationSound: "chime",
+    },
+    create: {
+      email: "admin@evosport.com",
+      name: "EvoSport Admin",
+      passwordHash: adminPasswordHash,
+      role: Role.ADMIN,
+      soundEnabled: true,
+      notificationSound: "chime",
+    },
+  });
+
+  const customerPasswordHash = await bcrypt.hash("password123", 10);
+  const customer = await prisma.user.upsert({
+    where: { email: "abera.dev.one@gmail.com" },
+    update: {
+      passwordHash: customerPasswordHash,
+      role: Role.CUSTOMER,
+      soundEnabled: true,
+      notificationSound: "chime",
+    },
+    create: {
+      email: "abera.dev.one@gmail.com",
+      name: "Abera Dev",
+      passwordHash: customerPasswordHash,
+      role: Role.CUSTOMER,
+      soundEnabled: true,
+      notificationSound: "chime",
+    },
+  });
+
+  // 2. Settings
+  const settings = [
+    { key: "storeName", value: "EvoSport Performance" },
+    { key: "contactEmail", value: "support@evosport.com" },
+    { key: "supportPhone", value: "+1 (800) 555-EVO1" },
+    { key: "freeShippingThreshold", value: "100" },
+    { key: "flatRateShipping", value: "9.99" },
+    { key: "taxRate", value: "0.08" },
+    { key: "maintenanceMode", value: "false" },
+    { key: "showDiscountBadge", value: "true" },
+  ];
+
+  for (const s of settings) {
+    const existing = await prisma.setting.findFirst({ where: { key: s.key } });
+    if (existing) {
+      await prisma.setting.update({
+        where: { id: existing.id },
+        data: { value: s.value },
+      });
+    } else {
+      await prisma.setting.create({
+        data: { key: s.key, value: s.value },
+      });
+    }
+  }
+
+  // 3. Homepage Banners
+  await prisma.homepageBanner.deleteMany();
+  const banners = [
+    {
+      headline: "ELEVATE YOUR GAME. WEAR THE DIFFERENCE.",
+      subtext: "Experience maximum responsiveness and high-energy propulsion with our advanced pro footwear collection.",
+      badgeText: "NEW 2026 PRO COLLECTION RELEASED",
+      ctaText: "EXPLORE ALL GEAR",
+      ctaLink: "/shop",
+      backgroundImageUrl: "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=1600&q=80",
+      backgroundBlur: 0,
+      lightModeOverlayOpacity: 80,
+      darkModeOverlayOpacity: 85,
+      displayDurationSeconds: 5,
+      order: 1,
+      active: true,
+    },
+    {
+      headline: "ENGINEER YOUR LIMITLESS POTENTIAL - PRO EDITION 2026",
+      subtext: "Discover precision carbon running shoes, thermal compression apparel, and endurance hydration systems designed for professional athletes.",
+      badgeText: "LIMITED EDITION",
+      ctaText: "SHOP RUNNING",
+      ctaLink: "/shop?category=running-shoes",
+      backgroundImageUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=1600&q=80",
+      backgroundBlur: 0,
+      lightModeOverlayOpacity: 80,
+      darkModeOverlayOpacity: 85,
+      displayDurationSeconds: 6,
+      order: 2,
+      active: true,
+    },
+    {
+      headline: "EVERYTHING YOU NEED TO MOVE",
+      subtext: "Engineered for intense gym sessions, cardio conditioning, and maximum training comfort.",
+      badgeText: "TRAINING SERIES",
+      ctaText: "SHOP TRAINING",
+      ctaLink: "/shop?category=gym-gear",
+      backgroundImageUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=1600&q=80",
+      backgroundBlur: 0,
+      lightModeOverlayOpacity: 80,
+      darkModeOverlayOpacity: 85,
+      displayDurationSeconds: 5,
+      order: 3,
+      active: true,
+    },
+    {
+      headline: "BUILT TO MOVE. MADE TO STAND OUT",
+      subtext: "Ultra-breathable moisture-wicking materials crafted for unrestricted athletic movement.",
+      badgeText: "SUMMER ESSENTIALS",
+      ctaText: "DISCOVER APPAREL",
+      ctaLink: "/shop?category=apparel",
+      backgroundImageUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1600&q=80",
+      backgroundBlur: 0,
+      lightModeOverlayOpacity: 80,
+      darkModeOverlayOpacity: 85,
+      displayDurationSeconds: 5,
+      order: 4,
+      active: true,
+    },
+  ];
+
+  for (const b of banners) {
+    await prisma.homepageBanner.create({ data: b });
+  }
+
+  // 4. Clean Catalog
+  await prisma.review.deleteMany();
+  await prisma.wishlistItem.deleteMany();
+  await prisma.cartItem.deleteMany();
+  await prisma.orderItem.deleteMany();
   await prisma.productVariant.deleteMany();
   await prisma.productImage.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
   await prisma.brand.deleteMany();
 
+  // 5. Brands
   const evoBrand = await prisma.brand.create({
     data: {
       name: "EvoSport Lab",
@@ -35,6 +172,7 @@ async function main() {
     },
   });
 
+  // 6. Categories
   const shoesCategory = await prisma.category.create({
     data: {
       name: "Running Shoes",
@@ -63,6 +201,7 @@ async function main() {
     },
   });
 
+  // 7. All 11 Products
   const productsData = [
     {
       name: "EvoRun Pro Carbon Shoes",
@@ -72,6 +211,7 @@ async function main() {
       categoryId: shoesCategory.id,
       basePrice: 189.99,
       compareAtPrice: 229.99,
+      isFeatured: true,
       status: ProductStatus.ACTIVE,
       images: [
         { url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600", altText: "EvoRun Pro Main Image", position: 1 },
@@ -91,6 +231,7 @@ async function main() {
       categoryId: shoesCategory.id,
       basePrice: 149.99,
       compareAtPrice: 179.99,
+      isFeatured: true,
       status: ProductStatus.ACTIVE,
       images: [
         { url: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600", altText: "Apex HyperStride", position: 1 },
@@ -106,15 +247,16 @@ async function main() {
       description: "Seamless moisture-wicking compression t-shirt for intense training and recovery.",
       brandId: pulseBrand.id,
       categoryId: apparelCategory.id,
-      basePrice: 45.00,
-      compareAtPrice: 55.00,
+      basePrice: 45.0,
+      compareAtPrice: 55.0,
+      isFeatured: true,
       status: ProductStatus.ACTIVE,
       images: [
         { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600", altText: "Pulse Compression Tee", position: 1 },
       ],
       variants: [
-        { sku: "PLS-TEE-BLK-M", color: "Stealth Black", size: "M", price: 45.00, stock: 25 },
-        { sku: "PLS-TEE-BLK-L", color: "Stealth Black", size: "L", price: 45.00, stock: 30 },
+        { sku: "PLS-TEE-BLK-M", color: "Stealth Black", size: "M", price: 45.0, stock: 25 },
+        { sku: "PLS-TEE-BLK-L", color: "Stealth Black", size: "L", price: 45.0, stock: 30 },
       ],
     },
     {
@@ -124,7 +266,8 @@ async function main() {
       brandId: evoBrand.id,
       categoryId: apparelCategory.id,
       basePrice: 89.99,
-      compareAtPrice: 110.00,
+      compareAtPrice: 110.0,
+      isFeatured: true,
       status: ProductStatus.ACTIVE,
       images: [
         { url: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600", altText: "EvoTech Thermal Hoodie", position: 1 },
@@ -253,7 +396,7 @@ async function main() {
 
   for (const p of productsData) {
     const { images, variants, ...productInfo } = p;
-    await prisma.product.create({
+    const createdProduct = await prisma.product.create({
       data: {
         ...productInfo,
         images: {
@@ -264,13 +407,24 @@ async function main() {
         },
       },
     });
+
+    // Add 5-star review
+    await prisma.review.create({
+      data: {
+        productId: createdProduct.id,
+        userId: customer.id,
+        rating: 5,
+        comment: "Excellent quality and performance. Exceeded expectations!",
+        status: "APPROVED",
+      },
+    });
   }
 
   const brandCount = await prisma.brand.count();
   const categoryCount = await prisma.category.count();
   const productCount = await prisma.product.count();
 
-  console.log(`✅ Seeded ${brandCount} brands, ${categoryCount} categories, ${productCount} products successfully!`);
+  console.log(`✅ Successfully seeded ${productCount} products across ${categoryCount} categories and ${brandCount} brands!`);
 }
 
 main()

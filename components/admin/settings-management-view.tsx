@@ -1,9 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Save, Store, Truck, Percent, Wrench, AlertCircle, CheckCircle2, Tag } from "lucide-react";
+import {
+  Settings,
+  Save,
+  Store,
+  Truck,
+  Percent,
+  Wrench,
+  AlertCircle,
+  CheckCircle2,
+  Tag,
+  Volume2,
+  VolumeX,
+  Play,
+  Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  SOUND_OPTIONS,
+  NotificationSoundType,
+  previewNotificationSound,
+  setSoundEnabled as setLocalSoundEnabled,
+  setSavedNotificationSound,
+} from "@/lib/audio-notification";
+import { toast } from "sonner";
 
 interface SettingsMap {
   storeName: string;
@@ -16,18 +38,41 @@ interface SettingsMap {
   showDiscountBadge: boolean;
 }
 
-interface SettingsManagementViewProps {
-  initialSettings: SettingsMap;
+interface SoundSettings {
+  soundEnabled: boolean;
+  notificationSound: string;
 }
 
-export function SettingsManagementView({ initialSettings }: SettingsManagementViewProps) {
+interface SettingsManagementViewProps {
+  initialSettings: SettingsMap;
+  initialSoundSettings?: SoundSettings;
+}
+
+export function SettingsManagementView({
+  initialSettings,
+  initialSoundSettings,
+}: SettingsManagementViewProps) {
   const [settings, setSettings] = useState<SettingsMap>(initialSettings);
+  const [soundEnabled, setSoundEnabledState] = useState(
+    initialSoundSettings?.soundEnabled ?? true
+  );
+  const [selectedSound, setSelectedSound] = useState<NotificationSoundType>(
+    (initialSoundSettings?.notificationSound as NotificationSoundType) || "chime"
+  );
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleInputChange = (field: keyof SettingsMap, value: any) => {
     setSettings({ ...settings, [field]: value });
+  };
+
+  const handleTestSound = async (soundId?: NotificationSoundType) => {
+    const soundToPlay = soundId || selectedSound;
+    setIsPlayingPreview(true);
+    await previewNotificationSound(soundToPlay);
+    setTimeout(() => setIsPlayingPreview(false), 500);
   };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
@@ -37,7 +82,8 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
       setErrorMsg(null);
       setSuccessMsg(null);
 
-      const res = await fetch("/api/admin/settings", {
+      // 1. Save store & system settings
+      const resStore = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -52,18 +98,35 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        setErrorMsg(data.error || "Failed to update settings.");
+      const storeData = await resStore.json();
+      if (!resStore.ok) {
+        setErrorMsg(storeData.error || "Failed to update store settings.");
         setIsSaving(false);
         return;
       }
 
-      setSettings(data.settings);
-      setSuccessMsg("Store settings updated successfully.");
+      // 2. Save admin user notification sound settings
+      const resSound = await fetch("/api/user/notification-settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          soundEnabled,
+          notificationSound: selectedSound,
+        }),
+      });
+
+      if (resSound.ok) {
+        setLocalSoundEnabled(soundEnabled);
+        setSavedNotificationSound(selectedSound);
+      }
+
+      setSettings(storeData.settings);
+      setSuccessMsg("Store settings and alert sound preferences saved successfully.");
+      toast.success("Settings saved successfully.");
     } catch (err) {
       console.error("Error updating settings:", err);
-      setErrorMsg("Failed to save store settings.");
+      setErrorMsg("Failed to save settings.");
+      toast.error("Failed to save settings.");
     } finally {
       setIsSaving(false);
     }
@@ -79,7 +142,7 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
             STORE & SYSTEM SETTINGS
           </h1>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-            Configure functional store parameters: tax rates, free shipping thresholds, contact information, and maintenance mode.
+            Configure functional store parameters, admin alert sounds, tax rates, free shipping thresholds, and maintenance mode.
           </p>
         </div>
       </div>
@@ -99,6 +162,118 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
       )}
 
       <form onSubmit={handleSaveSettings} className="space-y-6">
+        {/* Section 0: Admin Alert Sound & Audio Preferences */}
+        <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-neutral-800 pb-3">
+            <h2 className="text-sm font-black uppercase tracking-wide text-neutral-900 dark:text-white flex items-center gap-2">
+              <Volume2 className="h-4 w-4 text-rose-600 dark:text-rose-500" />
+              Admin Alert Sound Preferences
+            </h2>
+
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={soundEnabled}
+                onChange={(e) => setSoundEnabledState(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 dark:bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              When enabled, a chime will play automatically when new orders or admin alerts are detected during your session.
+            </p>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-900 dark:text-white shrink-0 ml-4">
+              {soundEnabled ? (
+                <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                  <Volume2 className="h-3.5 w-3.5" /> Sound Active
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-rose-500">
+                  <VolumeX className="h-3.5 w-3.5" /> Muted
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Sound Selector Grid */}
+          <div className="pt-2 space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+              Select Admin Alert Tone
+            </label>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {SOUND_OPTIONS.map((option) => {
+                const isSelected = selectedSound === option.id;
+
+                return (
+                  <div
+                    key={option.id}
+                    onClick={() => {
+                      setSelectedSound(option.id);
+                      handleTestSound(option.id);
+                    }}
+                    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                      isSelected
+                        ? "border-rose-600 bg-rose-50/50 dark:bg-rose-950/20 ring-1 ring-rose-600"
+                        : "border-gray-200 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-950/40 hover:border-gray-300 dark:hover:border-neutral-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className={`flex h-5 w-5 items-center justify-center rounded-full border text-[9px] font-bold ${
+                          isSelected
+                            ? "border-rose-600 bg-rose-600 text-white"
+                            : "border-gray-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-transparent"
+                        }`}
+                      >
+                        {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-neutral-900 dark:text-white">
+                          {option.name}
+                        </div>
+                        <div className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                          {option.description}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTestSound(option.id);
+                      }}
+                      className="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-white dark:hover:bg-neutral-800 transition-colors"
+                      title="Preview this sound"
+                      aria-label={`Preview ${option.name}`}
+                    >
+                      <Play className="h-3 w-3 fill-current" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="pt-2 flex justify-start">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handleTestSound()}
+              disabled={isPlayingPreview}
+              className="border-gray-200 dark:border-neutral-800 text-xs font-bold text-neutral-900 dark:text-white h-8"
+            >
+              <Play className="mr-1.5 h-3 w-3 fill-current" />
+              {isPlayingPreview ? "Playing..." : "Test Selected Sound"}
+            </Button>
+          </div>
+        </div>
+
         {/* Section 1: General Store Settings */}
         <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 p-6 space-y-4 shadow-sm">
           <h2 className="text-sm font-black uppercase tracking-wide text-neutral-900 dark:text-white flex items-center gap-2 border-b border-gray-100 dark:border-neutral-800 pb-3">
@@ -108,7 +283,9 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Store Name</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                Store Name
+              </label>
               <Input
                 value={settings.storeName}
                 onChange={(e) => handleInputChange("storeName", e.target.value)}
@@ -117,7 +294,9 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Contact Email</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                Contact Email
+              </label>
               <Input
                 type="email"
                 value={settings.contactEmail}
@@ -127,7 +306,9 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Support Phone</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                Support Phone
+              </label>
               <Input
                 value={settings.supportPhone}
                 onChange={(e) => handleInputChange("supportPhone", e.target.value)}
@@ -146,27 +327,39 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Free Shipping Threshold ($)</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                Free Shipping Threshold ($)
+              </label>
               <Input
                 type="number"
                 step="0.01"
                 value={settings.freeShippingThreshold}
-                onChange={(e) => handleInputChange("freeShippingThreshold", parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleInputChange("freeShippingThreshold", parseFloat(e.target.value))
+                }
                 className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white font-bold"
               />
-              <p className="text-[10px] text-neutral-500 mt-1">Orders with subtotal at or above this amount receive free shipping at checkout.</p>
+              <p className="text-[10px] text-neutral-500 mt-1">
+                Orders with subtotal at or above this amount receive free shipping at checkout.
+              </p>
             </div>
 
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Flat Rate Shipping Fee ($)</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                Flat Rate Shipping Fee ($)
+              </label>
               <Input
                 type="number"
                 step="0.01"
                 value={settings.flatRateShipping}
-                onChange={(e) => handleInputChange("flatRateShipping", parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleInputChange("flatRateShipping", parseFloat(e.target.value))
+                }
                 className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white font-bold"
               />
-              <p className="text-[10px] text-neutral-500 mt-1">Standard shipping fee applied when subtotal is under free shipping threshold.</p>
+              <p className="text-[10px] text-neutral-500 mt-1">
+                Standard shipping fee applied when subtotal is under free shipping threshold.
+              </p>
             </div>
           </div>
         </div>
@@ -179,7 +372,9 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
           </h2>
 
           <div className="max-w-xs space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Store Sales Tax Rate (as decimal, e.g. 0.10 for 10%)</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+              Store Sales Tax Rate (as decimal, e.g. 0.08 for 8%)
+            </label>
             <Input
               type="number"
               step="0.01"
@@ -187,7 +382,9 @@ export function SettingsManagementView({ initialSettings }: SettingsManagementVi
               onChange={(e) => handleInputChange("taxRate", parseFloat(e.target.value))}
               className="mt-1 bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white font-mono font-bold text-rose-600 dark:text-rose-400"
             />
-            <p className="text-[10px] text-neutral-500">Currently set to {(settings.taxRate * 100).toFixed(0)}% sales tax on checkout orders.</p>
+            <p className="text-[10px] text-neutral-500">
+              Currently set to {(settings.taxRate * 100).toFixed(0)}% sales tax on checkout orders.
+            </p>
           </div>
         </div>
 

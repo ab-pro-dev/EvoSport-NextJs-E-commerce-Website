@@ -6,7 +6,7 @@ import { SettingsManagementView } from "@/components/admin/settings-management-v
 
 export const metadata: Metadata = {
   title: "Store & System Settings | EvoSport Admin",
-  description: "Configure store parameters, tax rates, free shipping rules, and maintenance mode.",
+  description: "Configure store parameters, tax rates, free shipping rules, maintenance mode, and admin alert sounds.",
 };
 
 const DEFAULT_SETTINGS = {
@@ -28,7 +28,11 @@ export default async function AdminSettingsPage() {
 
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { role: true },
+    select: {
+      role: true,
+      soundEnabled: true,
+      notificationSound: true,
+    },
   });
 
   if (!dbUser || dbUser.role !== "ADMIN") {
@@ -48,5 +52,13 @@ export default async function AdminSettingsPage() {
     }
   }
 
-  return <SettingsManagementView initialSettings={settingsMap} />;
+  return (
+    <SettingsManagementView
+      initialSettings={settingsMap}
+      initialSoundSettings={{
+        soundEnabled: dbUser.soundEnabled ?? true,
+        notificationSound: dbUser.notificationSound || "chime",
+      }}
+    />
+  );
 }

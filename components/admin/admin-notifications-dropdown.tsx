@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/popover";
 import {
   playNotificationSound,
-  isSoundMuted,
-  setSoundMuted,
+  isSoundEnabled,
+  setSoundEnabled,
+  initNotificationPreferences,
 } from "@/lib/audio-notification";
 
 interface AdminAlertItem {
@@ -25,26 +26,63 @@ export function AdminNotificationsDropdown() {
   const [alerts, setAlerts] = useState<AdminAlertItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   const prevCountRef = useRef<number | null>(null);
+  const isFetchingRef = useRef(false);
 
   useEffect(() => {
-    setIsMuted(isSoundMuted());
-    const handleToggle = (e: Event) => {
-      const customEvent = e as CustomEvent<{ muted: boolean }>;
-      setIsMuted(customEvent.detail?.muted ?? isSoundMuted());
+    setSoundOn(isSoundEnabled());
+
+    // Fetch user preferences from DB to sync
+    fetch("/api/user/notification-settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          initNotificationPreferences(data);
+          setSoundOn(data.soundEnabled ?? true);
+        }
+      })
+      .catch(() => {});
+
+    const handleSoundChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ soundEnabled?: boolean; muted?: boolean }>;
+      if (customEvent.detail?.soundEnabled !== undefined) {
+        setSoundOn(customEvent.detail.soundEnabled);
+      } else if (customEvent.detail?.muted !== undefined) {
+        setSoundOn(!customEvent.detail.muted);
+      } else {
+        setSoundOn(isSoundEnabled());
+      }
     };
-    window.addEventListener("evosport_sound_toggle", handleToggle);
-    return () => window.removeEventListener("evosport_sound_toggle", handleToggle);
+
+    window.addEventListener("evosport_sound_toggle", handleSoundChange);
+    window.addEventListener("evosport_sound_preference_changed", handleSoundChange);
+
+    return () => {
+      window.removeEventListener("evosport_sound_toggle", handleSoundChange);
+      window.removeEventListener("evosport_sound_preference_changed", handleSoundChange);
+    };
   }, []);
 
-  const toggleMute = () => {
-    const nextState = !isMuted;
-    setIsMuted(nextState);
-    setSoundMuted(nextState);
+  const toggleSound = async () => {
+    const nextState = !soundOn;
+    setSoundOn(nextState);
+    setSoundEnabled(nextState);
+
+    // Persist to admin user settings in DB
+    try {
+      await fetch("/api/user/notification-settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ soundEnabled: nextState }),
+      });
+    } catch {}
   };
 
   const fetchAdminAlerts = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
     try {
       const res = await fetch("/api/admin/orders?limit=5");
       if (res.ok) {
@@ -57,14 +95,16 @@ export function AdminNotificationsDropdown() {
         const mappedAlerts: AdminAlertItem[] = pendingOrders.map((o: any) => ({
           id: o.id || "",
           title: `New Order #${(o.id || "").slice(-6).toUpperCase()}`,
-          message: `Customer ${o.customer?.name || o.user?.name || "Guest"} placed an order of $${Number(o.total ?? o.totalAmount ?? 0).toFixed(2)}`,
+          message: `Customer ${o.customer?.name || o.user?.name || "Guest"} placed an order of $${Number(
+            o.total ?? o.totalAmount ?? 0
+          ).toFixed(2)}`,
           type: "ORDER",
           createdAt: o.createdAt || new Date().toISOString(),
         }));
 
         const newCount = mappedAlerts.length;
 
-        // Play chime only if alert count strictly increased from previous poll
+        // Play sound only if count strictly increased from previous poll (and not initial load)
         if (prevCountRef.current !== null && newCount > prevCountRef.current) {
           playNotificationSound();
         }
@@ -75,6 +115,8 @@ export function AdminNotificationsDropdown() {
       }
     } catch (err) {
       console.error("[AdminNotificationsDropdown] Error fetching alerts:", err);
+    } finally {
+      isFetchingRef.current = false;
     }
   }, []);
 
@@ -106,11 +148,16 @@ export function AdminNotificationsDropdown() {
         </button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-80 sm:w-96 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-0 text-neutral-900 dark:text-white shadow-2xl" align="end">
+      <PopoverContent
+        className="w-80 sm:w-96 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-0 text-neutral-900 dark:text-white shadow-2xl"
+        align="end"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-neutral-800 p-4">
           <div className="flex items-center gap-2">
-            <h3 className="text-xs font-black uppercase tracking-wider text-neutral-900 dark:text-white">Admin Alerts</h3>
+            <h3 className="text-xs font-black uppercase tracking-wider text-neutral-900 dark:text-white">
+              Admin Alerts
+            </h3>
             {unreadCount > 0 && (
               <span className="rounded-full bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 text-[10px] font-bold text-rose-600 dark:text-rose-400">
                 {unreadCount} pending
@@ -120,16 +167,16 @@ export function AdminNotificationsDropdown() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={toggleMute}
+              onClick={toggleSound}
               className="flex items-center gap-1 text-[11px] font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-              title={isMuted ? "Unmute notification sounds" : "Mute notification sounds"}
+              title={soundOn ? "Mute notification sounds" : "Unmute notification sounds"}
             >
-              {isMuted ? (
-                <VolumeX className="h-3.5 w-3.5 text-rose-500" />
-              ) : (
+              {soundOn ? (
                 <Volume2 className="h-3.5 w-3.5 text-emerald-500" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5 text-rose-500" />
               )}
-              <span className="text-[10px]">{isMuted ? "Muted" : "Sound"}</span>
+              <span className="text-[10px]">{soundOn ? "Sound" : "Muted"}</span>
             </button>
 
             {unreadCount > 0 && (
@@ -156,8 +203,12 @@ export function AdminNotificationsDropdown() {
                     <ShoppingCart className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-neutral-900 dark:text-white">{item.title}</div>
-                    <div className="text-[11px] text-neutral-600 dark:text-neutral-300 mt-0.5">{item.message}</div>
+                    <div className="text-xs font-bold text-neutral-900 dark:text-white">
+                      {item.title}
+                    </div>
+                    <div className="text-[11px] text-neutral-600 dark:text-neutral-300 mt-0.5">
+                      {item.message}
+                    </div>
                     <div className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-1">
                       {new Date(item.createdAt).toLocaleDateString("en-US", {
                         month: "short",

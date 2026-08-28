@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/popover";
 import {
   playNotificationSound,
-  isSoundMuted,
-  setSoundMuted,
+  isSoundEnabled,
+  setSoundEnabled,
+  initNotificationPreferences,
 } from "@/lib/audio-notification";
 
 interface NotificationItem {
@@ -25,34 +26,72 @@ export function NotificationsDropdown() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   const prevUnreadCountRef = useRef<number | null>(null);
+  const isFetchingRef = useRef(false);
 
+  // Sync preferences on mount
   useEffect(() => {
-    setIsMuted(isSoundMuted());
-    const handleToggle = (e: Event) => {
-      const customEvent = e as CustomEvent<{ muted: boolean }>;
-      setIsMuted(customEvent.detail?.muted ?? isSoundMuted());
+    setSoundOn(isSoundEnabled());
+
+    // Fetch user preferences from DB to sync
+    fetch("/api/user/notification-settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          initNotificationPreferences(data);
+          setSoundOn(data.soundEnabled ?? true);
+        }
+      })
+      .catch(() => {});
+
+    const handleSoundChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ soundEnabled?: boolean; muted?: boolean }>;
+      if (customEvent.detail?.soundEnabled !== undefined) {
+        setSoundOn(customEvent.detail.soundEnabled);
+      } else if (customEvent.detail?.muted !== undefined) {
+        setSoundOn(!customEvent.detail.muted);
+      } else {
+        setSoundOn(isSoundEnabled());
+      }
     };
-    window.addEventListener("evosport_sound_toggle", handleToggle);
-    return () => window.removeEventListener("evosport_sound_toggle", handleToggle);
+
+    window.addEventListener("evosport_sound_toggle", handleSoundChange);
+    window.addEventListener("evosport_sound_preference_changed", handleSoundChange);
+
+    return () => {
+      window.removeEventListener("evosport_sound_toggle", handleSoundChange);
+      window.removeEventListener("evosport_sound_preference_changed", handleSoundChange);
+    };
   }, []);
 
-  const toggleMute = () => {
-    const nextState = !isMuted;
-    setIsMuted(nextState);
-    setSoundMuted(nextState);
+  const toggleSound = async () => {
+    const nextState = !soundOn;
+    setSoundOn(nextState);
+    setSoundEnabled(nextState);
+
+    // Persist to user settings in DB
+    try {
+      await fetch("/api/user/notification-settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ soundEnabled: nextState }),
+      });
+    } catch {}
   };
 
   const fetchNotifications = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
     try {
       const res = await fetch("/api/notifications");
       if (res.ok) {
         const data = await res.json();
-        const newNotifications = data.notifications || [];
-        const newUnread = data.unreadCount || 0;
+        const newNotifications: NotificationItem[] = data.notifications || [];
+        const newUnread: number = data.unreadCount || 0;
 
-        // Play chime only if unread count strictly increased from previous poll
+        // Play chime only if unread count strictly increased from previous poll (and not first load)
         if (prevUnreadCountRef.current !== null && newUnread > prevUnreadCountRef.current) {
           playNotificationSound();
         }
@@ -63,6 +102,8 @@ export function NotificationsDropdown() {
       }
     } catch (err) {
       console.error("Error fetching notifications:", err);
+    } finally {
+      isFetchingRef.current = false;
     }
   }, []);
 
@@ -128,11 +169,16 @@ export function NotificationsDropdown() {
         </button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-80 sm:w-96 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 text-[#0F1B2D] dark:text-slate-100 shadow-xl" align="end">
+      <PopoverContent
+        className="w-80 sm:w-96 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 text-[#0F1B2D] dark:text-slate-100 shadow-xl"
+        align="end"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 p-4">
           <div className="flex items-center gap-2">
-            <h3 className="text-xs font-black uppercase tracking-wider text-[#0F1B2D] dark:text-white">Notifications</h3>
+            <h3 className="text-xs font-black uppercase tracking-wider text-[#0F1B2D] dark:text-white">
+              Notifications
+            </h3>
             {unreadCount > 0 && (
               <span className="rounded-full bg-[#B8FF00]/15 dark:bg-[#B8FF00]/20 border border-[#B8FF00]/40 px-2 py-0.5 text-[10px] font-bold text-[#0F1B2D] dark:text-[#B8FF00]">
                 {unreadCount} new
@@ -142,16 +188,16 @@ export function NotificationsDropdown() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={toggleMute}
+              onClick={toggleSound}
               className="flex items-center gap-1 text-[11px] font-medium text-[#0F1B2D]/60 dark:text-slate-400 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"
-              title={isMuted ? "Unmute notification sounds" : "Mute notification sounds"}
+              title={soundOn ? "Mute notification sounds" : "Unmute notification sounds"}
             >
-              {isMuted ? (
-                <VolumeX className="h-3.5 w-3.5 text-rose-500" />
-              ) : (
+              {soundOn ? (
                 <Volume2 className="h-3.5 w-3.5 text-emerald-500" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5 text-rose-500" />
               )}
-              <span className="text-[10px]">{isMuted ? "Muted" : "Sound"}</span>
+              <span className="text-[10px]">{soundOn ? "Sound" : "Muted"}</span>
             </button>
 
             {unreadCount > 0 && (
@@ -183,7 +229,9 @@ export function NotificationsDropdown() {
                     {getIcon(item.type)}
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-[#0F1B2D] dark:text-white">{item.message}</div>
+                    <div className="text-xs font-bold text-[#0F1B2D] dark:text-white">
+                      {item.message}
+                    </div>
                     <div className="text-[10px] text-[#0F1B2D]/40 dark:text-slate-400 mt-0.5">
                       {new Date(item.createdAt).toLocaleDateString("en-US", {
                         month: "short",

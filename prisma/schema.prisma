@@ -82,6 +82,8 @@ model User {
   role          Role      @default(CUSTOMER)
   isBanned      Boolean   @default(false)
   emailVerified DateTime?
+  notificationSound String @default("chime")
+  soundEnabled      Boolean @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

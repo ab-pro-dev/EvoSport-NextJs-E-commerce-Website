@@ -2,11 +2,11 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { ProfileFormView } from "@/components/dashboard/profile-form-view";
+import { ProfileDetailsView } from "@/components/dashboard/profile-details-view";
 
 export const metadata: Metadata = {
   title: "My Profile | EvoSport",
-  description: "Manage your personal profile and account settings.",
+  description: "Manage your personal profile information and contact details.",
 };
 
 export default async function UserProfilePage() {
@@ -31,5 +31,5 @@ export default async function UserProfilePage() {
     redirect("/login");
   }
 
-  return <ProfileFormView user={user} />;
+  return <ProfileDetailsView user={user} />;
 }

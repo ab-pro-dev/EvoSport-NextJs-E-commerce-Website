@@ -122,16 +122,20 @@ export function ProductCard({ product, showDiscountBadge = false }: ProductCardP
           </button>
         </div>
 
-        <div className="absolute inset-x-3 bottom-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10 relative">
-          <AddToCartTooltip show={added} />
-          <button
-            onClick={handleQuickAdd}
-            disabled={isAdding}
-            className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#B8FF00] py-2.5 text-xs font-black uppercase tracking-wider text-[#0F1B2D] shadow-lg shadow-[#B8FF00]/20 hover:bg-[#a8ef00] transition-colors"
-          >
-            <ShoppingBag className="h-3.5 w-3.5" />
-            {isAdding ? "Adding..." : added ? "Added!" : "Quick Add"}
-          </button>
+        {/* Quick Add overlay at bottom of card image */}
+        <div className="absolute inset-x-3 bottom-3 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="relative w-full">
+            <AddToCartTooltip show={added} />
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              disabled={isAdding}
+              className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#B8FF00] py-2.5 text-xs font-black uppercase tracking-wider text-[#0F1B2D] shadow-lg shadow-[#B8FF00]/20 hover:bg-[#a8ef00] transition-colors"
+            >
+              <ShoppingBag className="h-3.5 w-3.5" />
+              {isAdding ? "Adding..." : added ? "Added!" : "Quick Add"}
+            </button>
+          </div>
         </div>
       </div>
 

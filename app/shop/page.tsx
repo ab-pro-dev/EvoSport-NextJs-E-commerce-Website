@@ -3,9 +3,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { ShopFilters } from "@/components/shop/shop-filters";
-import { ProductCard } from "@/components/shop/product-card";
-import { ShopPagination } from "@/components/shop/shop-pagination";
+import { ShopLayoutView } from "@/components/shop/shop-layout-view";
 
 interface ShopPageProps {
   searchParams: Promise<{
@@ -239,67 +237,23 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
       {/* Main Shop Container */}
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-          {/* Filter Sidebar */}
-          <aside className="lg:col-span-1">
-            <Suspense fallback={<div className="h-96 bg-white dark:bg-slate-900 animate-pulse rounded-xl border border-gray-200 dark:border-slate-800" />}>
-              <ShopFilters
-                categories={categories}
-                brands={brands}
-                selectedGender={genderSlug}
-                selectedCategory={categorySlug}
-                selectedBrand={brandSlug}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                sort={sort}
-                search={search}
-              />
-            </Suspense>
-          </aside>
-
-          {/* Product Grid & Top Bar */}
-          <section className="lg:col-span-3">
-            {/* Top Bar */}
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-3.5 shadow-sm text-xs text-[#0F1B2D]/60 dark:text-slate-400">
-              <div>
-                Showing <strong className="text-[#0F1B2D] dark:text-white">{products.length > 0 ? "1-" + products.length : "0"}</strong> of{" "}
-                <strong className="text-[#0F1B2D] dark:text-white">{totalCount}</strong> results
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="font-medium text-[#0F1B2D]/60 dark:text-slate-400">Sort by: <strong className="text-[#0F1B2D] dark:text-white">Featured</strong></span>
-                <span className="font-medium text-[#0F1B2D]/60 dark:text-slate-400">Show: <strong className="text-[#0F1B2D] dark:text-white">12</strong></span>
-              </div>
-            </div>
-
-            {/* Product Grid - 3 Column Layout */}
-            {products.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} showDiscountBadge={showDiscountBadge} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 dark:border-slate-800 p-12 text-center bg-white dark:bg-[#0F172A] shadow-sm">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F4F8FC] dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-[#0F1B2D]/40 dark:text-slate-500 mb-4">
-                  <Image
-                    src="/images/shop_runner_hero.jpg"
-                    alt="Empty"
-                    width={40}
-                    height={40}
-                    className="rounded-full object-cover opacity-50 grayscale"
-                  />
-                </div>
-                <h3 className="text-base font-black uppercase tracking-tight text-[#0F1B2D] dark:text-white">No products found</h3>
-                <p className="mt-1.5 text-xs text-[#0F1B2D]/50 dark:text-slate-400 max-w-sm">
-                  We don&apos;t have any products matching your selected filters right now. New gear is arriving soon!
-                </p>
-              </div>
-            )}
-
-            {/* Pagination */}
-            <ShopPagination currentPage={currentPage} totalPages={totalPages} />
-          </section>
-        </div>
+        <Suspense fallback={<div className="h-96 bg-white dark:bg-slate-900 animate-pulse rounded-xl border border-gray-200 dark:border-slate-800" />}>
+          <ShopLayoutView
+            categories={categories}
+            products={products}
+            totalCount={totalCount}
+            totalPages={totalPages}
+            currentPage={currentPage}
+            showDiscountBadge={showDiscountBadge}
+            genderSlug={genderSlug}
+            categorySlug={categorySlug}
+            brandSlug={brandSlug}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            sort={sort}
+            search={search}
+          />
+        </Suspense>
       </main>
     </div>
   );

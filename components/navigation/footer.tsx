@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Send, ShieldCheck, Truck, RefreshCw, CreditCard, Share2, Globe, MessageSquare, Video } from "lucide-react";
+import { Send, Share2, Globe, MessageSquare, Video } from "lucide-react";
 
 export function Footer() {
   const [email, setEmail] = useState("");
@@ -17,53 +17,6 @@ export function Footer() {
 
   return (
     <footer className="bg-white dark:bg-[#060911] border-t border-gray-200/80 dark:border-slate-800 text-[#0F1B2D] dark:text-[#F1F5F9] transition-colors duration-200 mt-auto">
-      {/* Value Props Strip */}
-      <div className="border-b border-gray-100 dark:border-slate-800/80 bg-[#F4F8FC]/60 dark:bg-[#090E17]/60 py-6">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]">
-                <Truck className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black uppercase text-[#0F1B2D] dark:text-white">Free Express Shipping</h4>
-                <p className="text-[11px] text-[#0F1B2D]/50 dark:text-slate-400">On orders over $100</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]">
-                <RefreshCw className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black uppercase text-[#0F1B2D] dark:text-white">Easy 30-Day Returns</h4>
-                <p className="text-[11px] text-[#0F1B2D]/50 dark:text-slate-400">Hassle-free guarantee</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black uppercase text-[#0F1B2D] dark:text-white">100% Secure Checkout</h4>
-                <p className="text-[11px] text-[#0F1B2D]/50 dark:text-slate-400">Encrypted payment gateway</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#B8FF00]/20 text-[#0F1B2D] dark:text-[#B8FF00]">
-                <CreditCard className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black uppercase text-[#0F1B2D] dark:text-white">Pro-Grade Gear</h4>
-                <p className="text-[11px] text-[#0F1B2D]/50 dark:text-slate-400">Built for peak performance</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Links & Newsletter */}
       <div className="container mx-auto px-4 py-12 md:py-16 max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">

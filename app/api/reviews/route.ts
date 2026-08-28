@@ -2,6 +2,49 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// GET /api/reviews — Fetch all reviews submitted by the current authenticated user
+export async function GET() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const reviews = await prisma.review.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            basePrice: true,
+            images: {
+              take: 1,
+              orderBy: { position: "asc" },
+            },
+          },
+        },
+      },
+    });
+
+    const serializedReviews = reviews.map((r) => ({
+      ...r,
+      product: {
+        ...r.product,
+        basePrice: Number(r.product.basePrice),
+      },
+    }));
+
+    return NextResponse.json({ reviews: serializedReviews }, { status: 200 });
+  } catch (error) {
+    console.error("GET /api/reviews error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+// POST /api/reviews — Submit a new product review
 export async function POST(req: Request) {
   try {
     const session = await auth();

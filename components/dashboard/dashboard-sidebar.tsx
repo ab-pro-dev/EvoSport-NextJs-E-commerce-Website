@@ -11,9 +11,7 @@ import {
   Star,
   Bell,
   User,
-  CreditCard,
   Settings,
-  Lock,
   LogOut,
 } from "lucide-react";
 
@@ -49,20 +47,24 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
 
   const accountNav = [
     { name: "Profile", href: "/dashboard/profile", icon: User },
-    { name: "Payment Methods", href: "/dashboard/payments", icon: CreditCard },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
-    { name: "Security", href: "/dashboard/security", icon: Lock },
   ];
 
   return (
     <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
       {/* Profile Mini-Card */}
       <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] p-4 shadow-sm flex items-center gap-3">
-        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#B8FF00] font-black text-[#0F1B2D] text-sm shadow-sm">
-          {getInitials(user.name)}
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#B8FF00] font-black text-[#0F1B2D] text-sm shadow-sm overflow-hidden">
+          {user.image ? (
+            <img src={user.image} alt={user.name || "User"} className="h-full w-full object-cover" />
+          ) : (
+            getInitials(user.name)
+          )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-bold text-sm text-[#0F1B2D] dark:text-white">{user.name || "Customer"}</h3>
+          <h3 className="truncate font-bold text-sm text-[#0F1B2D] dark:text-white">
+            {user.name || "Customer"}
+          </h3>
           <p className="truncate text-[11px] text-[#0F1B2D]/40 dark:text-slate-400">{user.email}</p>
         </div>
       </div>
@@ -88,7 +90,11 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
                       : "text-[#0F1B2D]/50 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-[#0F1B2D] dark:hover:text-white"
                   }`}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? "text-[#B8FF00]" : "text-[#0F1B2D]/40 dark:text-slate-400"}`} />
+                  <Icon
+                    className={`h-4 w-4 ${
+                      isActive ? "text-[#B8FF00]" : "text-[#0F1B2D]/40 dark:text-slate-400"
+                    }`}
+                  />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -116,7 +122,11 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
                       : "text-[#0F1B2D]/50 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-[#0F1B2D] dark:hover:text-white"
                   }`}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? "text-[#B8FF00]" : "text-[#0F1B2D]/40 dark:text-slate-400"}`} />
+                  <Icon
+                    className={`h-4 w-4 ${
+                      isActive ? "text-[#B8FF00]" : "text-[#0F1B2D]/40 dark:text-slate-400"
+                    }`}
+                  />
                   <span>{item.name}</span>
                 </Link>
               );

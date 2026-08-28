@@ -17,6 +17,7 @@ export interface HomepageBannerData {
   backgroundBlur?: number;
   lightModeOverlayOpacity?: number;
   darkModeOverlayOpacity?: number;
+  displayDurationSeconds?: number;
   order: number;
 }
 
@@ -35,6 +36,7 @@ const DEFAULT_BANNER: HomepageBannerData = {
   backgroundBlur: 0,
   lightModeOverlayOpacity: 80,
   darkModeOverlayOpacity: 85,
+  displayDurationSeconds: 5,
   order: 0,
 };
 
@@ -77,18 +79,19 @@ export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
     setCurrentIndex(idx);
   };
 
-  // Auto-rotation every 6 seconds if multiple banners exist
+  const currentBanner = activeBanners[currentIndex] || activeBanners[0];
+  const durationMs = Math.max(1, currentBanner.displayDurationSeconds ?? 5) * 1000;
+
+  // Banner-specific auto-rotation: each banner stays static for its own configured displayDurationSeconds
   useEffect(() => {
     if (totalBanners <= 1 || isPaused) return;
 
-    const timer = setInterval(() => {
+    const timer = setTimeout(() => {
       handleNext();
-    }, 6000);
+    }, durationMs);
 
-    return () => clearInterval(timer);
-  }, [totalBanners, isPaused, handleNext]);
-
-  const currentBanner = activeBanners[currentIndex] || activeBanners[0];
+    return () => clearTimeout(timer);
+  }, [currentIndex, totalBanners, isPaused, handleNext, durationMs]);
 
   return (
     <section

@@ -51,6 +51,7 @@ export async function PATCH(
       backgroundBlur,
       lightModeOverlayOpacity,
       darkModeOverlayOpacity,
+      displayDurationSeconds,
       order,
       active,
       startsAt,
@@ -68,6 +69,7 @@ export async function PATCH(
     if (backgroundBlur !== undefined) dataToUpdate.backgroundBlur = typeof backgroundBlur === "number" ? Math.max(0, Math.min(20, backgroundBlur)) : parseInt(backgroundBlur, 10) || 0;
     if (lightModeOverlayOpacity !== undefined) dataToUpdate.lightModeOverlayOpacity = typeof lightModeOverlayOpacity === "number" ? Math.max(0, Math.min(100, lightModeOverlayOpacity)) : parseInt(lightModeOverlayOpacity, 10) ?? 80;
     if (darkModeOverlayOpacity !== undefined) dataToUpdate.darkModeOverlayOpacity = typeof darkModeOverlayOpacity === "number" ? Math.max(0, Math.min(100, darkModeOverlayOpacity)) : parseInt(darkModeOverlayOpacity, 10) ?? 85;
+    if (displayDurationSeconds !== undefined) dataToUpdate.displayDurationSeconds = typeof displayDurationSeconds === "number" ? Math.max(1, Math.min(30, displayDurationSeconds)) : parseInt(displayDurationSeconds, 10) || 5;
     if (order !== undefined) dataToUpdate.order = typeof order === "number" ? order : parseInt(order, 10) || 0;
     if (active !== undefined) dataToUpdate.active = Boolean(active);
     if (startsAt !== undefined) dataToUpdate.startsAt = startsAt ? new Date(startsAt) : null;

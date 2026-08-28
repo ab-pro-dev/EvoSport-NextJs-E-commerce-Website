@@ -46,6 +46,7 @@ export default async function HomePage() {
     backgroundBlur: b.backgroundBlur ?? 0,
     lightModeOverlayOpacity: b.lightModeOverlayOpacity ?? 80,
     darkModeOverlayOpacity: b.darkModeOverlayOpacity ?? 85,
+    displayDurationSeconds: b.displayDurationSeconds ?? 5,
     order: b.order,
   }));
 

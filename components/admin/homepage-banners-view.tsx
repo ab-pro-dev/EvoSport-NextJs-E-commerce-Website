@@ -37,6 +37,7 @@ export interface BannerItem {
   backgroundBlur: number;
   lightModeOverlayOpacity: number;
   darkModeOverlayOpacity: number;
+  displayDurationSeconds: number;
   order: number;
   active: boolean;
   startsAt: string | null;
@@ -68,6 +69,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
   const [backgroundBlur, setBackgroundBlur] = useState<number>(0);
   const [lightModeOverlayOpacity, setLightModeOverlayOpacity] = useState<number>(80);
   const [darkModeOverlayOpacity, setDarkModeOverlayOpacity] = useState<number>(85);
+  const [displayDurationSeconds, setDisplayDurationSeconds] = useState<number>(5);
   const [order, setOrder] = useState<number>(0);
   const [active, setActive] = useState(true);
   const [startsAt, setStartsAt] = useState("");
@@ -95,6 +97,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     setBackgroundBlur(0);
     setLightModeOverlayOpacity(80);
     setDarkModeOverlayOpacity(85);
+    setDisplayDurationSeconds(5);
     setImageUrlInput("");
     setOrder(banners.length > 0 ? Math.max(...banners.map((b) => b.order)) + 1 : 1);
     setActive(true);
@@ -115,6 +118,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
     setBackgroundBlur(banner.backgroundBlur ?? 0);
     setLightModeOverlayOpacity(banner.lightModeOverlayOpacity ?? 80);
     setDarkModeOverlayOpacity(banner.darkModeOverlayOpacity ?? 85);
+    setDisplayDurationSeconds(banner.displayDurationSeconds ?? 5);
     setImageUrlInput(banner.backgroundImageUrl || "");
     setOrder(banner.order);
     setActive(banner.active);
@@ -184,6 +188,7 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
         backgroundBlur: Number(backgroundBlur) || 0,
         lightModeOverlayOpacity: Number(lightModeOverlayOpacity) ?? 80,
         darkModeOverlayOpacity: Number(darkModeOverlayOpacity) ?? 85,
+        displayDurationSeconds: Number(displayDurationSeconds) || 5,
         order: Number(order) || 0,
         active,
         startsAt: startsAt ? new Date(startsAt).toISOString() : null,
@@ -522,6 +527,12 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                       <p className="text-[11px] text-neutral-500 dark:text-neutral-400 line-clamp-2 mt-0.5">
                         {banner.subtext}
                       </p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="inline-flex items-center gap-1 rounded bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900">
+                          <Clock className="h-3 w-3" />
+                          {banner.displayDurationSeconds ?? 5}s rotation duration
+                        </span>
+                      </div>
                     </td>
 
                     {/* CTA Details */}
@@ -610,42 +621,41 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
         )}
       </div>
 
-      {/* CREATE / EDIT BANNER MODAL */}
+      {/* Add / Edit Banner Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-2xl p-6 my-8 space-y-5">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 dark:border-neutral-800 my-8 space-y-5 animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-neutral-800 pb-3">
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-neutral-800 pb-4">
               <div>
-                <h3 className="text-base font-black uppercase tracking-tight text-neutral-900 dark:text-white flex items-center gap-2">
-                  <Megaphone className="h-4 w-4 text-rose-600 dark:text-rose-500" />
-                  <span>{editingBanner ? "Edit Homepage Banner" : "Create Homepage Banner"}</span>
+                <h3 className="text-lg font-black uppercase tracking-tight text-neutral-900 dark:text-white">
+                  {editingBanner ? "Edit Homepage Banner" : "Create Homepage Banner"}
                 </h3>
-                <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
-                  Configure text, CTA button, custom background image, and rotation order.
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                  Configure promotion headline, CTA link, duration, and hero effects.
                 </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+                className="p-2 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-gray-100 dark:hover:bg-neutral-800"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
             {errorMsg && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-xs text-rose-600 dark:text-rose-400 font-medium">
+              <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-xs text-rose-600 dark:text-rose-400 font-bold flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
-            {/* Form */}
+            {/* Modal Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Badge Text */}
               <div>
                 <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
-                  Pill Badge Text (Optional)
+                  Pill Badge Text (Optional Top Tag)
                 </label>
                 <Input
                   value={badgeText}
@@ -658,29 +668,29 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
               {/* Headline */}
               <div>
                 <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
-                  Headline <span className="text-rose-500">*</span>
+                  Headline Text *
                 </label>
                 <Input
                   required
                   value={headline}
                   onChange={(e) => setHeadline(e.target.value)}
                   placeholder="e.g. ENGINEER YOUR LIMITLESS POTENTIAL"
-                  className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs font-extrabold text-neutral-900 dark:text-white"
+                  className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs font-black uppercase text-neutral-900 dark:text-white"
                 />
               </div>
 
               {/* Subtext */}
               <div>
                 <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
-                  Subtext Description <span className="text-rose-500">*</span>
+                  Subtext Description *
                 </label>
                 <textarea
                   required
                   rows={2}
                   value={subtext}
                   onChange={(e) => setSubtext(e.target.value)}
-                  placeholder="e.g. Discover precision carbon running shoes, thermal compression apparel, and endurance hydration systems..."
-                  className="w-full rounded-md border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950 p-2.5 text-xs text-neutral-900 dark:text-white focus:border-rose-500 focus:outline-none"
+                  placeholder="e.g. Discover precision carbon running shoes, thermal compression apparel..."
+                  className="w-full rounded-md border border-gray-200 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-950 p-2 text-xs text-neutral-900 dark:text-white focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
@@ -688,46 +698,46 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
-                    CTA Button Text <span className="text-rose-500">*</span>
+                    Button CTA Text *
                   </label>
                   <Input
                     required
                     value={ctaText}
                     onChange={(e) => setCtaText(e.target.value)}
                     placeholder="e.g. EXPLORE ALL GEAR"
-                    className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs font-bold text-neutral-900 dark:text-white"
+                    className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs font-bold uppercase text-neutral-900 dark:text-white"
                   />
                 </div>
-
                 <div>
                   <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
-                    CTA Link URL <span className="text-rose-500">*</span>
+                    Button Destination URL / Route *
                   </label>
                   <Input
                     required
                     value={ctaLink}
                     onChange={(e) => setCtaLink(e.target.value)}
-                    placeholder="e.g. /shop or /shop?category=footwear"
+                    placeholder="e.g. /shop or /shop?category=shoes"
                     className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs font-mono text-neutral-900 dark:text-white"
                   />
                 </div>
               </div>
 
-              {/* IMAGE UPLOAD SECTION (Device + URL Dual Mode) */}
-              <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50/70 dark:bg-neutral-950/60 p-4 space-y-3">
+              {/* Background Image & Effects Section */}
+              <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-50/70 dark:bg-neutral-950/60 p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <ImageIcon className="h-3.5 w-3.5" />
-                    Background Image (Optional)
+                  <span className="text-xs font-black uppercase tracking-wider text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5">
+                    <ImageIcon className="h-3.5 w-3.5 text-rose-500" />
+                    Background Image & Hero Effects
                   </span>
-                  <div className="flex rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-0.5 text-[10px] font-bold">
+
+                  <div className="flex items-center gap-1 bg-gray-200/70 dark:bg-neutral-800 p-0.5 rounded-lg text-[10px] font-bold">
                     <button
                       type="button"
                       onClick={() => setImageInputMode("upload")}
-                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                      className={`px-2 py-0.5 rounded ${
                         imageInputMode === "upload"
-                          ? "bg-rose-600 text-white"
-                          : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+                          ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-xs"
+                          : "text-neutral-500"
                       }`}
                     >
                       Upload File
@@ -735,91 +745,82 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                     <button
                       type="button"
                       onClick={() => setImageInputMode("url")}
-                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                      className={`px-2 py-0.5 rounded ${
                         imageInputMode === "url"
-                          ? "bg-rose-600 text-white"
-                          : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+                          ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-xs"
+                          : "text-neutral-500"
                       }`}
                     >
-                      Paste URL
+                      Enter URL
                     </button>
                   </div>
                 </div>
 
+                {/* Upload or URL controls */}
                 {imageInputMode === "upload" ? (
-                  <div>
+                  <div className="space-y-2">
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
                       onChange={handleFileUpload}
                       className="hidden"
-                      id="banner-image-file-input"
                     />
-                    <label
-                      htmlFor="banner-image-file-input"
-                      className="flex flex-col items-center justify-center p-4 border border-dashed border-gray-300 dark:border-neutral-800 rounded-lg bg-white/80 dark:bg-neutral-900/50 hover:bg-white dark:hover:bg-neutral-900 hover:border-gray-400 dark:hover:border-neutral-700 cursor-pointer transition-all text-center"
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingImage}
+                      className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-neutral-700 rounded-xl p-4 text-xs font-bold text-neutral-600 dark:text-neutral-400 hover:border-rose-500 dark:hover:border-rose-500 transition-colors cursor-pointer bg-white/60 dark:bg-neutral-900/60"
                     >
-                      <Upload className="h-5 w-5 text-neutral-400 mb-1" />
-                      <span className="text-xs font-bold text-neutral-900 dark:text-white">
-                        {isUploadingImage ? "Uploading to Cloudinary..." : "Click to browse and upload image from device"}
-                      </span>
-                      <span className="text-[10px] text-neutral-500 mt-0.5">PNG, JPG, WEBP up to 10MB</span>
-                    </label>
+                      <Upload className="h-4 w-4 text-rose-500" />
+                      {isUploadingImage ? "Uploading to Cloudinary..." : "Click to browse and upload image from device"}
+                    </button>
                   </div>
                 ) : (
                   <div className="flex gap-2">
                     <Input
-                      placeholder="https://images.unsplash.com/photo-..."
                       value={imageUrlInput}
                       onChange={(e) => setImageUrlInput(e.target.value)}
-                      className="bg-white dark:bg-neutral-900 border-gray-300 dark:border-neutral-800 text-xs text-neutral-900 dark:text-white flex-1"
+                      placeholder="Paste Unsplash / Cloudinary / Web image URL..."
+                      className="text-xs bg-white dark:bg-neutral-900 border-gray-300 dark:border-neutral-800"
                     />
                     <Button
                       type="button"
                       onClick={handleApplyUrl}
-                      className="bg-neutral-800 dark:bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold px-4"
+                      className="bg-neutral-800 hover:bg-neutral-900 text-white text-xs font-bold shrink-0"
                     >
-                      Apply URL
+                      Apply
                     </Button>
                   </div>
                 )}
 
-                {/* Preview of Background Image or Default Gradient */}
-                {backgroundImageUrl ? (
-                  <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-neutral-800">
-                    <div className="flex items-center gap-3">
-                      <div className="relative h-28 w-44 rounded-xl overflow-hidden border border-gray-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 shadow-md">
+                {/* Image Preview & Sliders */}
+                {backgroundImageUrl && (
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center gap-3 p-2 bg-white dark:bg-neutral-900 rounded-lg border border-gray-200 dark:border-neutral-800">
+                      <div className="relative h-12 w-20 rounded overflow-hidden border border-gray-200 dark:border-neutral-700 shrink-0">
                         <Image
                           src={backgroundImageUrl}
                           alt="Banner Preview"
                           fill
-                          className="object-cover transition-all duration-200"
+                          className="object-cover"
                           style={{
                             filter: backgroundBlur > 0 ? `blur(${backgroundBlur}px)` : "none",
                           }}
                         />
                       </div>
-                      <div className="flex-1 text-[11px] truncate space-y-1">
-                        <span className="font-bold text-neutral-800 dark:text-neutral-200">Active Background Image:</span>
-                        <p className="text-neutral-500 font-mono truncate">{backgroundImageUrl}</p>
-                      </div>
+                      <p className="text-[10px] text-neutral-500 truncate font-mono">{backgroundImageUrl}</p>
                       <button
                         type="button"
-                        onClick={() => {
-                          setBackgroundImageUrl("");
-                          setImageUrlInput("");
-                          setBackgroundBlur(0);
-                        }}
-                        className="p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                        title="Remove Image"
+                        onClick={() => setBackgroundImageUrl("")}
+                        className="ml-auto p-1.5 rounded-lg border border-rose-200 dark:border-rose-900/40 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
 
-                    {/* Image Effect Sliders Control (Blur, Light Overlay, Dark Overlay) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 border-t border-gray-200/80 dark:border-neutral-800/80">
+                    {/* Image Effect Sliders Control (Blur, Light Overlay, Dark Overlay, Display Duration) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-2 border-t border-gray-200/80 dark:border-neutral-800/80">
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
@@ -838,15 +839,11 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                           onChange={(e) => setBackgroundBlur(parseInt(e.target.value, 10) || 0)}
                           className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-rose-600 dark:accent-rose-500"
                         />
-                        <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
-                          0px (sharp) to 20px (blur).
-                        </p>
                       </div>
-
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
-                            Light Overlay
+                            Light Overlay %
                           </label>
                           <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-900">
                             {lightModeOverlayOpacity}%
@@ -856,20 +853,16 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                           type="range"
                           min="0"
                           max="100"
-                          step="1"
+                          step="5"
                           value={lightModeOverlayOpacity}
-                          onChange={(e) => setLightModeOverlayOpacity(parseInt(e.target.value, 10) ?? 80)}
+                          onChange={(e) => setLightModeOverlayOpacity(parseInt(e.target.value, 10) || 0)}
                           className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-indigo-600 dark:accent-indigo-500"
                         />
-                        <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
-                          0% to 100% (light theme).
-                        </p>
                       </div>
-
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
-                            Dark Overlay
+                            Dark Overlay %
                           </label>
                           <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-900">
                             {darkModeOverlayOpacity}%
@@ -879,35 +872,101 @@ export function HomepageBannersView({ initialBanners }: HomepageBannersViewProps
                           type="range"
                           min="0"
                           max="100"
-                          step="1"
+                          step="5"
                           value={darkModeOverlayOpacity}
-                          onChange={(e) => setDarkModeOverlayOpacity(parseInt(e.target.value, 10) ?? 85)}
+                          onChange={(e) => setDarkModeOverlayOpacity(parseInt(e.target.value, 10) || 0)}
                           className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-emerald-600 dark:accent-emerald-500"
                         />
                         <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
                           0% to 100% (dark theme).
                         </p>
                       </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                            Display Duration
+                          </label>
+                          <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-900">
+                            {displayDurationSeconds}s
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="30"
+                          step="1"
+                          value={displayDurationSeconds}
+                          onChange={(e) => setDisplayDurationSeconds(parseInt(e.target.value, 10) || 5)}
+                          className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-600 dark:accent-amber-500"
+                        />
+                        <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
+                          1s to 30s before rotating.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 italic">
-                    No image set. Banner will automatically use the dynamic ambient gradient theme.
-                  </p>
+                )}
+
+                {!backgroundImageUrl && (
+                  <div className="space-y-3 pt-2">
+                    <p className="text-[11px] text-neutral-500 dark:text-neutral-400 italic">
+                      No image set. Banner will automatically use the dynamic ambient gradient theme.
+                    </p>
+
+                    {/* Display Duration slider even when gradient theme is active */}
+                    <div className="p-3 bg-white dark:bg-neutral-900 rounded-lg border border-gray-200 dark:border-neutral-800 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                          Display Duration (seconds)
+                        </label>
+                        <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-900">
+                          {displayDurationSeconds}s
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="30"
+                        step="1"
+                        value={displayDurationSeconds}
+                        onChange={(e) => setDisplayDurationSeconds(parseInt(e.target.value, 10) || 5)}
+                        className="w-full h-2 bg-gray-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-600 dark:accent-amber-500"
+                      />
+                      <p className="text-[10px] text-neutral-500 dark:text-neutral-400 italic">
+                        Controls how long this banner shows (1–30s) before rotating.
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {/* Order & Active Toggle */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+              {/* Order, Duration & Active Toggle */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                 <div>
                   <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
-                    Display Order (Multi-banner Sequence)
+                    Display Order Sequence
                   </label>
                   <Input
                     type="number"
                     value={order}
                     onChange={(e) => setOrder(parseInt(e.target.value, 10) || 0)}
                     placeholder="1"
+                    className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs font-bold text-neutral-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-1">
+                    Display Duration (seconds)
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={displayDurationSeconds}
+                    onChange={(e) => setDisplayDurationSeconds(parseInt(e.target.value, 10) || 5)}
+                    placeholder="5"
                     className="bg-gray-50 dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 text-xs font-bold text-neutral-900 dark:text-white"
                   />
                 </div>

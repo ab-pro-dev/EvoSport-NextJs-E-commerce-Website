@@ -97,7 +97,7 @@ export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
     <section
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative overflow-hidden border-b border-gray-200/80 dark:border-slate-800/80 bg-gradient-to-b from-[#EEF8F1] via-[#F4F8FC] to-white dark:from-[#0B182B] dark:via-[#090E17] dark:to-[#090E17] min-h-[calc(100vh-4rem)] flex items-center py-10 sm:py-14 transition-colors duration-300"
+      className="relative overflow-hidden border-b border-gray-200/80 dark:border-slate-800/80 bg-gradient-to-b from-[#EEF8F1] via-[#F4F8FC] to-white dark:from-[#0B182B] dark:via-[#090E17] dark:to-[#090E17] min-h-[calc(100vh-4rem)] flex items-center m-0 p-0 transition-colors duration-300"
     >
       {/* Soft Ambient Gradients & Glow Circles (Always visible as ambient background lighting) */}
       <div className="absolute top-1/4 left-10 h-80 w-80 rounded-full bg-[#B8FF00]/15 dark:bg-[#B8FF00]/10 blur-3xl pointer-events-none z-0" />
@@ -161,7 +161,7 @@ export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
             )}
 
             {/* Banner Content Layer */}
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10 text-left">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10 text-left py-12 sm:py-16 md:py-20">
               <div className="max-w-5xl space-y-4 sm:space-y-5">
                 {/* Pill Badge */}
                 {currentBanner.badgeText && (

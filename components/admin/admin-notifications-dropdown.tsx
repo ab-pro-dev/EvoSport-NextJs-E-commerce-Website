@@ -13,6 +13,7 @@ import {
   setSoundEnabled,
   initNotificationPreferences,
 } from "@/lib/audio-notification";
+import { useSmartPolling, ADMIN_POLLING_CONFIG } from "@/hooks/use-smart-polling";
 
 interface AdminAlertItem {
   id: string;
@@ -28,6 +29,7 @@ export function AdminNotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const prevCountRef = useRef<number | null>(null);
+  const lastTimestampRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export function AdminNotificationsDropdown() {
     } catch {}
   };
 
-  const fetchAdminAlerts = useCallback(async () => {
+  const fetchFullAlerts = useCallback(async () => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
 
@@ -102,16 +104,10 @@ export function AdminNotificationsDropdown() {
           createdAt: o.createdAt || new Date().toISOString(),
         }));
 
-        const newCount = mappedAlerts.length;
-
-        // Play sound only if count strictly increased from previous poll (and not initial load)
-        if (prevCountRef.current !== null && newCount > prevCountRef.current) {
-          playNotificationSound();
-        }
-        prevCountRef.current = newCount;
-
         setAlerts(mappedAlerts);
+        const newCount = mappedAlerts.length;
         setUnreadCount(newCount);
+        prevCountRef.current = newCount;
       }
     } catch (err) {
       console.error("[AdminNotificationsDropdown] Error fetching alerts:", err);
@@ -120,11 +116,53 @@ export function AdminNotificationsDropdown() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchAdminAlerts();
-    const interval = setInterval(fetchAdminAlerts, 15000);
-    return () => clearInterval(interval);
-  }, [fetchAdminAlerts]);
+  const pollAlertsSummary = useCallback(
+    async ({ isCatchUp }: { isCatchUp: boolean }) => {
+      try {
+        const res = await fetch("/api/admin/orders/alerts-summary");
+        if (!res.ok) return;
+        const data = await res.json();
+        const newCount = typeof data.pendingCount === "number" ? data.pendingCount : 0;
+        const newTimestamp = data.latestOrderTimestamp || null;
+
+        // Chime rule: play only when count strictly increases between two consecutive active polls
+        // Skip on catch-up fetch or initial load
+        if (!isCatchUp && prevCountRef.current !== null && newCount > prevCountRef.current) {
+          playNotificationSound();
+        }
+
+        const summaryChanged =
+          prevCountRef.current !== null &&
+          (newCount !== prevCountRef.current || newTimestamp !== lastTimestampRef.current);
+
+        prevCountRef.current = newCount;
+        lastTimestampRef.current = newTimestamp;
+        setUnreadCount(newCount);
+
+        // Fetch full order list only when dropdown is opened or summary changed
+        if (summaryChanged || isOpen) {
+          fetchFullAlerts();
+        }
+      } catch (err) {
+        console.error("[AdminNotificationsDropdown] Error polling alerts summary:", err);
+      }
+    },
+    [isOpen, fetchFullAlerts]
+  );
+
+  useSmartPolling({
+    intervalMs: ADMIN_POLLING_CONFIG.intervalMs,
+    idleLimitMs: ADMIN_POLLING_CONFIG.idleLimitMs,
+    pauseWhenHidden: ADMIN_POLLING_CONFIG.pauseWhenHidden,
+    onPoll: pollAlertsSummary,
+  });
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      fetchFullAlerts();
+    }
+  };
 
   const handleDismissAll = () => {
     setAlerts([]);
@@ -133,7 +171,7 @@ export function AdminNotificationsDropdown() {
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <button
           className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors shadow-sm"

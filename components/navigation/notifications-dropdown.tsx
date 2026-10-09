@@ -13,6 +13,7 @@ import {
   setSoundEnabled,
   initNotificationPreferences,
 } from "@/lib/audio-notification";
+import { useSmartPolling, CUSTOMER_POLLING_CONFIG } from "@/hooks/use-smart-polling";
 
 interface NotificationItem {
   id: string;
@@ -80,7 +81,7 @@ export function NotificationsDropdown() {
     } catch {}
   };
 
-  const fetchNotifications = useCallback(async () => {
+  const fetchFullNotifications = useCallback(async () => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
 
@@ -89,29 +90,61 @@ export function NotificationsDropdown() {
       if (res.ok) {
         const data = await res.json();
         const newNotifications: NotificationItem[] = data.notifications || [];
-        const newUnread: number = data.unreadCount || 0;
-
-        // Play chime only if unread count strictly increased from previous poll (and not first load)
-        if (prevUnreadCountRef.current !== null && newUnread > prevUnreadCountRef.current) {
-          playNotificationSound();
-        }
-        prevUnreadCountRef.current = newUnread;
-
         setNotifications(newNotifications);
-        setUnreadCount(newUnread);
+        if (typeof data.unreadCount === "number") {
+          setUnreadCount(data.unreadCount);
+          prevUnreadCountRef.current = data.unreadCount;
+        }
       }
     } catch (err) {
-      console.error("Error fetching notifications:", err);
+      console.error("Error fetching full notifications:", err);
     } finally {
       isFetchingRef.current = false;
     }
   }, []);
 
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 15000);
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
+  const pollUnreadCount = useCallback(
+    async ({ isCatchUp }: { isCatchUp: boolean }) => {
+      try {
+        const res = await fetch("/api/notifications/unread-count");
+        if (!res.ok) return;
+        const data = await res.json();
+        const newUnread = typeof data.unreadCount === "number" ? data.unreadCount : 0;
+
+        // Chime rule: play only when unread count strictly increases between two consecutive active polls
+        // Skip on catch-up fetch or initial load (prevUnreadCountRef is null initially)
+        if (!isCatchUp && prevUnreadCountRef.current !== null && newUnread > prevUnreadCountRef.current) {
+          playNotificationSound();
+        }
+
+        const countIncreased = prevUnreadCountRef.current !== null && newUnread > prevUnreadCountRef.current;
+        prevUnreadCountRef.current = newUnread;
+        setUnreadCount(newUnread);
+
+        // Fetch full list only when unread count increased or if dropdown is open
+        if (countIncreased || isOpen) {
+          fetchFullNotifications();
+        }
+      } catch (err) {
+        console.error("Error polling unread count:", err);
+      }
+    },
+    [isOpen, fetchFullNotifications]
+  );
+
+  useSmartPolling({
+    intervalMs: CUSTOMER_POLLING_CONFIG.intervalMs,
+    idleLimitMs: CUSTOMER_POLLING_CONFIG.idleLimitMs,
+    pauseWhenHidden: CUSTOMER_POLLING_CONFIG.pauseWhenHidden,
+    onPoll: pollUnreadCount,
+  });
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      fetchFullNotifications();
+    }
+  };
 
   const handleMarkAllRead = async () => {
     try {
@@ -154,7 +187,7 @@ export function NotificationsDropdown() {
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <button
           className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#0F1B2D]/60 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-[#0F1B2D] dark:hover:text-white transition-colors"

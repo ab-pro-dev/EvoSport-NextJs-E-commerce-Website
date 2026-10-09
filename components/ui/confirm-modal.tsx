@@ -14,6 +14,7 @@ interface ConfirmModalProps {
   cancelText?: string;
   variant?: "danger" | "warning" | "primary";
   isLoading?: boolean;
+  icon?: React.ReactNode;
 }
 
 export function ConfirmModal({
@@ -26,6 +27,7 @@ export function ConfirmModal({
   cancelText = "Cancel",
   variant = "danger",
   isLoading = false,
+  icon,
 }: ConfirmModalProps) {
   if (!isOpen) return null;
 
@@ -57,7 +59,7 @@ export function ConfirmModal({
                 : "bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400"
             }`}
           >
-            {isDanger ? <Trash2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+            {icon ? icon : isDanger ? <Trash2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
           </div>
           <div>
             <h3 className="text-base font-black uppercase text-neutral-900 dark:text-white tracking-tight">

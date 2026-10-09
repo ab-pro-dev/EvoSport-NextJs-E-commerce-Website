@@ -57,15 +57,15 @@ export function AdminSidebar() {
 
   return (
     <>
-      <aside className="w-64 border-r border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/90 flex flex-col justify-between p-4 shrink-0 min-h-[calc(100vh-4rem)]">
-        <div className="space-y-6">
-          <div className="px-3 py-2 border-b border-gray-100 dark:border-neutral-800">
+      <aside className="w-64 border-r border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/90 flex flex-col justify-between p-4 shrink-0 sticky top-16 h-[calc(100vh-4rem)]">
+        <div className="flex-1 flex flex-col min-h-0 space-y-4">
+          <div className="px-3 py-2 border-b border-gray-100 dark:border-neutral-800 shrink-0">
             <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-500">
               ADMIN MANAGEMENT
             </span>
           </div>
 
-          <nav className="space-y-1">
+          <nav className="flex-1 overflow-y-auto space-y-1 pr-1 pb-2">
             {NAV_ITEMS.map((item) => {
               const isActive =
                 item.href === "/admin"
@@ -88,17 +88,32 @@ export function AdminSidebar() {
                 </Link>
               );
             })}
+
+            {/* Logout item directly inside the navigation list */}
+            <button
+              type="button"
+              onClick={() => setShowLogoutModal(true)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-300 transition-all cursor-pointer text-left"
+            >
+              <LogOut className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+              <span>Logout</span>
+            </button>
           </nav>
         </div>
 
-        <div className="pt-4 border-t border-gray-200 dark:border-neutral-800">
+        <div className="pt-3 border-t border-gray-200 dark:border-neutral-800 shrink-0">
           <button
             type="button"
             onClick={() => setShowLogoutModal(true)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold text-neutral-600 dark:text-neutral-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold text-neutral-700 dark:text-neutral-300 bg-gray-50 dark:bg-neutral-800/60 border border-gray-200 dark:border-neutral-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900/50 transition-all cursor-pointer shadow-sm"
           >
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
+            <span className="flex items-center gap-2.5">
+              <LogOut className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+              <span>Logout</span>
+            </span>
+            <span className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+              Exit
+            </span>
           </button>
         </div>
       </aside>

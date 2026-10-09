@@ -8,7 +8,7 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx tests/smart-polling.test.ts"
+    "test": "tsx tests/smart-polling.test.ts && tsx tests/admin-profile.test.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",

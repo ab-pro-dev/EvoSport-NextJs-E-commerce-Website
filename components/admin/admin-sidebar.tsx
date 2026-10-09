@@ -16,6 +16,7 @@ import {
   FileText,
   Megaphone,
   Settings,
+  UserCircle,
   LogOut,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Blog", href: "/admin/blog", icon: FileText },
   { name: "Settings", href: "/admin/settings", icon: Settings },
+  { name: "Profile", href: "/admin/profile", icon: UserCircle },
 ];
 
 export function AdminSidebar() {

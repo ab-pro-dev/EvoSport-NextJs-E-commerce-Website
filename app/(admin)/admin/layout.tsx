@@ -60,15 +60,30 @@ export default async function AdminLayout({
 
           <AdminNotificationsDropdown />
 
-          <div className="flex items-center gap-2.5 rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/80 px-3 py-1.5 shadow-sm">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-[10px] font-black text-white">
-              {dbUser.name?.charAt(0).toUpperCase() || "A"}
-            </div>
+          <a
+            href="/admin/profile"
+            className="flex items-center gap-2.5 rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/80 px-3 py-1.5 shadow-sm hover:border-gray-300 dark:hover:border-neutral-700 transition-colors"
+          >
+            {dbUser?.image ? (
+              <img
+                src={dbUser.image}
+                alt={dbUser?.name || "Admin"}
+                className="h-6 w-6 rounded-full object-cover border border-gray-200 dark:border-neutral-700"
+              />
+            ) : (
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-[10px] font-black text-white">
+                {dbUser?.name?.charAt(0)?.toUpperCase() || "A"}
+              </div>
+            )}
             <div className="text-left leading-none">
-              <p className="text-xs font-bold text-neutral-900 dark:text-white">{dbUser.name}</p>
-              <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">{dbUser.email}</p>
+              <p className="text-xs font-bold text-neutral-900 dark:text-white">
+                {dbUser?.name || "Admin"}
+              </p>
+              <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+                {dbUser?.email || ""}
+              </p>
             </div>
-          </div>
+          </a>
         </div>
       </header>
 

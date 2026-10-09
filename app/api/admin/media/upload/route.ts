@@ -37,6 +37,22 @@ export async function POST(req: Request) {
     let publicId = "";
 
     if (file && typeof file !== "string") {
+      // Validate image MIME type only
+      if (!file.type || !file.type.startsWith("image/")) {
+        return NextResponse.json(
+          { error: "Only image files (JPEG, PNG, WEBP, GIF, SVG) are supported." },
+          { status: 400 }
+        );
+      }
+
+      // Check max size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: "Image file exceeds maximum allowed size of 5MB." },
+          { status: 400 }
+        );
+      }
+
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const base64 = `data:${file.type || "image/jpeg"};base64,${buffer.toString("base64")}`;

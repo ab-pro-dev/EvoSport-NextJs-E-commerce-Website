@@ -8,7 +8,9 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx tests/smart-polling.test.ts && tsx tests/admin-profile.test.ts"
+    "test": "tsx tests/smart-polling.test.ts && tsx tests/admin-profile.test.ts",
+    "db:seed": "tsx scripts/assert-not-prod.ts && prisma db seed",
+    "db:migrate:dev": "tsx scripts/assert-not-prod.ts && prisma migrate dev"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
